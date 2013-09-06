@@ -124,7 +124,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL4_CLAW_REPEAT          800
 #define LEVEL4_CLAW_K_SCALE         1.0f
 
-#define LEVEL4_TRAMPLE_DMG             ADM(111)
+#define LEVEL4_TRAMPLE_DMG             ADM(75)
 #define LEVEL4_TRAMPLE_SPEED           2.0f
 #define LEVEL4_TRAMPLE_CHARGE_MIN      375   // minimum msec to start a charge
 #define LEVEL4_TRAMPLE_CHARGE_MAX      1000  // msec to maximum charge stored
