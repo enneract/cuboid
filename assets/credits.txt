@@ -1,0 +1,145 @@
+    NAME
+
+Cuboid - a Tremulous 1.2 mod focused on cuboids and fixing balance issues.
+
+    TODO
+
+       - impregnation sounds
+       - a proper Helmet Mk2 texture
+
+    CHANGELOG
+
+Version  Release date
+______________________________________________________________________________________________
+0.1.0    Sep 06 2013
+GAMEPLAY:
+- Based upon Cuboid 0.2.2 (note: the versioning in the original cuboid was different).
+- Added Human Impregnation Mod.
+- Jetpacks now need fuel to operate (buy ammo to refuel).
+- Added a Jetpack fuel indicator (cg_fuelInfo* cvars to customize).
+- Jumping uses fuel instead of stamina when possible (jetpack jumps).
+- Implemented CPMA physics for everyone (both teams, all classes).
+- Lucifer Cannon behaviour reverted to 1.1 (slow missiles, high firerate).
+- Knockback values of Tesla Generators, Flame Throwers and Hives were decrased greatly 
+- Aliens now build faster than Humans (all buildables).
+- It is now possible to evolve near an enemy as long as he's not in the sight.
+- Adv. Marauder now works like Quake 3's Lightning Gun (greatly increased fire rate, damage per second remains unchanged).
+- Medkit now gives humans 15s long immunity to poison.
+- Dodging was removed.
+- Dragoon pounce damage lowered by 25%.
+- Trample damage lowered by 33%.
+- Added Biores (heals the user and grants a partial immunity to poison).
+- Server operator can choose to limit the amount of buildings that can be built in an area
+- Tyrants can drop bombs (regenerate at a Booster)
+- Updated the tutorial system - now it turns itself on every update but displays help only about things that weren't in the last version
+- A splash screen (with Cuboid logo and version) is now displayed every map load/restart. 
+NON-GAMEPLAY:
+- Jetpack now has new, less annoying sounds.
+- Flamer sounds better.
+- New Marauder zapping sounds.
+
+    CREDITS
+
+  Programming:
+theinvsblman (lead programmer)
+ViruS (a.k.a. ZdrytchX) (implementing CPMA physics)
+
+Source code and assets are available at https://github.com/enneract/cuboid under the terms of the GNU GPL.
+This mod is based on Tremulous (Darklegion Development), which is based on Quake III: Arena (id Software).
+  
+   Art
+Pikachu, http//spiney.me/ (sounds)
+theinvsblman (Cuboid-related stuff)
+
+Below is the full list of all resources used by the mod.
+
+File                                  Author                                     Licence
+______________________________________________________________________________________________
+configs/*                             theinvsblman                               cc-by
+credits.txt                           theinvsblman                               cc-by
+cuboid/logo_1.tga - logo_15.tga       theinvsblman                               cc-by
+cuboid/logo_left.tga, logo_right.tga  Bitstream                                  Bistream Vera Fonts Copyright
+emoticons/*                           theinvsblman                               cc-by
+icons/iconu_biokit.tga                Purga                                      cc0
+icons/iconu_helmet_mk2.tga            Darklegion Development, theinvsblman       cc-by-sa
+models/cuboid/concrete/concrete.jpg   Randy Reddig @ shaderlab.com               shaderlab*
+models/cuboid/concrete/fragment.tga   Randy Reddig @ shaderlab.com, theinvsblman shaderlab*
+models/cuboid/cracks*                 theinvsblman                               cc-by
+models/cuboid/cuboid.md3              theinvsblman                               cc-by
+models/cuboid/glass/fragment.tga      theinvsblman                               cc-by
+models/cuboid/glass/glass.jpg         theinvsblman                               cc-by
+models/cuboid/ladder/fragment.tga     Randy Reddig @ shaderlab.com, theinvsblman shaderlab*
+models/cuboid/ladder/ladder.jpg       Randy Reddig @ shaderlab.com               shaderlab*
+models/cuboid/organic/fragment.tga    Darklegion Development, theinvsblman       cc-by-sa
+models/cuboid/organic/organic.jpg     Darklegion Development, theinvsblman       cc-by-sa
+models/cuboid/organic/organic_fx.jpg  Darklegion Development, theinvsblman       cc-by-sa
+models/cuboid/slime/fragment.tga      theinvsblman                               cc-by
+models/cuboid/slime/slime.jpg         theinvsblman                               cc-by
+models/players/human_base/h_helmet... theinvsblman                               cc0
+models/players/human_base/head_lig... Darklegion Development, theinvsblman       cc-by-sa
+models/weapons/flamer/fireloop_qui... Darklegion Development, theinvsblman       cc-by-sa
+models/weapons/flamer/weapon.cfg      Darklegion Development, theinvsblman       cc-by-sa
+models/weapons/level2upg/zap1.wav     Halleck @ freesound.org                    cc-by
+models/weapons/level2upg/zap_conti... DJ Chronos @ freesound.org                 cc-by
+models/weapons/level2upg/weapon.cfg   Darklegion Development, theinvsblman       cc-by-sa
+models/weapons/level4/weapon.cfg      Darklegion Development, theinvsblman       cc-by-sa
+scripts/*                             theinvsblman                               cc-by
+sound/cuboid/axischange.wav           Ongitak @ freesound.org                    cc-by
+sound/cuboid/concrete/dstr0.wav       Michael Manzke @ freesound.org             cc-by-nc
+sound/cuboid/concrete/pain0.wav       Benboncan @ freesound.org                  cc-by
+sound/cuboid/concrete/pain1.wav       Benboncan @ freesound.org                  cc-by
+sound/cuboid/error.wav                Ludovic Kierasinski @ freesound.org        cc-by
+sound/cuboid/glass/dstr0.wav          Tomlija @ freesound.org                    cc-by
+sound/cuboid/glass/dstr1.wav          Richard Frohlich @ freesound.org           cc-by
+sound/cuboid/glass/dstr2.wav          Rock Savage @ freesound.org                sampling+
+sound/cuboid/glass/pain0.wav          RHumphries @ freesound.org                 cc-by
+sound/cuboid/glass/pain1.wav          RHumphries @ freesound.org                 cc-b
+sound/cuboid/glass/pain2.wav          RHumphries @ freesound.org                 cc-by
+sound/cuboid/ladder/dstr0.wav         sagetyrtle @ freesound.org                 cc0
+sound/cuboid/ladder/pain0.wav         sagetyrtle @ freesound.org                 cc0
+sound/cuboid/ladder/pain1.wav         sagetyrtle @ freesound.org                 cc0
+sound/cuboid/organic/dstr0.wav        Michael Manzke @ freesound.org             cc-by-nc
+sound/cuboid/organic/dstr1.wav        aust_paul @ freesound.org                  sampling+
+sound/cuboid/organic/dstr2.wav        Michael Manzke @ freesound.org, Redman     cc-by-nc
+sound/cuboid/organic/pain0.wav        Michael Manzke @ freesound.org             cc-by
+sound/cuboid/organic/pain1.wav        Michael Manzke @ freesound.org             cc-by
+sound/cuboid/organic/pain2.wav        Michael Manzke @ freesound.org             cc-by
+sound/cuboid/resizea.wav              djgriffin @ freesound.org                  cc-by-nc
+sound/cuboid/resizeb.wav              djgriffin @ freesound.org                  cc-by-nc
+sound/cuboid/rotate.wav               djgriffin @ freesound.org                  cc-by-nc
+sound/cuboid/slime/dstr0.wav          Michael Manzke @ freesound.org             cc-by
+sound/cuboid/slime/dstr1.wav          Audionautics @ freesound.org               cc-by
+sound/cuboid/slime/pain0.wav          anechoix @ freesound.org                   cc-by-nc
+sound/cuboid/slime/pain1.wav          anechoix @ freesound.org                   cc-by-nc
+sound/upgrades/jetpack/hi.wav         Pikachu                                    cc0
+sound/upgrades/jetpack/idle.wav       Pikachu                                    cc0
+sound/upgrades/jetpack/low.wav        Pikachu                                    cc0
+sound/upgrades/jetpack/jump.wav       alexmol @ freesound.org, Q009,
+                                      Pikachu                                    cc-by-sa 3
+sound/upgrades/jetpack/lowfuel.wav    Pikachu                                    cc0
+sound/upgrades/jetpack/nojumpfuel.wav Pikachu                                    cc0 
+sound/upgrades/jetpack/refuel.wav     joeseshon @ freesound.org, 
+                                      alexmol @ freesound.org, Pikachu           cc-by
+ui/help.txt                           theinvsblman                               cc-by
+ui/ingame_options.menu                Darklegion Development, theinvsblman       cc-by-sa
+vm/*.qvm                              authors denoted in Programming section     GPL
+
+
+
+Following files come from the original Tremulous GPP release and are not part of the Cuboid mod. All of them were made by Darklegion Development and are licensed under the terms of CC-BY-SA.
+
+scripts/weapons.shader, scripts/crosshairs.shader, scripts/mdriver.trail, scripts/misc.particle, scripts/weapons.particle, scripts/ui.shader, sound/buildables/barricade, sound/buildables/barricade/sound.cfg, ui/tremulous_teamselect.menu, ui/main.menu, ui/ingame_help.menu, ui/tremulous_alienclass.menu, ui/tremulous_dialogs.menu, ui/password.menu, ui/tremulous.txt, ui/tremulous_alien_common_hud.h, ui/tremulous_alienupgrade.menu, ui/tremulous_common_hud.h, ui/say.menu, ui/menus.txt, ui/createserver.menu, ui/menudef.h, ui/download.menu, ui/ingame.txt, ui/news.menu, ui/mod.menu, ui/tremulous_aliendialogs.menu, ui/tremulous_human_hud.menu, ui/ingame.menu, ui/demo.menu, ui/serverinfo.menu, ui/connect.menu, ui/tremulous_humanbuild.menu, ui/quit.menu, ui/findplayer.menu, ui/error.menu, ui/hud.txt, ui/joinserver.menu, ui/ingame_game.menu, ui/tremulous_default_hud.menu, ui/tremulous_alien_builder_hud.menu, ui/quitcredit.menu, ui/drop.menu, ui/teamscore.menu, ui/tremulous_alienbuild.menu, ui/tremulous_humanarmoury.menu, ui/ingame_leave.menu, ui/loading.menu, ui/tremulous_humandialogs.menu, ui/tremulous_alien_general_hud.menu, ui/tremulous_humanitem.menu, ui/createfavorite.menu, ui/assets/human/buildstat.cfg, ui/assets/alien/buildstat.cfg, ui/options.menu, models/players/level1/animation.cfg, models/players/human_bsuit/locdamage.cfg, models/players/human_base/locdamage.cfg, models/weapons/level3upg/weapon.cfg, models/weapons/level2, models/weapons/level2/weapon.cfg, models/weapons/level1upg/weapon.cfg, models/weapons/level1/weapon.cfg, models/weapons/abuildupg/weapon.cfg, models/weapons/abuild/weapon.cfg, level0/weapon.cfg,models/weapons/psaw/weapon.cfg, models/weapons/prifle/weapon.cfg, models/weapons/level3/weapon.cfg, models/weapons/mdriver/weapon.cfg, models/weapons/lcannon/weapon.cfg, models/buildables/mgturret, models/buildables/mgturret/animation.cfg, models/buildables/barricade/animation.cfg, models/buildables/acid_tube/animation.cfg, models/buildables/tesla/animation.cfg, models/buildables/repeater/animation.cfg, models/buildables/medistat/animation.cfg, configs/classes/level2upg.cfg, configs/classes/builder.cfg, configs/classes/builderupg.cfg, configs/classes/level4.cfg, configs/classes/spectator.cfg, configs/classes/level1upg.cfg, configs/classes/level3upg.cfg, configs/classes/level0.cfg, configs/classes/level3.cfg, configs/classes/level2.cfg, configs/classes/level1.cfg, configs/classes/human_bsuit.cfg, configs/classes/human_base.cfg, configs/buildables/eggpod.cfg, configs/buildables/hive.cfg, configs/buildables/hovel.cfg, configs/buildables/dcc.cfg, configs/buildables/telenode.cfg, configs/buildables/trapper.cfg, configs/buildables/tesla.cfg, configs/buildables/barricade.cfg, configs/buildables/repeater.cfg, configs/buildables/reactor.cfg, configs/buildables/medistat.cfg, configs/buildables/overmind.cfg, configs/buildables/arm.cfg, configs/buildables/booster.cfg, configs/buildables/acid_tube.cfg, configs/buildables/mgturret.cfg, armour/larmour.armour, armour/helmet.armour, armour/bsuit.armour
+
+Terms of the Creative Commons licenses (includes the Sampling Plus license) can be found at: http://creativecommons.org/licenses/.
+
+Terms of the Bitstream Vera Fonts Copyright can be found at: http://dejavu-fonts.org/wiki/License.
+
+shaderlab's copyright notice (http://shaderlab.com):
+______________________________________________________________________________
+Usage and redistribution policy: Textures may be freely downloaded, modified,
+and used in free maps, mods or total conversions provided this copyright notice
+is left intact and a link to Shaderlab is provided in the credits or read-me file.
+ther non-commercial applications are considered on a case-by-case basis via e-mail.
+All other usage requires written permission.  Bulk redistribution or archival of
+the textures in any medium, digital or otherwise (except mapping packages for mods)
+is prohibited.
