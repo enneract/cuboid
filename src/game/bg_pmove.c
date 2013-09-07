@@ -59,7 +59,12 @@ float	cpm_pm_airstopaccelerate = 2.5;
 //It doesn't need it though, but may feel akward
 float cpm_pm_jump_z = 0.5; //CPM: 100/270 (normal jumpvel is 270, doublejump default 100) = 0.37037
                            //However, that value feels too low and nothing much is acomplished since
-                           //tremulous human jump default is only 240 ups, meaning half hight.
+                           //tremulous human jump default is only 240 ups, meaning half height.
+
+//Clip time for maintaining velocity when clipping. For marauder it's actually equal to the jump
+//repeat rate so we can't modify it to cpm's default. CPM Default is 400 I think, but I placed 200
+//becausemarauder has 200, it's a bit tricky to get used to two different values at once.
+float pm_cliptime = 200;
 
 int   c_pmove = 0;
 
@@ -879,6 +884,7 @@ static qboolean PM_CheckJump( void )
 				//Adding requires me to multiply by class vel again
 			}
 			pm->ps->persistant[PERS_JUMPTIME] = 400;
+			pm->ps->pm_time = pm_cliptime; //clip through walls with the same timer as walljump
 	  }
    
   pm->ps->groundEntityNum = ENTITYNUM_NONE;
@@ -2287,7 +2293,7 @@ static void PM_GroundTrace( void )
     qboolean  steppedDown = qfalse;
 
     // try to step down
-    if( pml.groundPlane != qfalse && PM_PredictStepMove( ) && pm->ps->velocity[ 2 ] > 0.0f )
+    if( pml.groundPlane != qfalse && PM_PredictStepMove( ) && pm->ps->velocity[ 2 ] <= 0.0f )
     {
       //step down
       point[ 0 ] = pm->ps->origin[ 0 ];
