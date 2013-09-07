@@ -2293,7 +2293,7 @@ static void PM_GroundTrace( void )
     qboolean  steppedDown = qfalse;
 
     // try to step down
-    if( pml.groundPlane != qfalse && PM_PredictStepMove( ) && pm->ps->velocity[ 2 ] > 0.0f )
+    if( pml.groundPlane != qfalse && PM_PredictStepMove( ) && pm->ps->velocity[ 2 ] <= 0.0f )
     {
       //step down
       point[ 0 ] = pm->ps->origin[ 0 ];
