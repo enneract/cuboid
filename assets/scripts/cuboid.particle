@@ -1,0 +1,66 @@
+alienHatchPS
+{
+  ejector
+  {
+    particle
+    {
+      shader sync gfx/damage/blood.tga
+
+      displacement 0 0 20 ~0
+
+      velocityType      normal
+      velocityDir       linear
+      velocityMagnitude 300~75%
+      velocity          0 0 1 ~50
+
+      accelerationType      static
+      accelerationDir       linear
+      accelerationMagnitude 800
+      acceleration          0 0 -1 0
+
+      radius 0 30 50
+      alpha  0 1.0 0.0
+      rotation 0 ~360 -
+      bounce 0.0
+      color 0 { 1.0 0 0 } -
+
+      lifeTime 1000
+    }
+
+    count 10
+    delay 0
+    period 5 - ~0%
+  }
+
+  ejector
+  {
+    particle
+    {
+      //TODO: human gibs
+      model models/fx/alien_gibs/a_gib1.md3 models/fx/alien_gibs/a_gib2.md3 models/fx/alien_gibs/a_gib3.md3 models/fx/alien_gibs/a_gib4.md3
+
+      displacement 0 0 20 ~0
+
+      velocityType      normal
+      velocityDir       linear
+      velocityMagnitude 100~80%
+      velocity          0 0 1 ~10
+
+      accelerationType      static
+      accelerationDir       linear
+      accelerationMagnitude 800
+      acceleration          0 0 -1 0
+
+      radius          0 0.8 -
+      bounce          0.2
+      bounceMark      1~1 16 creep
+      bounceSound     ~1 sound/misc/organic_bounce.wav
+
+      lifeTime 5000~1000
+    }
+
+    count 4
+    delay 0
+    period 10 - ~0%
+  }
+}
