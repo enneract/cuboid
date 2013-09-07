@@ -127,7 +127,7 @@ static void CG_ClipMoveToEntities ( const vec3_t start, const vec3_t mins,
       VectorCopy( cent->lerpAngles, angles );
       BG_EvaluateTrajectory( &cent->currentState.pos, cg.physicsTime, origin );
     }
-    else if( BG_IsCuboid( ent->modelindex ) )
+    else if( ent->eType == ET_BUILDABLE && BG_IsCuboid( ent->modelindex ) )
     {
       BG_CuboidBBox( ent->angles, bmins, bmaxs );
       cmodel = trap_CM_TempBoxModel( bmins, bmaxs );

@@ -480,7 +480,7 @@ int G_FindDCC( gentity_t *self )
     return 0;
 
   //iterate through entities
-  for( i = MAX_CLIENTS, ent = g_entities + i; i < level.num_entities; i++, ent++ )
+  for( i = MAX_CLIENTS, ent = g_entities + i; i < level.num_entities && foundDCC < MAX_DCS_PER_BUILDABLE; i++, ent++ )
   {
     if( ent->s.eType != ET_BUILDABLE )
       continue;
@@ -2789,7 +2789,9 @@ void G_BuildableThink( gentity_t *ent, int msec )
         ent->health += regenRate;
       }
       else if( ent->buildableTeam == TEAM_HUMANS && ent->dcc &&
-        ( ent->lastDamageTime + HUMAN_REGEN_DAMAGE_TIME ) < level.time )
+               ( ent->lastDamageTime + HUMAN_REGEN_DAMAGE_TIME ) < level.time &&
+               ( !BG_Buildable( ent->s.modelindex, NULL )->cuboid || 
+                 BG_CuboidAttributes( ent->s.modelindex )->repairable ) )
       {
         ent->health += DC_HEALRATE * ent->dcc;
       }
@@ -2813,10 +2815,10 @@ void G_BuildableThink( gentity_t *ent, int msec )
   ent->dcc = ( ent->buildableTeam != TEAM_HUMANS ) ? 0 : G_FindDCC( ent );
 
   // Set health
-  ent->s.generic1 = MIN(MAX(ent->health,0),999);
+  ent->s.generic1 = MIN( MAX( ent->health, 0 ), 999 );
   
-  // Set health for cuboids (BG_CuboidPackHealthSafe does nothing if not a cuboid) !@#CUBOID
-  BG_CuboidPackHealthSafe(ent->s.modelindex,&ent->s,ent->health);
+  // Set health for cuboids (BG_CuboidPackHealthSafe does nothing if not a cuboid)
+  BG_CuboidPackHealthSafe( ent->s.modelindex, &ent->s, ent->health );
 
   // Set flags
   ent->s.eFlags &= ~( EF_B_POWERED | EF_B_SPAWNED | EF_B_MARKED );
@@ -3805,14 +3807,14 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
       break;
   }
 
-  if(buildable>=CUBOID_FIRST && buildable<=CUBOID_LAST)
+  if( buildable >= CUBOID_FIRST && buildable <= CUBOID_LAST )
   {
-   built->think=Cuboid_Think;
-   built->die=Cuboid_Die;
+    built->think = Cuboid_Think;
+    built->die = Cuboid_Die;
   }
   
   built->clipmask = MASK_PLAYERSOLID;
-  built->r.contents=CONTENTS_BODY;
+  built->r.contents = CONTENTS_BODY;
   built->s.number = built - g_entities;
   built->enemy = NULL;
   built->s.weapon = BG_Buildable( buildable, NULL )->turretProjType;
@@ -3824,7 +3826,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
 
   G_SetOrigin( built, localOrigin );
 
-  // roughly nudge the buildable onto the surface D:< !@#CUBOID
+  // roughly nudge the buildable onto the surface D:<
   VectorScale( normal, -512.0f, built->s.pos.trDelta );
 
   if(BG_Buildable(buildable, NULL)->cuboid)

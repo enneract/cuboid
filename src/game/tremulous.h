@@ -90,6 +90,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL2_AREAZAP_REPEAT       100 //1500
 #define LEVEL2_AREAZAP_TIME         100 //1000
 #define LEVEL2_AREAZAP_MAX_TARGETS  5
+#define LEVEL2_AREAZAP_DMG_MOD      0.66f //versus buildings
 #define LEVEL2_WALLJUMP_MAXSPEED    1000.0f
 
 #define LEVEL3_CLAW_DMG             ADM(80)
@@ -603,6 +604,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define DC_HEALRATE                 4
 #define DC_RANGE                    1000
 #define DC_VALUE                    HBVM(DC_BP)
+#define MAX_DCS_PER_BUILDABLE       2
 
 #define ARMOURY_BP                  10
 #define ARMOURY_BT                  15000
@@ -645,7 +647,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define STAMINA_WALK_RESTORE        15
 #define STAMINA_MEDISTAT_RESTORE    30 // stacked on STOP or WALK
 #define STAMINA_SPRINT_TAKE         6
-#define STAMINA_JUMP_TAKE           250
+#define STAMINA_JUMP_TAKE           150 //250
 #define STAMINA_DODGE_TAKE          250
 #define STAMINA_MAX                 1000
 #define STAMINA_BREATHING_LEVEL     0

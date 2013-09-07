@@ -816,40 +816,45 @@ const buildableAttributes_t *BG_Buildable( buildable_t buildable, const vec3_t c
   float volume;
   vec3_t sorted;
 
-  if(buildable>BA_NONE&&buildable<BA_NUM_BUILDABLES)
-    attr=&bg_buildableList[buildable-1];
+  if( buildable > BA_NONE && buildable < BA_NUM_BUILDABLES )
+    attr = &bg_buildableList[ buildable - 1 ];
   else
     return &nullBuildable;
 
-  if(attr->cuboid)
+  if( attr->cuboid )
   {
-    volume=cuboidSize[0]*cuboidSize[1]*cuboidSize[2]*5.5306341e-5; // NOTE: cubic quake units -> cubic meters ( 1qu = 0.0381m )
-    memcpy(&cuboidAttr,attr,sizeof(buildableAttributes_t));
-    cuboid=BG_CuboidAttributes(buildable);
+    volume = cuboidSize[ 0 ] * cuboidSize[ 1 ] * cuboidSize[ 2 ] * 5.5306341e-5; // NOTE: cubic quake units -> cubic meters ( 1qu = 0.0381m )
+    memcpy( &cuboidAttr, attr, sizeof( buildableAttributes_t ) );
+    cuboid = BG_CuboidAttributes( buildable );
     
-    switch(cuboid->hpt)
+    switch( cuboid->hpt )
     {
-     case CBHPT_PLAIN:
-      cuboidAttr.health=ceil(volume*cuboid->hppv);
-      break;
-     case CBHPT_CUBES:
-      BG_CuboidSortSize(cuboidSize,sorted);
-      cuboidAttr.health=sqrt(sorted[2]*sorted[0])*sqrt(sorted[1]*sorted[0])*(float)sorted[0]*5.5306341e-5*cuboid->hppv;
-      break;
-     case CBHPT_PANES:
-      BG_CuboidSortSize(cuboidSize,sorted);
-      cuboidAttr.health=(float)sorted[2]*(float)sorted[1]*((float)sorted[0]+(float)sorted[2])/2.0f*5.5306341e-5*cuboid->hppv;    
-      break;
+      case CBHPT_PLAIN:
+        cuboidAttr.health = ceil( volume * cuboid->hppv );
+        break;
+      case CBHPT_CUBES:
+        break;
+      case CBHPT_PANES:
+        {
+          float v2;
+
+          BG_CuboidSortSize( cuboidSize, sorted );
+
+          v2 = sorted[ 1 ] * sorted [ 1 ] * sorted [ 2 ] * 5.5306341e-5;
+
+          cuboidAttr.health = ceil( sqrt( volume * v2 ) * cuboid->hppv ) ;    
+       }
+       break;
     }
 
-    if(cuboidAttr.health<1)
-     cuboidAttr.health=1;
-    cuboidAttr.splashDamage=0;
-    cuboidAttr.splashRadius=0;
-    if(cuboid->regen)
-      cuboidAttr.regenRate=cuboid->regenrate;
-    cuboidAttr.buildTime=MAX((float)cuboidAttr.health/(float)cuboid->buildrate*1e3,(float)cuboid->minbt);
-    cuboidAttr.buildPoints=MAX(ceil((float)cuboidAttr.health/cuboid->hppv*cuboid->bppv),1);
+    if(cuboidAttr.health < 1)
+      cuboidAttr.health = 1;
+    cuboidAttr.splashDamage = 0;
+    cuboidAttr.splashRadius = 0;
+    if( cuboid->regen )
+      cuboidAttr.regenRate = cuboid->regenrate;
+    cuboidAttr.buildTime = MAX( (float)cuboidAttr.health / (float)cuboid->buildrate * 1e3, (float)cuboid->minbt );
+    cuboidAttr.buildPoints = MAX( ceil( (float)cuboidAttr.health / cuboid->hppv * cuboid->bppv ), 1 );
     return &cuboidAttr;
   }
   return attr;
@@ -4270,11 +4275,11 @@ const cuboidAttributes_t BG_CuboidTypes [] =
    1,           // int numsounds
    {0}          // float volumes[6]
   },            // }
-  180,          // float hppv
-  CBHPT_CUBES,  // int hpt
+  80,          // float hppv
+  CBHPT_PLAIN,  // int hpt
   3.0,          // float bppv
-  40,           // int buildrate
-  1500,         // int minbt
+  20,           // int buildrate
+  5000,         // int minbt
   qfalse,       // qboolean regen;
   0,            // int regenspeed
   qfalse,       // qboolean zappable
@@ -4297,8 +4302,8 @@ const cuboidAttributes_t BG_CuboidTypes [] =
   52,           // float hppv
   CBHPT_PANES,  // int hpt
   1.5,          // float bppv
-  55,           // int buildrate
-  1200,         // int minbt
+  15,           // int buildrate
+  6500,         // int minbt
   qfalse,       // qboolean regen;
   0,            // int regenspeed
   qfalse,       // qboolean zappable
@@ -4321,8 +4326,8 @@ const cuboidAttributes_t BG_CuboidTypes [] =
   50,           // float hppv
   CBHPT_PLAIN,  // int hpt
   4.0,          // float bppv
-  26,           // int buildrate
-  1800,         // int minbt
+  10,           // int buildrate
+  8000,         // int minbt
   qfalse,       // qboolean regen;
   0,            // int regenspeed
   qfalse,       // qboolean zappable
@@ -4342,11 +4347,11 @@ const cuboidAttributes_t BG_CuboidTypes [] =
    3,           // int numsounds
    {0,2.0,4.5}  // float volumes[6]
   },            // }
-  50,           // float hppv
+  20,           // float hppv
   CBHPT_PLAIN,  // int hpt
   1.2,          // float bppv
-  83,           // int buildrate
-  750,          // int minbt
+  35,           // int buildrate
+  3750,         // int minbt
   qtrue,        // qboolean regen;
   45,           // int regenspeed
   qfalse,       // qboolean zappable
@@ -4369,8 +4374,8 @@ const cuboidAttributes_t BG_CuboidTypes [] =
   20,           // float hppv
   CBHPT_PLAIN,  // int hpt
   1.5,          // float bppv
-  45,           // int buildrate
-  1300,         // int minbt
+  25,           // int buildrate
+  5500,         // int minbt
   qtrue,        // qboolean regen;
   90,           // int regenspeed
   qfalse,       // qboolean zappable
