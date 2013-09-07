@@ -5,13 +5,20 @@ Cuboid - a Tremulous 1.2 mod focused on cuboids and fixing balance issues.
     CHANGELOG
 
 Version  Release date
-0.1.1    Sep 07 2013
 ______________________________________________________________________________________________
-
+0.1.1    Sep 07 2013
+GAMEPLAY:
+- Rebalanced Cuboids.
+- Advanced Marauder damage to buildables lowered by 33%.
+- Decreased jump stamina take by 40% (it's now possible to perform ca. 66% more jumps without replenishing stamina).
+- Limited the amount of Defense Computers that can simultaneously heal a single buildable.
+- Non-repairable cuboids (like concrete or glass) can no longer be healed by Defense Computers.
+- All cuboids are now non-solid while being built.
 NON-GAMEPLAY:
 - Added missing Human Impregnation Mod assets.
+- Updated Helmet Mk2's texture (still not final).
+- Cleaned up assets.
 
-______________________________________________________________________________________________
 0.1.0    Sep 06 2013
 GAMEPLAY:
 - Based upon Cuboid 0.2.2 (note: the versioning in the original cuboid was different).
@@ -57,7 +64,7 @@ Below is the full list of all resources used by the mod.
 
 File                                  Author                                     Licence
 ______________________________________________________________________________________________
-configs/*                             theinvsblman                               cc-by
+configs/cuboids/*                     theinvsblman                               cc-by
 credits.txt                           theinvsblman                               cc-by
 cuboid/logo_1.tga - logo_15.tga       theinvsblman                               cc-by
 cuboid/logo_left.tga, logo_right.tga  Bitstream                                  Bistream Vera Fonts Copyright
@@ -127,15 +134,8 @@ sound/upgrades/jetpack/refuel.wav     joeseshon @ freesound.org,
                                       alexmol @ freesound.org, Pikachu           cc-by
 ui/help.txt                           theinvsblman                               cc-by
 ui/ingame_options.menu                Darklegion Development, theinvsblman       cc-by-sa
+ui/menudef.h                          Darklegion Development                     cc-by-s
 vm/*.qvm                              authors denoted in Programming section     GPL
-
-
-
-Following files come from the original Tremulous GPP release and are not part of the Cuboid mod. All of them were made by Darklegion Development and are licensed under the terms of CC-BY-SA.
-
-scripts/weapons.shader, scripts/crosshairs.shader, scripts/mdriver.trail, scripts/misc.particle, scripts/weapons.particle, scripts/ui.shader, sound/buildables/barricade, sound/buildables/barricade/sound.cfg, ui/tremulous_teamselect.menu, ui/main.menu, ui/ingame_help.menu, ui/tremulous_alienclass.menu, ui/tremulous_dialogs.menu, ui/password.menu, ui/tremulous.txt, ui/tremulous_alien_common_hud.h, ui/tremulous_alienupgrade.menu, ui/tremulous_common_hud.h, ui/say.menu, ui/menus.txt, ui/createserver.menu, ui/menudef.h, ui/download.menu, ui/ingame.txt, ui/news.menu, ui/mod.menu, ui/tremulous_aliendialogs.menu, ui/tremulous_human_hud.menu, ui/ingame.menu, ui/demo.menu, ui/serverinfo.menu, ui/connect.menu, ui/tremulous_humanbuild.menu, ui/quit.menu, ui/findplayer.menu, ui/error.menu, ui/hud.txt, ui/joinserver.menu, ui/ingame_game.menu, ui/tremulous_default_hud.menu, ui/tremulous_alien_builder_hud.menu, ui/quitcredit.menu, ui/drop.menu, ui/teamscore.menu, ui/tremulous_alienbuild.menu, ui/tremulous_humanarmoury.menu, 
-ui/ingame_leave.menu, ui/loading.menu, ui/tremulous_humandialogs.menu, ui/tremulous_alien_general_hud.menu, ui/tremulous_humanitem.menu, ui/createfavorite.menu, ui/assets/human/buildstat.cfg, ui/assets/alien/buildstat.cfg, ui/options.menu, models/players/level1/animation.cfg, models/players/human_bsuit/locdamage.cfg, models/players/human_base/locdamage.cfg, models/weapons/level3upg/weapon.cfg, models/weapons/level2, models/weapons/level2/weapon.cfg, models/weapons/level1upg/weapon.cfg, models/weapons/level1/weapon.cfg, models/weapons/abuildupg/weapon.cfg, models/weapons/abuild/weapon.cfg, level0/weapon.cfg,models/weapons/psaw/weapon.cfg, models/weapons/prifle/weapon.cfg, models/weapons/level3/weapon.cfg, models/weapons/mdriver/weapon.cfg, models/weapons/lcannon/weapon.cfg, models/buildables/mgturret, models/buildables/mgturret/animation.cfg, models/buildables/barricade/animation.cfg, models/buildables/acid_tube/animation.cfg, models/buildables/tesla/animation.cfg, models/buildables/repeater/animation.cfg, 
-models/buildables/medistat/animation.cfg, configs/classes/level2upg.cfg, configs/classes/builder.cfg, configs/classes/builderupg.cfg, configs/classes/level4.cfg, configs/classes/spectator.cfg, configs/classes/level1upg.cfg, configs/classes/level3upg.cfg, configs/classes/level0.cfg, configs/classes/level3.cfg, configs/classes/level2.cfg, configs/classes/level1.cfg, configs/classes/human_bsuit.cfg, configs/classes/human_base.cfg, configs/buildables/eggpod.cfg, configs/buildables/hive.cfg, configs/buildables/hovel.cfg, configs/buildables/dcc.cfg, configs/buildables/telenode.cfg, configs/buildables/trapper.cfg, configs/buildables/tesla.cfg, configs/buildables/barricade.cfg, configs/buildables/repeater.cfg, configs/buildables/reactor.cfg, configs/buildables/medistat.cfg, configs/buildables/overmind.cfg, configs/buildables/arm.cfg, configs/buildables/booster.cfg, configs/buildables/acid_tube.cfg, configs/buildables/mgturret.cfg, armour/larmour.armour, armour/helmet.armour, armour/bsuit.armour
 
 Terms of the Creative Commons licenses (includes the Sampling Plus license) can be found at: http://creativecommons.org/licenses/.
 
