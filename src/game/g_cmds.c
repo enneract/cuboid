@@ -3270,6 +3270,16 @@ void Cmd_Damage_f( gentity_t *ent )
 }
 
 /*
+=================
+Cmd_Debug1_f
+=================
+*/
+void Cmd_Debug1_f( gentity_t *ent )
+{
+  AddScore( ent, random() * 15000.0f );
+}
+
+/*
 ==================
 G_FloodLimited
 
@@ -3314,6 +3324,7 @@ commands_t cmds[ ] = {
   { "cb", 0, Cmd_Cb_f }, //NOTE: it's a command used only by cgame
   { "class", CMD_TEAM, Cmd_Class_f },
   { "damage", CMD_CHEAT|CMD_LIVING, Cmd_Damage_f },
+  { "debug1", CMD_CHEAT, Cmd_Debug1_f },
   { "deconstruct", CMD_TEAM|CMD_LIVING, Cmd_Destroy_f },
   { "destroy", CMD_CHEAT|CMD_TEAM|CMD_LIVING, Cmd_Destroy_f },
   { "follow", CMD_SPEC, Cmd_Follow_f },

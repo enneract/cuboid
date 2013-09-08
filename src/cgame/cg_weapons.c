@@ -1765,8 +1765,7 @@ void CG_MissileHitEntity( weapon_t weaponNum, weaponMode_t weaponMode,
   if( weaponMode <= WPM_NONE || weaponMode >= WPM_NUM_WEAPONMODES )
     weaponMode = WPM_PRIMARY;
 
-  // always impact!
-  //if( weapon->wim[ weaponMode ].alwaysImpact )
+  if( weapon->wim[ weaponMode ].alwaysImpact )
   {
     int sound;
 

@@ -747,12 +747,13 @@ void ClientTimerActions( gentity_t *ent, int msec )
         ent->health < ent->client->ps.stats[ STAT_MAX_HEALTH ] )
     {
       float hp, dmod;
-      
-      dmod = MIN( level.time - ent->lastDamageTime, 3000 ) / 3000.0f;
+
+      dmod = MAX( MIN( level.time - ent->lastDamageTime - 2000, 3000 ) / 3000.0f, 0 );
+
       hp = (float)ent->health / ent->client->ps.stats[ STAT_MAX_HEALTH ];
       ent->client->bioresHealTimer += (BIORES_EQUATION) * 10 * dmod;
     } 
-    
+
     if( ent->client->bioresHealTimer >= 100 )
     {
       int delta;

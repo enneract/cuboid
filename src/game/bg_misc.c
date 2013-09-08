@@ -2997,6 +2997,7 @@ char *eventnames[ ] =
   "EV_FALLING",
 
   "EV_JUMP",
+  "EV_JETJUMP",
   "EV_WATER_TOUCH", // foot touches
   "EV_WATER_LEAVE", // foot leaves
   "EV_WATER_UNDER", // head touches
@@ -3048,6 +3049,7 @@ char *eventnames[ ] =
   "EV_BUILD_REPAIRED",  // buildable has full health
   "EV_HUMAN_BUILDABLE_EXPLOSION",
   "EV_ALIEN_BUILDABLE_EXPLOSION",
+  "EV_CUBOID_EXPLOSION",
   "EV_ALIEN_ACIDTUBE",
 
   "EV_MEDKIT_USED",
@@ -3066,9 +3068,16 @@ char *eventnames[ ] =
   "EV_DCC_ATTACK",      // dcc under attack
 
   "EV_MGTURRET_SPINUP", // trigger a sound
-
+  "EV_MGTURRET_KILL",
+  
   "EV_RPTUSE_SOUND",    // trigger a sound
-  "EV_LEV2_ZAP"
+  "EV_LEV2_ZAP",
+  
+  "EV_ALIEN_HATCH",
+  "EV_ALIEN_HATCH_FAILURE",
+  
+  "EV_JETPACK_DEACTIVATE",
+  "EV_JETPACK_REFUEL"
 };
 
 /*

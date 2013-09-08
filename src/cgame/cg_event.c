@@ -322,6 +322,12 @@ static void CG_Obituary( entityState_t *ent )
         message = "was crushed under";
         message2 = "'s weight";
         break;
+      case MOD_LEVEL4_BOMB:
+        message = "was bombed by";
+        Com_sprintf( className, 64, "'s %s",
+            BG_ClassConfig( PCL_ALIEN_LEVEL4 )->humanName );
+        message2 = className;
+        break;
 
       case MOD_POISON:
         message = "should have used a medkit against";
@@ -966,7 +972,15 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_MGTURRET_SPINUP:
-      trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.turretSpinupSound );
+      if( random() >= 0.5f )
+        trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.turretSpinupSoundA );
+      else
+        trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.turretSpinupSoundB );
+      break;
+
+
+    case EV_MGTURRET_KILL:
+      trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.turretKillSound );
       break;
 
     case EV_OVERMIND_SPAWNS:

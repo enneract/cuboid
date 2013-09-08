@@ -6,6 +6,17 @@ Cuboid - a Tremulous 1.2 mod focused on cuboids and fixing balance issues.
 
 Version  Release date
 ______________________________________________________________________________________________
+0.1.2    Sep 09 2013
+GAMEPLAY
+- Wall impact effects no longer appear on players or buildables (the MD passing through players bug).
+- Now it takes longer for Biores to start healing after the human is hurt.
+NON-GAMEPLAY:
+- Added a death obituary for being killed with a rantbomb.
+- Replaced Turret spinup sound.
+- Turrets now play a sound after killing their target.
+- It's now possible to change the resizing speed for cuboids (via menu or cg.cuboidResizeRate).
+- Scoretable now displays high amounts of score properly.
+
 0.1.1    Sep 07 2013
 GAMEPLAY:
 - Rebalanced Cuboids.
@@ -13,7 +24,6 @@ GAMEPLAY:
 - Decreased jump stamina take by 40% (it's now possible to perform ca. 66% more jumps without replenishing stamina).
 - Limited the amount of Defense Computers that can simultaneously heal a single buildable.
 - Non-repairable cuboids (like concrete or glass) can no longer be healed by Defense Computers.
-- All cuboids are now non-solid while being built.
 NON-GAMEPLAY:
 - Added missing Human Impregnation Mod assets.
 - Updated Helmet Mk2's texture (still not final).
@@ -134,7 +144,8 @@ sound/upgrades/jetpack/refuel.wav     joeseshon @ freesound.org,
                                       alexmol @ freesound.org, Pikachu           cc-by
 ui/help.txt                           theinvsblman                               cc-by
 ui/ingame_options.menu                Darklegion Development, theinvsblman       cc-by-sa
-ui/menudef.h                          Darklegion Development                     cc-by-s
+ui/teamscore.menu                     Darklegion Development, theinvsblman       cc-by-sa
+ui/menudef.h                          Darklegion Development                     cc-by-sa
 vm/*.qvm                              authors denoted in Programming section     GPL
 
 Terms of the Creative Commons licenses (includes the Sampling Plus license) can be found at: http://creativecommons.org/licenses/.

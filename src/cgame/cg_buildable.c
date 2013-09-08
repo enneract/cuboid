@@ -2127,83 +2127,85 @@ Server responded to our cb with either cb2 or cb3.
 */
 void CG_Cuboid_Response(void)
 {
- // cb2 <a> <b> <c>         : server sets client-side cuboid
- // cb3 <echo>              : server agrees on player's cuboid
- // cb3 <echo> <a> <b> <c>  : server doesnt agree on player's cuboid and corrects it
- static qboolean init=qfalse;
- if(!BG_Buildable(cg.predictedPlayerState.stats[STAT_BUILDABLE]&~SB_VALID_TOGGLEBIT,NULL)->cuboid)
-  return;
- if(!Q_stricmp(CG_Argv(0),"cb2")&&trap_Argc()==4)
- {
-  cg.cuboidSelection[0]=atof(CG_Argv(1));
-  cg.cuboidSelection[1]=atof(CG_Argv(2));
-  cg.cuboidSelection[2]=atof(CG_Argv(3));
-  return;
- }
- else if(!Q_stricmp(CG_Argv(0),"cb3"))
- {
-  if(trap_Argc()==2)
+  // cb2 <a> <b> <c>         : server sets client-side cuboid
+  // cb3 <echo>              : server agrees on player's cuboid
+  // cb3 <echo> <a> <b> <c>  : server doesnt agree on player's cuboid and corrects it
+  static qboolean init = qfalse;
+  
+  if( !BG_Buildable( cg.predictedPlayerState.stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT, NULL )->cuboid )
+    return;
+ 
+  if( !Q_stricmp( CG_Argv( 0 ), "cb2" ) && trap_Argc( ) == 4 )
   {
-   if(atoi(CG_Argv(1))==cg.latestCBNumber)
-    cg.forbidCuboids=qfalse;
-   return;
+    cg.cuboidSelection[ 0 ] = atof( CG_Argv( 1 ) );
+    cg.cuboidSelection[ 1 ] = atof( CG_Argv( 2 ) );
+    cg.cuboidSelection[ 2 ] = atof( CG_Argv( 3 ) );
+    return;
   }
-  else if(trap_Argc()==5)
+  else if( !Q_stricmp( CG_Argv( 0 ), "cb3" ) )
   {
-   cg.cuboidSelection[0]=atof(CG_Argv(2));
-   cg.cuboidSelection[1]=atof(CG_Argv(3));
-   cg.cuboidSelection[2]=atof(CG_Argv(4));
-   if(atoi(CG_Argv(1))==cg.latestCBNumber)
-   { 
-    cg.forbidCuboids=qfalse;
-    if(cg.lastCuboidError+250<cg.time)
+    if( trap_Argc( ) == 2 )
     {
-     trap_S_StartLocalSound(cgs.media.cuboidErrorSound,CHAN_LOCAL_SOUND);
-     cg.lastCuboidError=cg.time;
-    }     
+      if( atoi( CG_Argv( 1 ) ) == cg.latestCBNumber )
+        cg.forbidCuboids = qfalse;
+      return;
+    }
+    else if( trap_Argc() == 5)
+    {
+      cg.cuboidSelection[ 0 ] = atof( CG_Argv( 2 ) );
+      cg.cuboidSelection[ 1 ] = atof( CG_Argv( 3 ) );
+      cg.cuboidSelection[ 2 ] = atof( CG_Argv( 4 ) );
+      if( atoi( CG_Argv( 1 ) ) == cg.latestCBNumber )
+      { 
+        cg.forbidCuboids = qfalse;
+        if( cg.lastCuboidError + 250 < cg.time )
+        {
+          trap_S_StartLocalSound( cgs.media.cuboidErrorSound, CHAN_LOCAL_SOUND );
+          cg.lastCuboidError = cg.time;
+        }     
+      }
+    return;
    }
-   return;
-  }
  }
- Com_Printf("^3warning: wrong cb2/cb3 from server\n");
+ Com_Printf( "^3warning: wrong cb2/cb3 from server\n" );
 }
 
 /*
 ======================
-CG_CuboidRotate_f
-
-Rotate the cuboid selection 90 degrees around the current axis.
-Syntax:
- cuboidRotate
+CG_CuboidResize_f
 ======================
 */
 void CG_CuboidResize(qboolean enlarge)
 {
- vec3_t dims;
- int rate=(enlarge?1:-1)*5; //FIXME: cvar for rate
- if(!BG_Buildable(cg.predictedPlayerState.stats[STAT_BUILDABLE]&~SB_VALID_TOGGLEBIT,NULL)->cuboid)
-  return;
- VectorCopy(cg.cuboidSelection,dims);
- switch(cg_cuboidResizeAxis.integer)
- {
-  case 0:
-   dims[0]+=rate;
-   break;
-  case 1:
-   dims[1]+=rate;
-   break;
-  default:
-   dims[2]+=rate;
-   break;
- }
- if(dims[0]<1||dims[1]<1||dims[2]<1|| 
-    dims[0]*dims[1]*dims[2]<CUBOID_MINVOLUME )
-  return;
- if(enlarge)
-  trap_S_StartLocalSound(cgs.media.cuboidResizeSoundA,CHAN_LOCAL_SOUND);
- else
-  trap_S_StartLocalSound(cgs.media.cuboidResizeSoundB,CHAN_LOCAL_SOUND);
- VectorCopy(dims,cg.cuboidSelection);
+  vec3_t dims;
+  float rate = ( enlarge ? 1.0f : -1.0f ) * cg_cuboidResizeRate.value;
+  
+  if( !BG_Buildable( cg.predictedPlayerState.stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT, NULL)->cuboid )
+    return;
+
+  VectorCopy( cg.cuboidSelection, dims );
+  switch( cg_cuboidResizeAxis.integer )
+  {
+    case 0:
+      dims[ 0 ] += rate;
+      break;
+    case 1:
+      dims[ 1 ] += rate;
+      break;
+    default:
+      dims[ 2 ] += rate;
+      break;
+  }
+  
+  if( dims[ 0 ] * dims[ 1 ] * dims[ 2 ] < CUBOID_MINVOLUME )
+    return;
+  
+  if( enlarge )
+    trap_S_StartLocalSound( cgs.media.cuboidResizeSoundA, CHAN_LOCAL_SOUND );
+  else
+    trap_S_StartLocalSound( cgs.media.cuboidResizeSoundB, CHAN_LOCAL_SOUND );
+ 
+  VectorCopy( dims, cg.cuboidSelection );
 }
 
 /*
@@ -2218,25 +2220,24 @@ Syntax:
 #define SWAPFLOATS(a,b) {float __t;__t=a,a=b,b=__t;}
 void CG_CuboidRotate_f(void)
 {
- int axis;
+  int axis;
 
- if(!BG_Buildable(cg.predictedPlayerState.stats[STAT_BUILDABLE]&~SB_VALID_TOGGLEBIT,NULL)->cuboid)
-  return;
- axis=cg_cuboidResizeAxis.integer;
- switch(axis)
- {
-  case 0:
-   SWAPFLOATS(cg.cuboidSelection[1],cg.cuboidSelection[2]);
-   break;
-  case 1:
-   SWAPFLOATS(cg.cuboidSelection[2],cg.cuboidSelection[0]);
-   break;
-  case 2:
-   SWAPFLOATS(cg.cuboidSelection[0],cg.cuboidSelection[1]);
-   break;
- }
- trap_S_StartLocalSound(cgs.media.cuboidRotateSound,CHAN_LOCAL_SOUND);
- CG_Cuboid_Send();
+  if( !BG_Buildable( cg.predictedPlayerState.stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT, NULL )->cuboid )
+    return;
+  switch( cg_cuboidResizeAxis.integer )
+  {
+    case 0:
+      SWAPFLOATS( cg.cuboidSelection[ 1 ], cg.cuboidSelection[ 2 ] );
+      break;
+    case 1:
+      SWAPFLOATS( cg.cuboidSelection[ 2 ], cg.cuboidSelection[ 0 ] );
+     break;
+    case 2:
+      SWAPFLOATS( cg.cuboidSelection[ 0 ], cg.cuboidSelection[ 1 ] );
+      break;
+  }
+  trap_S_StartLocalSound( cgs.media.cuboidRotateSound, CHAN_LOCAL_SOUND );
+  CG_Cuboid_Send( );
 }
 
 /*
@@ -2251,22 +2252,22 @@ Syntax:
 */
 void CG_CuboidAxis_f(void)
 {
- int axis;
+  int axis;
  
- axis=cg_cuboidResizeAxis.integer;
- if(!BG_Buildable(cg.predictedPlayerState.stats[STAT_BUILDABLE]&~SB_VALID_TOGGLEBIT,NULL)->cuboid)
-  return;
- if(!CG_Argv(1))
- {
-  Com_Printf("cuboidAxis next|0|1|2 : set axis on which you want to resize your cuboid selection (0 - X, 1 - Y, 2 - Z)\n");
-  return;
- }
- if(!Q_stricmp(CG_Argv(1),"next"))
-  axis++;
- else
-  axis=atoi(CG_Argv(1));
- trap_Cvar_Set("cg_cuboidResizeAxis",va("%i",(axis+3)%3));
- trap_S_StartLocalSound(cgs.media.cuboidAxisChangeSound,CHAN_LOCAL_SOUND);
+  axis = cg_cuboidResizeAxis.integer;
+  if( !BG_Buildable( cg.predictedPlayerState.stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT, NULL )->cuboid)
+    return;
+  if( !CG_Argv( 1 ) )
+  {
+    Com_Printf( "cuboidAxis next|0|1|2 : set axis on which you want to resize your cuboid selection (0 - X, 1 - Y, 2 - Z)\n" );
+    return;
+  }
+  if( !Q_stricmp( CG_Argv( 1 ), "next" ) )
+    axis++;
+  else
+    axis = atoi( CG_Argv( 1 ) );
+  trap_Cvar_Set( "cg_cuboidResizeAxis", va( "%i" , ( axis + 3 ) % 3 ) );
+  trap_S_StartLocalSound( cgs.media.cuboidAxisChangeSound, CHAN_LOCAL_SOUND );
 }
 
 /*
@@ -2280,11 +2281,12 @@ Otherwise send the normal +attack / -attack;
 */
 void CG_CuboidAttack_f(void)
 {
- if(BG_Buildable(cg.predictedPlayerState.stats[STAT_BUILDABLE]&~SB_VALID_TOGGLEBIT,NULL)->cuboid&&cg.forbidCuboids)
- {
-  trap_S_StartLocalSound(cgs.media.cuboidErrorSound,CHAN_LOCAL_SOUND);
-  return;
- }
- trap_SendClientCommand(va("%s",CG_Argv(0)));
+  if( BG_Buildable( cg.predictedPlayerState.stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT, NULL )->cuboid && 
+      cg.forbidCuboids )
+  {
+    trap_S_StartLocalSound( cgs.media.cuboidErrorSound, CHAN_LOCAL_SOUND );
+    return;
+  }
+  trap_SendClientCommand( va( "%s", CG_Argv(0) ) );
 }
 

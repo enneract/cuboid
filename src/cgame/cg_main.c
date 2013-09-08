@@ -228,6 +228,7 @@ vmCvar_t  cg_emoticons;
 vmCvar_t  cg_chatTeamPrefix;
 
 vmCvar_t  cg_cuboidResizeAxis;
+vmCvar_t  cg_cuboidResizeRate;
 vmCvar_t  cg_cuboidPSQuality;
 vmCvar_t  cg_cuboidInfoX;
 vmCvar_t  cg_cuboidInfoY;
@@ -370,10 +371,11 @@ static cvarTable_t cvarTable[ ] =
 
   { &cg_emoticons, "cg_emoticons", "1", CVAR_LATCH|CVAR_ARCHIVE},
 
-  { &cg_chatTeamPrefix, "cg_chatTeamPrefix", "1", CVAR_ARCHIVE},
+  { &cg_chatTeamPrefix, "cg_chatTeamPrefix", "1", CVAR_ARCHIVE },
   
-  { &cg_cuboidResizeAxis, "cg_cuboidResizeAxis", "2", 0},
-  { &cg_cuboidPSQuality, "cg_cuboidPSQuality", "3", CVAR_ARCHIVE},
+  { &cg_cuboidResizeAxis, "cg_cuboidResizeAxis", "2", 0 },
+  { &cg_cuboidResizeRate, "cg_cuboidResizeRate", "5", CVAR_ARCHIVE },
+  { &cg_cuboidPSQuality, "cg_cuboidPSQuality", "3", CVAR_ARCHIVE },
   
   { &cg_cuboidInfoX, "cg_cuboidInfoX" ,"0", CVAR_ARCHIVE },
   { &cg_cuboidInfoY, "cg_cuboidInfoY" ,"150", CVAR_ARCHIVE },
@@ -655,7 +657,9 @@ static void CG_RegisterSounds( void )
 
   cgs.media.tracerSound           = trap_S_RegisterSound( "sound/weapons/tracer.wav", qfalse );
   cgs.media.selectSound           = trap_S_RegisterSound( "sound/weapons/change.wav", qfalse );
-  cgs.media.turretSpinupSound     = trap_S_RegisterSound( "sound/buildables/mgturret/spinup.wav", qfalse );
+  cgs.media.turretSpinupSoundA    = trap_S_RegisterSound( "sound/buildables/mgturret/spinup_a.wav", qfalse );
+  cgs.media.turretSpinupSoundB    = trap_S_RegisterSound( "sound/buildables/mgturret/spinup_b.wav", qfalse );
+  cgs.media.turretKillSound       = trap_S_RegisterSound( "sound/buildables/mgturret/turretkill_a.wav", qfalse );  
   cgs.media.weaponEmptyClick      = trap_S_RegisterSound( "sound/weapons/click.wav", qfalse );
 
   cgs.media.talkSound             = trap_S_RegisterSound( "sound/misc/talk.wav", qfalse );

@@ -1240,8 +1240,10 @@ typedef struct
   sfxHandle_t humanTalkSound;
   sfxHandle_t landSound;
   sfxHandle_t fallSound;
-  sfxHandle_t turretSpinupSound;
-
+  sfxHandle_t turretSpinupSoundA;
+  sfxHandle_t turretSpinupSoundB;
+  sfxHandle_t turretKillSound;
+  
   sfxHandle_t hardBounceSound1;
   sfxHandle_t hardBounceSound2;
 
@@ -1606,6 +1608,7 @@ extern  vmCvar_t    cg_emoticons;
 extern  vmCvar_t    cg_chatTeamPrefix;
 
 extern  vmCvar_t    cg_cuboidResizeAxis;
+extern  vmCvar_t    cg_cuboidResizeRate;
 extern  vmCvar_t    cg_cuboidPSQuality;
 extern  vmCvar_t    cg_cuboidInfoX;
 extern  vmCvar_t    cg_cuboidInfoY;
@@ -2168,10 +2171,11 @@ typedef enum
 
 
 // mod version data
-#define MODVER_CURRENT        2
+#define MODVER_CURRENT        3
+#define MODVER_C2_0_1_2       3
 #define MODVER_C2_0_1_1       2
 #define MODVER_C2_0_1_0       1
-#define MODVER_TITLE          "0.1.1 (Sep 07)"
+#define MODVER_TITLE          "0.1.2 (Sep 09)"
 
 
 

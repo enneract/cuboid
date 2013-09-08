@@ -313,31 +313,39 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   self->enemy = attacker;
   self->client->ps.persistant[ PERS_KILLED ]++;
 
-  if( attacker && attacker->client )
+  if( attacker )
   {
-    attacker->client->lastkilled_client = self->s.number;
-
-    if( ( attacker == self || OnSameTeam( self, attacker ) ) && meansOfDeath != MOD_HSPAWN )
+    if ( attacker->client )
     {
-      //punish team kills and suicides
-      if( attacker->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
+      attacker->client->lastkilled_client = self->s.number;
+
+      if( ( attacker == self || OnSameTeam( self, attacker ) ) && meansOfDeath != MOD_HSPAWN )
       {
-        G_AddCreditToClient( attacker->client, -ALIEN_TK_SUICIDE_PENALTY, qtrue );
-        AddScore( attacker, -ALIEN_TK_SUICIDE_PENALTY );
-      }
-      else if( attacker->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
-      {
-        G_AddCreditToClient( attacker->client, -HUMAN_TK_SUICIDE_PENALTY, qtrue );
-        AddScore( attacker, -HUMAN_TK_SUICIDE_PENALTY );
+        //punish team kills and suicides
+        if( attacker->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
+        {
+          G_AddCreditToClient( attacker->client, -ALIEN_TK_SUICIDE_PENALTY, qtrue );
+          AddScore( attacker, -ALIEN_TK_SUICIDE_PENALTY );
+        }
+         else if( attacker->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+        {
+          G_AddCreditToClient( attacker->client, -HUMAN_TK_SUICIDE_PENALTY, qtrue );
+          AddScore( attacker, -HUMAN_TK_SUICIDE_PENALTY );
+        }
       }
     }
-  }
-  else if( attacker->s.eType != ET_BUILDABLE )
-  {
-    if( self->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
-      AddScore( self, -ALIEN_TK_SUICIDE_PENALTY );
-    else if( self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
-      AddScore( self, -HUMAN_TK_SUICIDE_PENALTY );
+    else if( attacker->s.eType == ET_BUILDABLE )
+    {
+      if( attacker->s.modelindex == BA_H_MGTURRET )
+        G_TempEntity( attacker->s.origin, EV_MGTURRET_KILL ); //FIXME: G_AddEvent doesn't work
+    }
+    else
+    {
+      if( self->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
+        AddScore( self, -ALIEN_TK_SUICIDE_PENALTY );
+      else if( self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+        AddScore( self, -HUMAN_TK_SUICIDE_PENALTY );
+    }
   }
 
   // give credits for killing this player

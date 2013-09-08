@@ -1535,7 +1535,7 @@
       }
     }
 
-//////// CHALLENGE-CUBOID
+//////// CUBOID
 
     itemDef
     {
@@ -1587,6 +1587,27 @@
       text "Rotate cuboid around axis:"
       cvar "cuboidRotate"
       rect SCONTENT_X (SCONTENT_Y+(1*ELEM_H)) SCONTENT_W ELEM_H
+      textalign ALIGN_RIGHT
+      textvalign VALIGN_CENTER
+      textalignx SCONTENT_OFF
+      textscale .25
+      forecolor 1 1 1 1
+      visible MENU_FALSE
+      action
+      {
+        play "sound/misc/menu1.wav";
+      }
+    }
+
+    itemDef
+    {
+      name cuboid
+      group optionsGrp
+      type ITEM_TYPE_MULTI
+      text "Resizing rate::"
+      cvar "cg_cuboidResizeRate"
+      cvarFloatList { "0.1" 0.1 "0.2" 0.2 "0.5" 0.5 "1" 1 "2" 2 "5" 5 "10" 10 }
+      rect SCONTENT_X (SCONTENT_Y+(2*ELEM_H)) SCONTENT_W ELEM_H
       textalign ALIGN_RIGHT
       textvalign VALIGN_CENTER
       textalignx SCONTENT_OFF

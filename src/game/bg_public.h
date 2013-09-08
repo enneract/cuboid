@@ -568,7 +568,8 @@ typedef enum
   EV_DCC_ATTACK,      // dcc under attack
 
   EV_MGTURRET_SPINUP, // turret spinup sound should play
-
+  EV_MGTURRET_KILL,
+  
   EV_RPTUSE_SOUND,    // trigger a sound
   EV_LEV2_ZAP,
   
