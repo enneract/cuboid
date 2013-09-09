@@ -72,6 +72,11 @@ vmCvar_t  g_allowVote;
 vmCvar_t  g_voteLimit;
 vmCvar_t  g_suddenDeathVotePercent;
 vmCvar_t  g_suddenDeathVoteDelay;
+vmCvar_t  g_mapVotePercent;
+vmCvar_t  g_mapVoteTimelimit;
+vmCvar_t  g_restartVotePercent;
+vmCvar_t  g_restartVoteTimelimit;
+vmCvar_t  g_drawVotePercent;
 vmCvar_t  g_teamForceBalance;
 vmCvar_t  g_smoothClients;
 vmCvar_t  pmove_fixed;
@@ -210,6 +215,12 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_voteLimit, "g_voteLimit", "5", CVAR_ARCHIVE, 0, qfalse },
   { &g_suddenDeathVotePercent, "g_suddenDeathVotePercent", "74", CVAR_ARCHIVE, 0, qfalse },
   { &g_suddenDeathVoteDelay, "g_suddenDeathVoteDelay", "180", CVAR_ARCHIVE, 0, qfalse },
+  { &g_mapVotePercent, "g_mapVotePercent", "67", CVAR_ARCHIVE, 0, qfalse },
+  { &g_mapVoteTimelimit, "g_mapVoteTimelimit", "5", CVAR_ARCHIVE, 0, qfalse },
+  { &g_restartVotePercent, "g_restartVotePercent", "67", CVAR_ARCHIVE, 0, qfalse },
+  { &g_restartVoteTimelimit, "g_restartVoteTimelimit", "10", CVAR_ARCHIVE, 0, qfalse },
+  { &g_drawVotePercent, "g_drawVotePercent", "67", CVAR_ARCHIVE, 0, qfalse },
+  
   { &g_minNameChangePeriod, "g_minNameChangePeriod", "5", 0, 0, qfalse},
   { &g_maxNameChanges, "g_maxNameChanges", "5", 0, 0, qfalse},
 
@@ -2215,6 +2226,7 @@ G_CheckVote
 void G_CheckVote( team_t team )
 {
   float    votePassThreshold = (float)level.voteThreshold[ team ] / 100.0f;
+  float    threshold;
   qboolean pass = qfalse;
   char     *msg;
   int      i;
@@ -2247,18 +2259,33 @@ void G_CheckVote( team_t team )
       return;
     }
   }
+  
+  threshold = (float)level.voteYes[ team ] / ( (float)level.voteNo[ team ] + level.voteYes[ team ] );
 
   if( pass )
+  {
+    if( !level.voteAborted[ team ] )
+      trap_SendServerCommand( -1, "voteevent votepassed" );
     level.voteExecuteTime[ team ] = level.time + level.voteDelay[ team ];
+  }
+  else
+  {
+    if( !level.voteAborted[ team ] )
+      trap_SendServerCommand( -1, "voteevent votefailed" );
+    else
+      trap_SendServerCommand( -1, "voteevent votecancelled" );
+  }
 
-  G_LogPrintf( "EndVote: %s %s %d %d %d\n",
+  G_LogPrintf( "EndVote: %s %s %d %d %d %f %f\n",
     team == TEAM_NONE ? "global" : BG_TeamName( team ),
     pass ? "pass" : "fail",
-    level.voteYes[ team ], level.voteNo[ team ], level.numVotingClients[ team ] );
+    level.voteYes[ team ], level.voteNo[ team ], level.numVotingClients[ team ],
+    threshold, votePassThreshold );
 
-  msg = va( "print \"%sote %sed (%d - %d)\n\"",
-    team == TEAM_NONE ? "V" : "Team v", pass ? "pass" : "fail",
-    level.voteYes[ team ], level.voteNo[ team ] );
+  msg = va( "print \"%sote %sed^7: %d - %d (%.0f%%/%.0f%%)\n\"",
+    team == TEAM_NONE ? "V" : "Team v", pass ? "^2pass" : "^1fail",
+    level.voteYes[ team ], level.voteNo[ team ], threshold * 100,
+    votePassThreshold * 100 );
 
   if( team == TEAM_NONE )
     trap_SendServerCommand( -1, msg );

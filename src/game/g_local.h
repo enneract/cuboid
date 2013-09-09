@@ -597,6 +597,7 @@ typedef struct
   int               voteYes[ NUM_TEAMS ];
   int               voteNo[ NUM_TEAMS ];
   int               numVotingClients[ NUM_TEAMS ];// set by CalculateRanks
+  qboolean          voteAborted[ NUM_TEAMS ];     // true if ended by an admin
 
   // spawn variables
   qboolean          spawning;                     // the G_Spawn*() functions are valid
@@ -833,6 +834,7 @@ void              G_BuildLogAuto( gentity_t *actor, gentity_t *buildable, buildF
 void              G_BuildLogRevert( int id );
 const char        *G_CuboidName(buildable_t buildable, const vec3_t cuboidSize, qboolean verbose);
 void              G_LayoutBuildItem( buildable_t buildable, vec3_t origin, vec3_t angles, vec3_t origin2, vec3_t angles2 );
+void              G_RemoveUnbuiltBuildables( gentity_t *self );
 
 //
 // g_utils.c
@@ -1143,6 +1145,11 @@ extern  vmCvar_t  g_allowVote;
 extern  vmCvar_t  g_voteLimit;
 extern  vmCvar_t  g_suddenDeathVotePercent;
 extern  vmCvar_t  g_suddenDeathVoteDelay;
+extern  vmCvar_t  g_mapVotePercent;
+extern  vmCvar_t  g_mapVoteTimelimit;
+extern  vmCvar_t  g_restartVotePercent;
+extern  vmCvar_t  g_restartVoteTimelimit;
+extern  vmCvar_t  g_drawVotePercent;
 extern  vmCvar_t  g_teamForceBalance;
 extern  vmCvar_t  g_smoothClients;
 extern  vmCvar_t  pmove_fixed;
@@ -1216,6 +1223,7 @@ extern  vmCvar_t  g_cuboidSizeLimit;
 
 extern  vmCvar_t  g_buildableDensityLimit;
 extern  vmCvar_t  g_buildableDensityLimitRange;
+
 
 void      trap_Print( const char *fmt );
 void      trap_Error( const char *fmt );

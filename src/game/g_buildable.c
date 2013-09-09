@@ -4548,3 +4548,36 @@ void G_BuildLogRevert( int id )
   }
 }
 
+/*
+============
+G_RemoveUnbuiltBuildables
+
+Kill all player's buildables if they havent spawned yet
+============
+*/
+void G_RemoveUnbuiltBuildables( gentity_t *self )
+{
+  int i;
+  vec3_t dir;
+  gentity_t *ent;
+  
+  dir[0] = dir[1] = 0.0f;
+  dir[2] = 1.0f;
+   
+  for( i = MAX_CLIENTS, ent = g_entities + i; i < level.num_entities; i++, ent++ )
+  {
+    if( ent->s.eType != ET_BUILDABLE )
+      continue;
+
+    if( ent == self )
+      continue;
+
+    if( ent->spawned )
+      continue;
+
+    if( ent->builtBy != self->client->ps.clientNum )
+      continue;
+    
+    G_Damage( ent, self, NULL, dir, dir, ent->health, 0, MOD_DECONSTRUCT );
+  }
+}

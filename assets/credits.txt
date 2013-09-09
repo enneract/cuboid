@@ -6,8 +6,19 @@ Cuboid - a Tremulous 1.2 mod focused on cuboids and fixing balance issues.
 
 Version  Release date
 ______________________________________________________________________________________________
+0.1.3    Sep 10 2013
+GAMEPLAY:
+- It's not longer possible to avoid buildtimer by reconnecting.
+NON-GAMEPLAY:
+- Customizable vote percentages: g_[map/restart/draw]VotePercent, default: 67.
+- Customizable vote timelimits: g_[map/restart]Timelimit, default: 5 for map votes, 10 for restart votes.
+- A lot of visual changes in the voting system.
+- Added vote sounds.
+
+
+______________________________________________________________________________________________
 0.1.2    Sep 09 2013
-GAMEPLAY
+GAMEPLAY:
 - Wall impact effects no longer appear on players or buildables (the MD passing through players bug).
 - Now it takes longer for Biores to start healing after the human is hurt.
 NON-GAMEPLAY:
@@ -104,6 +115,9 @@ models/weapons/level2upg/weapon.cfg   Darklegion Development, theinvsblman      
 models/weapons/level4/weapon.cfg      Darklegion Development, theinvsblman       cc-by-sa
 scripts/cuboid.shader                 theinvsblman                               cc-by
 scripts/cuboid.particle               Darklegion Development, theinvsblman       cc-by-sa
+sound/buildables/mgturret/spinup_a... Darklegion Development, Pikachu            cc-by-sa
+sound/buildables/mgturret/spinup_b... Darklegion Development, Pikachu            cc-by-sa
+sound/buildables/mgturret/turretki... Pikachu                                    cc0
 sound/cuboid/axischange.wav           Ongitak @ freesound.org                    cc-by
 sound/cuboid/concrete/dstr0.wav       Michael Manzke @ freesound.org             cc-by-nc
 sound/cuboid/concrete/pain0.wav       Benboncan @ freesound.org                  cc-by
@@ -131,6 +145,7 @@ sound/cuboid/slime/dstr0.wav          Michael Manzke @ freesound.org            
 sound/cuboid/slime/dstr1.wav          Audionautics @ freesound.org               cc-by
 sound/cuboid/slime/pain0.wav          anechoix @ freesound.org                   cc-by-nc
 sound/cuboid/slime/pain1.wav          anechoix @ freesound.org                   cc-by-nc
+sound/feedback/vote*.wav              ??                                         ??
 sound/player/alienhatch.wav           Darklegion Development, theinvsblman       cc-by-sa
 sound/player/alienfailedhatch.wav     Darklegion Development, theinvsblman       cc-by-sa
 sound/upgrades/jetpack/hi.wav         Pikachu                                    cc0

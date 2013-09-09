@@ -1363,12 +1363,28 @@ void Cmd_CallVote_f( gentity_t *ent )
     }
     else if( !Q_stricmp( vote, "map_restart" ) )
     {
+      if( level.time / 60000 >= g_restartVoteTimelimit.integer )
+      {
+        trap_SendServerCommand( ent-g_entities,
+          va( "print \"%s: It's not allowed to call a restart vote after %i minute%s.\n\"",
+            cmd, g_restartVoteTimelimit.integer, ( g_restartVoteTimelimit.integer == 1 ? "" : "s" ) ) );
+        return;
+      }
       strcpy( level.voteString[ team ], vote );
       strcpy( level.voteDisplayString[ team ], "Restart current map" );
+      level.voteThreshold[ team ] = g_restartVotePercent.integer;
       // map_restart comes with a default delay
     }
     else if( !Q_stricmp( vote, "map" ) )
     {
+      if( level.time / 60000 >= g_mapVoteTimelimit.integer )
+      {
+        trap_SendServerCommand( ent-g_entities,
+          va( "print \"%s: It's not allowed to call a map vote after %i minute%s. Call a ^1nextmap^7 vote instead\n\"",
+            cmd, g_mapVoteTimelimit.integer, ( g_mapVoteTimelimit.integer == 1 ? "" : "s" ) ) );
+        return;
+      }
+      
       if( !G_MapExists( arg ) )
       {
         trap_SendServerCommand( ent-g_entities,
@@ -1383,6 +1399,7 @@ void Cmd_CallVote_f( gentity_t *ent )
         sizeof( level.voteDisplayString[ team ] ),
         "Change to map '%s'", arg );
       level.voteDelay[ team ] = 3000;
+      level.voteThreshold[ team ] = g_mapVotePercent.integer;
     }
     else if( !Q_stricmp( vote, "nextmap" ) )
     {
@@ -1406,13 +1423,14 @@ void Cmd_CallVote_f( gentity_t *ent )
         "set g_nextMap \"%s\"", arg );
       Com_sprintf( level.voteDisplayString[ team ],
         sizeof( level.voteDisplayString[ team ] ),
-        "Set the next map to '%s'", arg );
+        "Set the ^1next^7 map to '%s'", arg );
     }
     else if( !Q_stricmp( vote, "draw" ) )
     {
       strcpy( level.voteString[ team ], "evacuation" );
       strcpy( level.voteDisplayString[ team ], "End match in a draw" );
       level.voteDelay[ team ] = 3000;
+      level.voteThreshold[ team ] = g_drawVotePercent.integer;
     }
     else if( !Q_stricmp( vote, "sudden_death" ) )
     {
@@ -1552,6 +1570,9 @@ void Cmd_CallVote_f( gentity_t *ent )
   ent->client->pers.namelog->voteCount++;
   ent->client->pers.vote |= 1 << team;
   G_Vote( ent, team, qtrue );
+  
+  level.voteAborted[ team ] = qfalse;
+  trap_SendServerCommand( -1, "voteevent votenow" );
 }
 
 /*

@@ -1259,6 +1259,33 @@ static void CG_PoisonCloud_f( void )
   }
 }
 
+/*
+=================
+CG_VoteEvent_f
+
+Vote sounds use commands to save on events and entities
+=================
+*/
+static void CG_VoteEvent( void )
+{
+  const char *event, *soundName;
+  
+  if( trap_Argc( ) != 2 )
+    return;
+  
+  event = CG_Argv( 1 );
+  
+  if( !Q_stricmp( event, "votenow" ) ||
+      !Q_stricmp( event, "votecancelled" ) ||
+      !Q_stricmp( event, "votefailed" ) ||
+      !Q_stricmp( event, "votepassed" ) )
+    soundName = va( "sound/feedback/%s.wav", event );
+  else
+    return;
+
+  trap_S_StartLocalSound( trap_S_RegisterSound( soundName, qfalse ), CHAN_VOICE );
+}
+
 static void CG_GameCmds_f( void )
 {
   int i;
@@ -1290,7 +1317,8 @@ static consoleCommand_t svcommands[ ] =
   { "serverclosemenus", CG_ServerCloseMenus_f },
   { "servermenu", CG_ServerMenu_f },
   { "tinfo", CG_ParseTeamInfo },
-  { "voice", CG_ParseVoice }
+  { "voice", CG_ParseVoice },
+  { "voteevent", CG_VoteEvent } 
 };
 
 /*

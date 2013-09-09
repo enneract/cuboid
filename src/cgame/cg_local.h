@@ -2171,11 +2171,12 @@ typedef enum
 
 
 // mod version data
-#define MODVER_CURRENT        3
+#define MODVER_CURRENT        4
+#define MODVER_C2_0_1_3       4
 #define MODVER_C2_0_1_2       3
 #define MODVER_C2_0_1_1       2
 #define MODVER_C2_0_1_0       1
-#define MODVER_TITLE          "0.1.2 (Sep 09)"
+#define MODVER_TITLE          "0.1.3 (Sep 10)"
 
 
 

@@ -281,27 +281,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   for( i = UP_NONE + 1; i < UP_NUM_UPGRADES; i++ )
     BG_DeactivateUpgrade( i, self->client->ps.stats );
 
-  // kill all player's buildables if they havent spawned yet
-  // this should eliminate build timer hacks for ever
-  dir[0] = dir[1] = 0.0f;
-  dir[2] = 1.0f;
-   
-  for( i = MAX_CLIENTS, ent = g_entities + i; i < level.num_entities; i++, ent++ )
-  {
-    if( ent->s.eType != ET_BUILDABLE )
-      continue;
-
-    if( ent == self )
-      continue;
-
-    if( ent->spawned )
-      continue;
-
-    if( ent->builtBy != self->client->ps.clientNum )
-      continue;
-    
-    G_Damage( ent, self, attacker, dir, dir, ent->health, 0, MOD_DECONSTRUCT );
-  }
+  G_RemoveUnbuiltBuildables( self );
   
   // broadcast the death event to everyone
   ent = G_TempEntity( self->r.currentOrigin, EV_OBITUARY );
