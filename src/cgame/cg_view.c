@@ -1459,6 +1459,9 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 
   // update audio positions
   trap_S_Respatialize( cg.snap->ps.clientNum, cg.refdef.vieworg, cg.refdef.viewaxis, inwater );
+  
+  // update announcer
+  CG_ProcessAnnouncer( );
 
   // make sure the lagometerSample and frame timing isn't done twice when in stereo
   if( stereoView != STEREO_RIGHT )

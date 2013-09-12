@@ -160,6 +160,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
       ""
     },
 
+    {"register", G_admin_register, qfalse, "register",
+      "register your name",
+      ""
+    },
+
     {"rename", G_admin_rename, qfalse, "rename",
       "rename a player",
       "[^3name|slot#^7] [^3new name^7]"
@@ -178,6 +183,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
     {"setlevel", G_admin_setlevel, qfalse, "setlevel",
       "sets the admin level of a player",
       "[^3name|slot#|admin#^7] [^3level^7]"
+    },
+
+    {"settitle", G_admin_settitle, qfalse, "settitle",
+      "sets the title of a player",
+      "[^3name|slot#|admin#^7] [^3title^7]"
     },
 
     {"showbans", G_admin_showbans, qtrue, "showbans",
@@ -440,6 +450,9 @@ static qboolean admin_higher_admin( g_admin_admin_t *a, g_admin_admin_t *b )
   if( !b )
     return qtrue;
 
+  if( a == b )
+    return qfalse;
+  
   if( admin_permission( b->flags, ADMF_IMMUTABLE, &perm ) )
     return !perm;
 
@@ -458,6 +471,9 @@ static qboolean admin_higher( gentity_t *admin, gentity_t *victim )
   // console always wins
   if( !admin )
     return qtrue;
+  
+  if( admin == victim )
+    return qfalse;
 
   return admin_higher_admin( admin->client->pers.admin,
     victim->client->pers.admin );
@@ -526,6 +542,8 @@ static void admin_writeconfig( void )
     admin_writeconfig_int( a->level, f );
     trap_FS_Write( "flags   = ", 10, f );
     admin_writeconfig_string( a->flags, f );
+    trap_FS_Write( "title   = ", 10, f );
+    admin_writeconfig_string( a->title, f );
     trap_FS_Write( "\n", 1, f );
   }
   for( b = g_admin_bans; b; b = b->next )
@@ -805,14 +823,23 @@ static void admin_out( void *admin, char *str )
 {
   g_admin_admin_t *a = (g_admin_admin_t *)admin;
   g_admin_level_t *l = G_admin_level( a->level );
+  char *title;
   int lncol = 0, i;
   for( i = 0; l && l->name[ i ]; i++ )
   {
     if( Q_IsColorString( l->name + i ) )
       lncol += 2;
   }
-  Com_sprintf( str, MAX_STRING_CHARS, "%-6d %*s^7 %s",
-    a->level, admin_level_maxname + lncol - 1, l ? l->name : "(null)",
+  
+  if( Q_stricmp( a->title, "" ) )
+    title = a->title;
+  else if ( l )
+    title = l->name;
+  else
+    title = "(null)";
+
+  Com_sprintf( str, MAX_STRING_CHARS, "%-2d %*s^7 %s",
+    a->level, admin_level_maxname + lncol - 1, title,
     a->name );
 }
 static int admin_listadmins( gentity_t *ent, int start, char *search )
@@ -1166,6 +1193,13 @@ qboolean G_admin_readconfig( gentity_t *ent )
       {
         admin_readconfig_string( &cnf, a->flags, sizeof( a->flags ) );
       }
+      else if( !Q_stricmp( t, "title" ) )
+      {
+        admin_readconfig_string( &cnf, a->title, sizeof( a->title ) );
+        len = Q_PrintStrlen( a->title );
+        if( len > admin_level_maxname )
+          admin_level_maxname = len;
+      }
       else
       {
         COM_ParseError( "[admin] unrecognized token \"%s\"", t );
@@ -1399,8 +1433,7 @@ qboolean G_admin_setlevel( gentity_t *ent )
 
   if( ent && !admin_higher_admin( ent->client->pers.admin, a ) )
   {
-    ADMP( "^3setlevel: ^7sorry, but your intended victim has a higher"
-        " admin level than you\n" );
+    ADMP( "^3setlevel: ^7indented victim is immune to your actions\n" );
     return qfalse;
   }
 
@@ -1563,8 +1596,7 @@ qboolean G_admin_kick( gentity_t *ent )
   vic = &g_entities[ pid ];
   if( !admin_higher( ent, vic ) )
   {
-    ADMP( "^3kick: ^7sorry, but your intended victim has a higher admin"
-        " level than you\n" );
+    ADMP( "^3kick: ^7indented victim is immune to your actions\n" );
     return qfalse;
   }
   if( vic->client->pers.localClient )
@@ -1676,8 +1708,7 @@ qboolean G_admin_ban( gentity_t *ent )
   if( ent && !admin_higher_guid( ent->client->pers.guid, match->guid ) )
   {
 
-    ADMP( "^3ban: ^7sorry, but your intended victim has a higher admin"
-      " level than you\n" );
+    ADMP( "^3ban: ^7indented victim is immune to your actions\n" );
     return qfalse;
   }
   if( match->slot > -1 && level.clients[ match->slot ].pers.localClient )
@@ -1930,8 +1961,7 @@ qboolean G_admin_putteam( gentity_t *ent )
   vic = &g_entities[ pid ];
   if( !admin_higher( ent, vic ) )
   {
-    ADMP( "^3putteam: ^7sorry, but your intended victim has a higher "
-        " admin level than you\n" );
+    ADMP( "^3putteam: ^7indented victim is immune to your actions\n" );
     return qfalse;
   }
   teamnum = G_TeamFromString( team );
@@ -2018,8 +2048,7 @@ qboolean G_admin_mute( gentity_t *ent )
   if( ent && !admin_higher_admin( ent->client->pers.admin,
       G_admin_admin( vic->guid ) ) )
   {
-    ADMP( va( "^3%s: ^7sorry, but your intended victim has a higher admin"
-        " level than you\n", command ) );
+    ADMP( va( "^3%s: ^7indented victim is immune to your actions\n", command ) );
     return qfalse;
   }
   if( vic->muted )
@@ -2194,7 +2223,7 @@ qboolean G_admin_listplayers( gentity_t *ent )
   gclient_t       *p;
   char            c, t; // color and team letter
   char            *registeredname;
-  char            lname[ MAX_NAME_LENGTH ];
+  char            lname[ MAX_ADMIN_TITLE ];
   char            muted, denied;
   int             colorlen;
   char            namecleaned[ MAX_NAME_LENGTH ];
@@ -2250,7 +2279,9 @@ qboolean G_admin_listplayers( gentity_t *ent )
       }
     }
 
-    if( l )
+    if( Q_stricmp( p->pers.admin->title, "" ) )
+      Q_strncpyz( lname, p->pers.admin->title, sizeof( lname ) );
+    else if( l )
       Q_strncpyz( lname, l->name, sizeof( lname ) );
 
     for( colorlen = j = 0; lname[ j ]; j++ )
@@ -2272,7 +2303,7 @@ qboolean G_admin_listplayers( gentity_t *ent )
               p->pers.netname,
               ( registeredname ) ? "(a.k.a. " : "",
               ( registeredname ) ? registeredname : "",
-              ( registeredname ) ? S_COLOR_WHITE ")" : "" ) );
+              ( registeredname ) ? S_COLOR_WHITE ")" : "" ) ) ;
 
   }
   ADMBP_end();
@@ -2454,6 +2485,7 @@ qboolean G_admin_adminhelp( gentity_t *ent )
 qboolean G_admin_admintest( gentity_t *ent )
 {
   g_admin_level_t *l;
+  char *title;
 
   if( !ent )
   {
@@ -2463,12 +2495,19 @@ qboolean G_admin_admintest( gentity_t *ent )
 
   l = G_admin_level( ent->client->pers.admin ? ent->client->pers.admin->level : 0 );
 
-  AP( va( "print \"^3admintest: ^7%s^7 is a level %d admin %s%s^7%s\n\"",
+  if( !l )
+    return qfalse;
+
+  if( ent->client->pers.admin &&
+      Q_stricmp( ent->client->pers.admin->title, "" ) )
+    title = ent->client->pers.admin->title;
+  else
+    title = l->name;
+  
+  AP( va( "print \"^3admintest: ^7%s^7 is %s^7 (level %d)\n\"",
           ent->client->pers.netname,
-          l ? l->level : 0,
-          l ? "(" : "",
-          l ? l->name : "",
-          l ? ")" : "" ) );
+          title,
+          l->level ) );
   return qtrue;
 }
 
@@ -2931,6 +2970,21 @@ qboolean G_admin_lock( gentity_t *ent )
     command, BG_TeamName( team ), lock ? "" : "un",
     ent ? ent->client->pers.netname : "console" ) );
 
+  if( team == TEAM_ALIENS )
+  {
+    if( lock )
+      trap_SendServerCommand( -1, "announce alienslocked" );
+    else
+      trap_SendServerCommand( -1, "announce aliensunlocked" );
+  }
+  else
+  {
+    if( lock )
+      trap_SendServerCommand( -1, "announce humanslocked" );
+    else
+      trap_SendServerCommand( -1, "announce humansunlocked" );
+  }
+
   return qtrue;
 }
 
@@ -3275,4 +3329,173 @@ void G_admin_cleanup( void )
   }
   g_admin_commands = NULL;
   BG_DefragmentMemory( );
+}
+
+/*
+================
+G_admin_settitle
+================
+*/
+qboolean G_admin_settitle( gentity_t *ent )
+{
+  char title[ MAX_ADMIN_TITLE ];
+  char name[ MAX_NAME_LENGTH ];
+  char testname[ MAX_NAME_LENGTH ];
+  int i;
+  gentity_t *vic = NULL;
+  g_admin_admin_t *a = NULL;
+  g_admin_level_t *l = NULL;
+  int na;
+  int len;
+
+  
+  if( trap_Argc() < 3 )
+  {
+    ADMP( "^3settitle: ^7usage: settitle [name|slot#] [title]\n" );
+    return qfalse;
+  }
+  
+  trap_Argv( 1, testname, sizeof( testname ) );
+  trap_Argv( 2, title, sizeof( title ) );
+  
+  for( na = 0, a = g_admin_admins; a; na++, a = a->next );
+  for( i = 0; testname[ i ] && isdigit( testname[ i ] ); i++ );
+  if( !testname[ i ] )
+  {
+    int id = atoi( testname );
+    if( id < MAX_CLIENTS )
+    {
+      vic = &g_entities[ id ];
+      if( !vic || !vic->client || vic->client->pers.connected == CON_DISCONNECTED )
+      {
+        ADMP( va( "^3settitle: ^7no player connected in slot %d\n", id ) );
+        return qfalse;
+      }
+    }
+    else if( id < na + MAX_CLIENTS )
+      for( i = 0, a = g_admin_admins; i < id - MAX_CLIENTS; i++, a = a->next );
+    else
+    {
+      ADMP( va( "^3settitle: ^7%s not in range 1-%d\n",
+                testname, na + MAX_CLIENTS - 1 ) );
+      return qfalse;
+    }
+  }
+  else
+    G_SanitiseString( testname, name, sizeof( name ) );
+
+  if( vic )
+    a = vic->client->pers.admin;
+  else if( !a )
+  {
+    g_admin_admin_t *wa;
+    int             matches = 0;
+
+    for( wa = g_admin_admins; wa && matches < 2; wa = wa->next )
+    {
+      G_SanitiseString( wa->name, testname, sizeof( testname ) );
+      if( strstr( testname, name ) )
+      {
+        a = wa;
+        matches++;
+      }
+    }
+
+    for( i = 0; i < level.maxclients && matches < 2; i++ )
+    {
+      if( level.clients[ i ].pers.connected == CON_DISCONNECTED )
+        continue;
+
+      if( matches && level.clients[ i ].pers.admin &&
+          level.clients[ i ].pers.admin == a )
+      {
+        vic = &g_entities[ i ];
+        continue;
+      }
+
+      G_SanitiseString( level.clients[ i ].pers.netname, testname,
+        sizeof( testname ) );
+      if( strstr( testname, name ) )
+      {
+        vic = &g_entities[ i ];
+        a = vic->client->pers.admin;
+        matches++;
+      }
+    }
+
+    if( matches == 0 )
+    {
+      ADMP( "^3settitle:^7 no match.  use listplayers or listadmins to "
+        "find an appropriate number to use instead of name.\n" );
+      return qfalse;
+    }
+    if( matches > 1 )
+    {
+      ADMP( "^3settitle:^7 more than one match.  Use the admin number "
+        "instead:\n" );
+      admin_listadmins( ent, 0, name );
+      return qfalse;
+    }
+  }
+ 
+  if( !a )
+  {
+    ADMP( "^3settitle: ^7indented victim has no admin record\n" );
+    return qfalse;
+  }
+
+  if( ent && admin_higher_admin( a, ent->client->pers.admin ) )
+  {
+     ADMP( "^3settitle: ^7indented victim is immune to your actions\n" );
+     return qfalse;
+  }
+
+  Q_strncpyz( a->title, title, sizeof( title ) );
+  
+  len = Q_PrintStrlen( a->title );
+  if( len > admin_level_maxname )
+    admin_level_maxname = len;
+  
+  AP( va( "print \"^3settitle: ^7%s^7 was granted the title '%s^7' by %s^7\n\"",
+          a->name, a->title, ( ent ) ? ent->client->pers.netname : "console" ) );
+
+  admin_writeconfig();
+  return qtrue;
+}
+
+/*
+================
+G_admin_register
+================
+*/
+qboolean G_admin_register( gentity_t *ent )
+{
+  if( !ent )
+    return qfalse;
+
+  if( !ent->client->pers.admin )
+  {
+    g_admin_admin_t *a;
+    
+    for( a = g_admin_admins; a && a->next; a = a->next );
+    
+    if( a )
+      a = a->next = BG_Alloc( sizeof( g_admin_admin_t ) );
+    else
+      a = g_admin_admins = BG_Alloc( sizeof( g_admin_admin_t ) );
+    
+    ent->client->pers.admin = a;
+    Q_strncpyz( a->guid, ent->client->pers.guid, sizeof( a->guid ) );
+    a->level = g_adminRegisterLevel.integer;
+    
+    AP( va( "print \"^3register: ^7'%s'^7 is now a registered nickname\n\"", ent->client->pers.netname ) );
+  }
+  else
+    ADMP( "^3register: ^7you have updated your nick protection" );
+  
+  Q_strncpyz( ent->client->pers.admin->name, 
+              ent->client->pers.netname, 
+              sizeof( ent->client->pers.admin->name ) );
+  
+  return qtrue;
 }

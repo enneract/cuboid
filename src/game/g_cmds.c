@@ -1572,7 +1572,7 @@ void Cmd_CallVote_f( gentity_t *ent )
   G_Vote( ent, team, qtrue );
   
   level.voteAborted[ team ] = qfalse;
-  trap_SendServerCommand( -1, "voteevent votenow" );
+  trap_SendServerCommand( -1, "announce votenow" );
 }
 
 /*
@@ -3295,9 +3295,16 @@ void Cmd_Damage_f( gentity_t *ent )
 Cmd_Debug1_f
 =================
 */
-void Cmd_Debug1_f( gentity_t *ent )
+void Cmd_Debug1_f( gentity_t *self )
 {
-  AddScore( ent, random() * 15000.0f );
+  gentity_t *ent;
+  ent = G_TempEntity( self->r.currentOrigin, EV_OBITUARY );
+  ent->s.eventParm = MOD_MACHINEGUN;
+  ent->s.otherEntityNum = self->s.number;
+  ent->s.modelindex = self->client->ps.stats[ STAT_CLASS ];
+  ent->s.otherEntityNum2 = 1;
+  ent->s.groundEntityNum = 666;
+  ent->r.svFlags = SVF_BROADCAST; // send to everyone
 }
 
 /*

@@ -1261,12 +1261,36 @@ static void CG_PoisonCloud_f( void )
 
 /*
 =================
-CG_VoteEvent_f
-
-Vote sounds use commands to save on events and entities
+CG_ProcessAnnouncer
 =================
 */
-static void CG_VoteEvent( void )
+#define ANNOUNCER_DELAY 2000
+void CG_ProcessAnnouncer( void )
+{
+  static int last = -ANNOUNCER_DELAY;
+
+  if( cg.announcerStackPos == cg.announcerStackLatest )
+    return;
+
+  if( last + ANNOUNCER_DELAY > cg.time )
+    return;
+  
+  cg.announcerStackPos++;
+  cg.announcerStackPos %= MAX_ANNOUNCER_STACK;
+  
+  trap_S_StartLocalSound( cg.announcerStack[ cg.announcerStackPos ], CHAN_VOICE );
+  
+  last = cg.time;
+}
+
+/*
+=================
+CG_Announce_f
+
+Play an announcer sound
+=================
+*/
+static void CG_Announce( void )
 {
   const char *event, *soundName;
   
@@ -1278,12 +1302,31 @@ static void CG_VoteEvent( void )
   if( !Q_stricmp( event, "votenow" ) ||
       !Q_stricmp( event, "votecancelled" ) ||
       !Q_stricmp( event, "votefailed" ) ||
-      !Q_stricmp( event, "votepassed" ) )
+      !Q_stricmp( event, "votepassed" ) || 
+      !Q_stricmp( event, "timelimit_hit" ) ||
+      !Q_stricmp( event, "timelimit_1min" ) ||
+      !Q_stricmp( event, "timelimit_5min" ) ||
+      !Q_stricmp( event, "suddendeath" ) ||
+      !Q_stricmp( event, "sdimminent" ) || 
+      !Q_stricmp( event, "alienswin" ) || 
+      !Q_stricmp( event, "aliensadmit" ) ||
+      !Q_stricmp( event, "alienslocked" ) ||
+      !Q_stricmp( event, "aliensunlocked" ) ||
+      !Q_stricmp( event, "humanswin" ) || 
+      !Q_stricmp( event, "humansadmit" ) ||
+      !Q_stricmp( event, "humanslocked" ) ||
+      !Q_stricmp( event, "humansunlocked" ) ||
+      !Q_stricmp( event, "stalemate" ) ||
+      !Q_stricmp( event, "1minremains" ) ||
+      !Q_stricmp( event, "5minremains" ) )
     soundName = va( "sound/feedback/%s.wav", event );
   else
     return;
 
-  trap_S_StartLocalSound( trap_S_RegisterSound( soundName, qfalse ), CHAN_VOICE );
+  cg.announcerStackLatest++;
+  cg.announcerStackLatest %= MAX_ANNOUNCER_STACK;
+
+  cg.announcerStack[ cg.announcerStackLatest ] = trap_S_RegisterSound( soundName, qfalse );
 }
 
 static void CG_GameCmds_f( void )
@@ -1303,6 +1346,7 @@ static void CG_GameCmds_f( void )
 
 static consoleCommand_t svcommands[ ] =
 {
+  { "announce", CG_Announce },
   { "cb2", CG_Cuboid_Response }, // set local cuboid
   { "cb3", CG_Cuboid_Response }, // set local cuboid and print a "limit exceeded" warning
   { "chat", CG_Chat_f },
@@ -1317,8 +1361,7 @@ static consoleCommand_t svcommands[ ] =
   { "serverclosemenus", CG_ServerCloseMenus_f },
   { "servermenu", CG_ServerMenu_f },
   { "tinfo", CG_ParseTeamInfo },
-  { "voice", CG_ParseVoice },
-  { "voteevent", CG_VoteEvent } 
+  { "voice", CG_ParseVoice }
 };
 
 /*

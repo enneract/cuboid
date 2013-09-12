@@ -1921,6 +1921,9 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
   CG_ShaderStateChanged( );
 
   trap_S_ClearLoopingSounds( qtrue );
+  
+  cg.announcerStackLatest = -1;
+  cg.announcerStackPos = -1;
 }
 
 /*

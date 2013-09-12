@@ -41,7 +41,7 @@ static void CG_Obituary( entityState_t *ent )
   const char    *attackerInfo;
   char          targetName[ MAX_NAME_LENGTH ];
   char          attackerName[ MAX_NAME_LENGTH ];
-  char          className[ 64 ];
+  char          className[ 64 ], victimClassName[ 64 ];
   gender_t      gender;
   clientInfo_t  *ci;
   qboolean      teamKill = qfalse;
@@ -76,6 +76,12 @@ static void CG_Obituary( entityState_t *ent )
   Q_strncpyz( targetName, Info_ValueForKey( targetInfo, "n" ), sizeof( targetName ));
 
   message2 = "";
+
+  if( ent->modelindex >= PCL_ALIEN_BUILDER0 &&
+      ent->modelindex <= PCL_ALIEN_LEVEL4 )
+    Com_sprintf( victimClassName, 64, "'s %s", BG_ClassConfig( ent->modelindex )->humanName );
+   else
+    victimClassName[ 0 ] = '\0';
 
   // check for single client messages
 
@@ -196,7 +202,7 @@ static void CG_Obituary( entityState_t *ent )
 
   if( message )
   {
-    CG_Printf( "%s" S_COLOR_WHITE " %s\n", targetName, message );
+    CG_Printf( "%s" S_COLOR_WHITE "%s %s\n", targetName, victimClassName, message );
     return;
   }
 
@@ -360,10 +366,10 @@ static void CG_Obituary( entityState_t *ent )
 
     if( message )
     {
-      CG_Printf( "%s" S_COLOR_WHITE " %s %s%s" S_COLOR_WHITE "%s\n",
-        targetName, message,
+      CG_Printf( "%s" S_COLOR_WHITE "%s %s %s%s" S_COLOR_WHITE "%s, %iHP left\n",
+        targetName, victimClassName, message, 
         ( teamKill ) ? S_COLOR_RED "TEAMMATE " S_COLOR_WHITE : "",
-        attackerName, message2 );
+        attackerName, message2, ent->groundEntityNum );
       if( teamKill && attacker == cg.clientNum )
       {
         CG_CenterPrint( va ( "You killed " S_COLOR_RED "TEAMMATE "
@@ -375,7 +381,7 @@ static void CG_Obituary( entityState_t *ent )
   }
 
   // we don't know what it was
-  CG_Printf( "%s" S_COLOR_WHITE " died\n", targetName );
+  CG_Printf( "%s" S_COLOR_WHITE "%s died\n", targetName, victimClassName );
 }
 
 

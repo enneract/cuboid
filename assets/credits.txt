@@ -6,6 +6,13 @@ Cuboid - a Tremulous 1.2 mod focused on cuboids and fixing balance issues.
 
 Version  Release date
 ______________________________________________________________________________________________
+0.1.4    Sep 12 2013
+NON-GAMEPLAY:
+- Announcer now announces things like "Aliens win" or "1 minute remaining", not just votes.
+- /register was implemented
+- Admin titles were implemented (/settitle, /listplayers).
+- Death obituaries were improved (now show killer's health and victim's class (if alien)).
+
 0.1.3    Sep 10 2013
 GAMEPLAY:
 - It's not longer possible to avoid buildtimer by reconnecting.
@@ -15,8 +22,6 @@ NON-GAMEPLAY:
 - A lot of visual changes in the voting system.
 - Added vote sounds.
 
-
-______________________________________________________________________________________________
 0.1.2    Sep 09 2013
 GAMEPLAY:
 - Wall impact effects no longer appear on players or buildables (the MD passing through players bug).
@@ -145,7 +150,7 @@ sound/cuboid/slime/dstr0.wav          Michael Manzke @ freesound.org            
 sound/cuboid/slime/dstr1.wav          Audionautics @ freesound.org               cc-by
 sound/cuboid/slime/pain0.wav          anechoix @ freesound.org                   cc-by-nc
 sound/cuboid/slime/pain1.wav          anechoix @ freesound.org                   cc-by-nc
-sound/feedback/vote*.wav              ??                                         ??
+sound/feedback/*.wav                  Pikachu                                    cc0
 sound/player/alienhatch.wav           Darklegion Development, theinvsblman       cc-by-sa
 sound/player/alienfailedhatch.wav     Darklegion Development, theinvsblman       cc-by-sa
 sound/upgrades/jetpack/hi.wav         Pikachu                                    cc0

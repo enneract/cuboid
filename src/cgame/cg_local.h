@@ -941,6 +941,8 @@ typedef struct
 // After this many msec the crosshair name fades out completely
 #define CROSSHAIR_CLIENT_TIMEOUT 1000
 
+#define MAX_ANNOUNCER_STACK 16
+
 typedef struct
 {
   int           clientFrame;                        // incremented each frame
@@ -1185,7 +1187,13 @@ typedef struct
   qboolean      forbidCuboids; //if true then dont let player build a cuboid
   int           latestCBNumber; //wait for this number from server before building a cuboid
   int           lastCuboidError; //last time error sound was played
+  
+  qhandle_t     announcerStack[ MAX_ANNOUNCER_STACK ];
+  int           announcerStackPos;
+  int           announcerStackLatest;
 } cg_t;
+
+
 
 
 // all of the model, shader, and sound references that are
@@ -1939,6 +1947,10 @@ void  CG_WritePTRCode( int code );
 const char *CG_TutorialText( void );
 
 //
+// cg_svcmds.c
+void CG_ProcessAnnouncer( void );
+
+//
 //===============================================
 
 //
@@ -2171,12 +2183,13 @@ typedef enum
 
 
 // mod version data
-#define MODVER_CURRENT        4
+#define MODVER_CURRENT        5
+#define MODVER_C2_0_1_4       5
 #define MODVER_C2_0_1_3       4
 #define MODVER_C2_0_1_2       3
 #define MODVER_C2_0_1_1       2
 #define MODVER_C2_0_1_0       1
-#define MODVER_TITLE          "0.1.3 (Sep 10)"
+#define MODVER_TITLE          "0.1.4 (Sep 12)"
 
 
 

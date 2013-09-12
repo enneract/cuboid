@@ -235,7 +235,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 {
   gentity_t *ent, *ent2;
   int       anim;
-  int       killer;
+  int       killer, killerHP;
   int       i;
   char      *killerName, *obit;
   vec3_t    dir;
@@ -254,14 +254,17 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
     killer = attacker->s.number;
 
     if( attacker->client )
-      killerName = attacker->client->pers.netname;
+      killerName = attacker->client->pers.netname,
+      killerHP = attacker->health;
     else
-      killerName = "<world>";
+      killerName = "<world>",
+      killerHP = 0;
   }
   else
   {
     killer = ENTITYNUM_WORLD;
     killerName = "<world>";
+    killerHP = 0;
   }
 
   if( meansOfDeath < 0 || meansOfDeath >= sizeof( modNames ) / sizeof( modNames[0] ) )
@@ -287,7 +290,9 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   ent = G_TempEntity( self->r.currentOrigin, EV_OBITUARY );
   ent->s.eventParm = meansOfDeath;
   ent->s.otherEntityNum = self->s.number;
+  ent->s.modelindex = self->client->ps.stats[ STAT_CLASS ];
   ent->s.otherEntityNum2 = killer;
+  ent->s.groundEntityNum = killerHP;
   ent->r.svFlags = SVF_BROADCAST; // send to everyone
 
   self->enemy = attacker;

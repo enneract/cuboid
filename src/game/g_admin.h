@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MAX_ADMIN_FLAGS 1024
 #define MAX_ADMIN_CMD_LEN 20
 #define MAX_ADMIN_BAN_REASON 50
+#define MAX_ADMIN_TITLE 30
 
 /*
  * IMMUNITY - cannot be vote kicked, vote muted
@@ -50,7 +51,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * INCOGNITO - does not show up as an admin in !listplayers
  * ALLFLAGS - all flags (including command flags) apply to this player
  * ADMINCHAT - receieves and can send /a admin messages
- * ALWAYSFRIEND - always marked as a friendly entity during buildgames
  */
 #define ADMF_IMMUNITY        "IMMUNITY"
 #define ADMF_NOCENSORFLOOD   "NOCENSORFLOOD"
@@ -65,8 +65,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ADMF_INCOGNITO       "INCOGNITO"
 #define ADMF_ALLFLAGS        "ALLFLAGS"
 #define ADMF_ADMINCHAT       "ADMINCHAT"
-
-#define ADMF_ALWAYSFRIEND    "ALWAYSFRIEND"
 
 #define MAX_ADMIN_LISTITEMS 20
 #define MAX_ADMIN_SHOWBANS 10
@@ -100,6 +98,7 @@ typedef struct g_admin_admin
   char guid[ 33 ];
   char name[ MAX_NAME_LENGTH ];
   char flags[ MAX_ADMIN_FLAGS ];
+  char title[ MAX_ADMIN_TITLE ];
 }
 g_admin_admin_t;
 
@@ -185,6 +184,10 @@ qboolean G_admin_pause( gentity_t *ent );
 qboolean G_admin_builder( gentity_t *ent );
 qboolean G_admin_buildlog( gentity_t *ent );
 qboolean G_admin_revert( gentity_t *ent );
+
+qboolean G_admin_settitle( gentity_t *ent );
+qboolean G_admin_register( gentity_t *ent );
+
 
 void G_admin_print( gentity_t *ent, char *m );
 void G_admin_buffer_print( gentity_t *ent, char *m );

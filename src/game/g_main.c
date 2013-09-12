@@ -138,6 +138,7 @@ vmCvar_t  g_emoticonsAllowedInNames;
 vmCvar_t  g_admin;
 vmCvar_t  g_adminTempBan;
 vmCvar_t  g_adminMaxBan;
+vmCvar_t  g_adminRegisterLevel;
 
 vmCvar_t  g_privateMessages;
 vmCvar_t  g_specChat;
@@ -281,6 +282,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_admin, "g_admin", "admin.dat", CVAR_ARCHIVE, 0, qfalse  },
   { &g_adminTempBan, "g_adminTempBan", "2m", CVAR_ARCHIVE, 0, qfalse  },
   { &g_adminMaxBan, "g_adminMaxBan", "2w", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_adminRegisterLevel, "g_adminRegisterLevel", "1", CVAR_ARCHIVE, 0, qfalse  },
 
   { &g_privateMessages, "g_privateMessages", "1", CVAR_ARCHIVE, 0, qfalse  },
   { &g_specChat, "g_specChat", "1", CVAR_ARCHIVE, 0, qfalse  },
@@ -1220,6 +1222,7 @@ void G_CalculateBuildPoints( void )
     G_LogPrintf( "Beginning Sudden Death\n" );
     trap_SendServerCommand( -1, "cp \"Sudden Death!\"" );
     trap_SendServerCommand( -1, "print \"Beginning Sudden Death.\n\"" );
+    trap_SendServerCommand( -1, "announce suddendeath" );    
     level.suddenDeathWarning = TW_PASSED;
     G_ClearDeconMarks( );
 
@@ -1237,6 +1240,7 @@ void G_CalculateBuildPoints( void )
           (int)( G_TimeTilSuddenDeath( ) / 1000 ) ) );
     trap_SendServerCommand( -1, va( "print \"Sudden Death will begin in %d seconds.\n\"",
           (int)( G_TimeTilSuddenDeath( ) / 1000 ) ) );
+    trap_SendServerCommand( -1, "announce sdimminent" );
     level.suddenDeathWarning = TW_IMMINENT;
   }
 
@@ -2112,6 +2116,7 @@ void CheckExitRules( void )
     {
       level.lastWin = TEAM_NONE;
       trap_SendServerCommand( -1, "print \"Timelimit hit\n\"" );
+      trap_SendServerCommand( -1, "announce stalemate" );
       trap_SetConfigstring( CS_WINNER, "Stalemate" );
       LogExit( "Timelimit hit." );
       return;
@@ -2120,12 +2125,14 @@ void CheckExitRules( void )
           level.timelimitWarning < TW_IMMINENT )
     {
       trap_SendServerCommand( -1, "cp \"5 minutes remaining!\"" );
+      trap_SendServerCommand( -1, "announce 5minremain" );
       level.timelimitWarning = TW_IMMINENT;
     }
     else if( level.time - level.startTime >= ( g_timelimit.integer - 1 ) * 60000 &&
           level.timelimitWarning < TW_PASSED )
     {
       trap_SendServerCommand( -1, "cp \"1 minute remaining!\"" );
+      trap_SendServerCommand( -1, "announce 1minremains" );
       level.timelimitWarning = TW_PASSED;
     }
   }
@@ -2140,6 +2147,7 @@ void CheckExitRules( void )
     //humans win
     level.lastWin = TEAM_HUMANS;
     trap_SendServerCommand( -1, "print \"Humans win\n\"");
+    trap_SendServerCommand( -1, "announce humanswin" );
     trap_SetConfigstring( CS_WINNER, "Humans Win" );
     LogExit( "Humans win." );
   }
@@ -2152,6 +2160,7 @@ void CheckExitRules( void )
     //aliens win
     level.lastWin = TEAM_ALIENS;
     trap_SendServerCommand( -1, "print \"Aliens win\n\"");
+    trap_SendServerCommand( -1, "announce alienswin" );
     trap_SetConfigstring( CS_WINNER, "Aliens Win" );
     LogExit( "Aliens win." );
   }
@@ -2265,15 +2274,15 @@ void G_CheckVote( team_t team )
   if( pass )
   {
     if( !level.voteAborted[ team ] )
-      trap_SendServerCommand( -1, "voteevent votepassed" );
+      trap_SendServerCommand( -1, "announce votepassed" );
     level.voteExecuteTime[ team ] = level.time + level.voteDelay[ team ];
   }
   else
   {
     if( !level.voteAborted[ team ] )
-      trap_SendServerCommand( -1, "voteevent votefailed" );
+      trap_SendServerCommand( -1, "announce votefailed" );
     else
-      trap_SendServerCommand( -1, "voteevent votecancelled" );
+      trap_SendServerCommand( -1, "announce votecancelled" );
   }
 
   G_LogPrintf( "EndVote: %s %s %d %d %d %f %f\n",

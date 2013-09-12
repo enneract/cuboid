@@ -2781,11 +2781,12 @@ static const upgradeAttributes_t bg_upgrades[ ] =
   {
     UP_BIORES,              //int   upgradeNum;
     BIORES_PRICE,           //int   price;
-    ( 1 << S2 )|( 1 << S3 ), //int  stages
+    ( 1 << S2 )|( 1 << S3 ),//int  stages
     SLOT_NONE,              //int   slots;
     "biores",               //char  *upgradeName;
     "Biores",               //char  *humanName;
-    "figure out a description later",
+    "A bioresistance implant that enhances the user's natural ability "
+      "to heal",
     "icons/iconu_biokit",
     qtrue,                  //qboolean purchasable
     qfalse,                 //qboolean usable
