@@ -2279,11 +2279,11 @@ qboolean G_admin_listplayers( gentity_t *ent )
       }
     }
 
-    if( Q_stricmp( p->pers.admin->title, "" ) )
+    if( p->pers.admin && Q_stricmp( p->pers.admin->title, "" ) )
       Q_strncpyz( lname, p->pers.admin->title, sizeof( lname ) );
     else if( l )
       Q_strncpyz( lname, l->name, sizeof( lname ) );
-
+      
     for( colorlen = j = 0; lname[ j ]; j++ )
     {
       if( Q_IsColorString( &lname[ j ] ) )
@@ -3473,7 +3473,7 @@ qboolean G_admin_register( gentity_t *ent )
   if( !ent )
     return qfalse;
 
-  if( !ent->client->pers.admin )
+  if( !ent->client->pers.admin || !ent->client->pers.admin->level )
   {
     g_admin_admin_t *a;
     
@@ -3488,10 +3488,10 @@ qboolean G_admin_register( gentity_t *ent )
     Q_strncpyz( a->guid, ent->client->pers.guid, sizeof( a->guid ) );
     a->level = g_adminRegisterLevel.integer;
     
-    AP( va( "print \"^3register: ^7'%s'^7 is now a registered nickname\n\"", ent->client->pers.netname ) );
+    AP( va( "print \"^3register: ^7'%s^7' is now a registered nickname\n\"", ent->client->pers.netname ) );
   }
   else
-    ADMP( "^3register: ^7you have updated your nick protection" );
+    ADMP( "^3register: ^7you have updated your nick protection\n" );
   
   Q_strncpyz( ent->client->pers.admin->name, 
               ent->client->pers.netname, 

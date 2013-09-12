@@ -2273,8 +2273,7 @@ void G_CheckVote( team_t team )
 
   if( pass )
   {
-    if( !level.voteAborted[ team ] )
-      trap_SendServerCommand( -1, "announce votepassed" );
+    trap_SendServerCommand( -1, "announce votepassed" );
     level.voteExecuteTime[ team ] = level.time + level.voteDelay[ team ];
   }
   else
