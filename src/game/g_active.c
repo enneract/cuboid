@@ -833,8 +833,10 @@ void ClientTimerActions( gentity_t *ent, int msec )
     if( client->isImpregnated && !client->isImplantMature && 
         level.time >= client->impregnationTime + ALIEN_IMPLANT_MATURING_TIME_MIN &&
         random() <= ALIEN_IMPLANT_MATURING_CHANCE )
+    {
       client->isImplantMature = qtrue;
-    
+      client->ps.stats[ STAT_STATE ] |= SS_IMPLANTED;
+    }
   }
 
   while( client->time10000 >= 10000 )

@@ -6,6 +6,11 @@ Cuboid - a Tremulous 1.2 mod focused on cuboids and fixing balance issues.
 
 Version  Release date
 ______________________________________________________________________________________________
+0.1.5    Sep 12 2013
+- Reverted both Lucifer Cannon and Advanced Marauder zap back to the GPP state.
+- Increased Jetpack jump fuel usage from 85 to 300 (up to 20 jumps instead of 70).
+- Health cross changes icon and color when implanted with an egg.
+
 0.1.4    Sep 12 2013
 NON-GAMEPLAY:
 - Announcer now announces things like "Aliens win" or "1 minute remaining", not just votes.
@@ -114,9 +119,6 @@ models/players/human_base/h_helmet... theinvsblman                              
 models/players/human_base/head_lig... Darklegion Development, theinvsblman       cc-by-sa
 models/weapons/flamer/fireloop_qui... Darklegion Development, theinvsblman       cc-by-sa
 models/weapons/flamer/weapon.cfg      Darklegion Development, theinvsblman       cc-by-sa
-models/weapons/level2upg/zap1.wav     Halleck @ freesound.org                    cc-by
-models/weapons/level2upg/zap_conti... DJ Chronos @ freesound.org                 cc-by
-models/weapons/level2upg/weapon.cfg   Darklegion Development, theinvsblman       cc-by-sa
 models/weapons/level4/weapon.cfg      Darklegion Development, theinvsblman       cc-by-sa
 scripts/cuboid.shader                 theinvsblman                               cc-by
 scripts/cuboid.particle               Darklegion Development, theinvsblman       cc-by-sa
@@ -162,6 +164,7 @@ sound/upgrades/jetpack/lowfuel.wav    Pikachu                                   
 sound/upgrades/jetpack/nojumpfuel.wav Pikachu                                    cc0 
 sound/upgrades/jetpack/refuel.wav     joeseshon @ freesound.org, 
                                       alexmol @ freesound.org, Pikachu           cc-by
+ui/assets/neutral/cross_implanted.tga Darklegion Development, theinvsblman       cc-by-sa
 ui/help.txt                           theinvsblman                               cc-by
 ui/ingame_options.menu                Darklegion Development, theinvsblman       cc-by-sa
 ui/teamscore.menu                     Darklegion Development, theinvsblman       cc-by-sa

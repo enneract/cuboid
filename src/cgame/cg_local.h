@@ -1347,7 +1347,8 @@ typedef struct
   qhandle_t   healthCross3X;
   qhandle_t   healthCrossMedkit;
   qhandle_t   healthCrossPoisoned;
-
+  qhandle_t   healthCrossImplanted;
+  
   qhandle_t   cuboidCracks[CUBOID_CRACK_TEXTURES-1];
   qhandle_t   cuboidModel;
   qhandle_t   cuboidRedBuildShader;
@@ -2183,13 +2184,14 @@ typedef enum
 
 
 // mod version data
-#define MODVER_CURRENT        5
+#define MODVER_CURRENT        6
+#define MODVER_C2_0_1_5       6
 #define MODVER_C2_0_1_4       5
 #define MODVER_C2_0_1_3       4
 #define MODVER_C2_0_1_2       3
 #define MODVER_C2_0_1_1       2
 #define MODVER_C2_0_1_0       1
-#define MODVER_TITLE          "0.1.4 (Sep 12)"
+#define MODVER_TITLE          "0.1.5 (Sep 12)"
 
 
 

@@ -858,6 +858,8 @@ static void CG_DrawPlayerHealthCross( rectDef_t *rect, vec4_t ref_color )
 
   // Pick the current icon
   shader = cgs.media.healthCross;
+  if( cg.snap->ps.stats[ STAT_STATE ] & SS_IMPLANTED )
+    shader = cgs.media.healthCrossImplanted;
   if( cg.snap->ps.stats[ STAT_STATE ] & SS_HEALING_3X )
     shader = cgs.media.healthCross3X;
   else if( cg.snap->ps.stats[ STAT_STATE ] & SS_HEALING_2X )
@@ -872,7 +874,13 @@ static void CG_DrawPlayerHealthCross( rectDef_t *rect, vec4_t ref_color )
 
   // Pick the alpha value
   Vector4Copy( ref_color, color );
-  if( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
+  if( cg.snap->ps.stats[ STAT_STATE ] & SS_IMPLANTED )
+  {
+    color[ 0 ] = 0.0f;
+    color[ 1 ] = 0.8f;
+    color[ 2 ] = 0.0f;
+  }
+  else if( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
       cg.snap->ps.stats[ STAT_HEALTH ] < 10 )
   {
     color[ 0 ] = 1.0f;

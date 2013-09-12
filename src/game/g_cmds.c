@@ -3295,16 +3295,14 @@ void Cmd_Damage_f( gentity_t *ent )
 Cmd_Debug1_f
 =================
 */
-void Cmd_Debug1_f( gentity_t *self )
+void Cmd_Debug1_f( gentity_t *other )
 {
-  gentity_t *ent;
-  ent = G_TempEntity( self->r.currentOrigin, EV_OBITUARY );
-  ent->s.eventParm = MOD_MACHINEGUN;
-  ent->s.otherEntityNum = self->s.number;
-  ent->s.modelindex = self->client->ps.stats[ STAT_CLASS ];
-  ent->s.otherEntityNum2 = 1;
-  ent->s.groundEntityNum = 666;
-  ent->r.svFlags = SVF_BROADCAST; // send to everyone
+            other->client->isImpregnated = qtrue;
+            other->client->isImplantMature = qfalse;
+            other->client->impregnationTime = level.time;
+            other->client->impregnatedBy = -1;
+                  other->client->isImplantMature = qtrue;
+      other->client->ps.stats[ STAT_STATE ] |= SS_IMPLANTED;
 }
 
 /*

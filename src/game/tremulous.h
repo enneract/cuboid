@@ -87,8 +87,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL2_AREAZAP_CHAIN_RANGE  150.0f
 #define LEVEL2_AREAZAP_CHAIN_FALLOFF 8.0f
 #define LEVEL2_AREAZAP_WIDTH        15.0f
-#define LEVEL2_AREAZAP_REPEAT       100 //1500
-#define LEVEL2_AREAZAP_TIME         100 //1000
+#define LEVEL2_AREAZAP_REPEAT       1500
+#define LEVEL2_AREAZAP_TIME         1000
 #define LEVEL2_AREAZAP_MAX_TARGETS  5
 #define LEVEL2_AREAZAP_DMG_MOD      0.66f //versus buildings
 #define LEVEL2_WALLJUMP_MAXSPEED    1000.0f
@@ -459,24 +459,23 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PRIFLE_SIZE                 5
 
 #define LCANNON_PRICE               600
-#define LCANNON_AMMO                90
+#define LCANNON_AMMO                80
 #define LCANNON_K_SCALE             1.0f
 #define LCANNON_REPEAT              500
 #define LCANNON_RELOAD              0
 #define LCANNON_DAMAGE              HDM(265)
-#define LCANNON_RADIUS              150
+#define LCANNON_RADIUS              150      // primary splash damage radius
 #define LCANNON_SIZE                5        // missile bounding box radius
-#define LCANNON_SECONDARY_DAMAGE    HDM(27)
-#define LCANNON_SECONDARY_RADIUS    75
-#define LCANNON_SECONDARY_SPEED     350
+#define LCANNON_SECONDARY_DAMAGE    HDM(30)
+#define LCANNON_SECONDARY_RADIUS    75       // secondary splash damage radius
+#define LCANNON_SECONDARY_SPEED     1400
 #define LCANNON_SECONDARY_RELOAD    2000
-#define LCANNON_SECONDARY_REPEAT    666
-#define LCANNON_SPEED               350
-#define LCANNON_TOTAL_CHARGE        255
-#define LCANNON_CHARGE_TIME_MIN     50
-#define LCANNON_CHARGE_TIME_MAX     2000
-#define LCANNON_CHARGE_TIME_WARN    1500
-#define LCANNON_CHARGE_AMMO         10  
+#define LCANNON_SECONDARY_REPEAT    1000
+#define LCANNON_SPEED               700
+#define LCANNON_CHARGE_TIME_MAX     3000
+#define LCANNON_CHARGE_TIME_MIN     100
+#define LCANNON_CHARGE_TIME_WARN    2000
+#define LCANNON_CHARGE_AMMO         10       // ammo cost of a full charge shot
 
 #define HBUILD_PRICE                0
 #define HBUILD_REPEAT               1000
@@ -511,7 +510,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define JETPACK_FUEL_FULL           6000 //can't exceed 32767
 #define JETPACK_FUEL_LOW            1500
 #define JETPACK_FUEL_USAGE          10 //every 100ms
-#define JETPACK_FUEL_JUMP           85
+#define JETPACK_FUEL_JUMP           300
 
 #define BSUIT_PRICE                 400
 #define BSUIT_POISON_PROTECTION     3

@@ -4367,7 +4367,7 @@ const cuboidAttributes_t BG_CuboidTypes [] =
   qfalse,       // qboolean zappable
   qfalse,       // qboolean repairable
   qfalse,       // qboolean detectable
-  qfalse,       // qboolean needpower
+  qtrue,        // qboolean needpower
   SURF_FLESH    // int surfaceFlags
  },
  {
@@ -4391,7 +4391,7 @@ const cuboidAttributes_t BG_CuboidTypes [] =
   qfalse,       // qboolean zappable
   qfalse,       // qboolean repairable
   qfalse,       // qboolean detectable
-  qfalse,       // qboolean needpower
+  qtrue,        // qboolean needpower
   SURF_SLICK    // int surfaceFlags
  }
 };
