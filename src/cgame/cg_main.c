@@ -1002,6 +1002,7 @@ static void CG_RegisterClients( void )
   cgs.media.larmourLegsSkin    = trap_R_RegisterSkin( "models/players/human_base/lower_light.skin" );
   cgs.media.larmourTorsoSkin   = trap_R_RegisterSkin( "models/players/human_base/upper_light.skin" );
 
+  cgs.media.headMk2Model       = trap_R_RegisterModel( "models/players/human_base/head_mk2.md3" );
   cgs.media.jetpackModel       = trap_R_RegisterModel( "models/players/human_base/jetpack.md3" );
   cgs.media.jetpackFlashModel  = trap_R_RegisterModel( "models/players/human_base/jetpack_flash.md3" );
   cgs.media.battpackModel      = trap_R_RegisterModel( "models/players/human_base/battpack.md3" );

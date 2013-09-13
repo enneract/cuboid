@@ -1308,6 +1308,7 @@ typedef struct
   qhandle_t larmourLegsSkin;
   qhandle_t larmourTorsoSkin;
 
+  qhandle_t headMk2Model;
   qhandle_t jetpackModel;
   qhandle_t jetpackFlashModel;
   qhandle_t battpackModel;

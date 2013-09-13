@@ -7,9 +7,12 @@ Cuboid - a Tremulous 1.2 mod focused on cuboids and fixing balance issues.
 Version  Release date
 ______________________________________________________________________________________________
 0.1.5    Sep 12 2013
+GAMEPLAY:
 - Reverted both Lucifer Cannon and Advanced Marauder zap back to the GPP state.
 - Increased Jetpack jump fuel usage from 85 to 300 (up to 20 jumps instead of 70).
 - Health cross changes icon and color when implanted with an egg.
+NON-GAMEPLAY:
+- Proper Helmet Mk2 model and texture.
 
 0.1.4    Sep 12 2013
 NON-GAMEPLAY:
@@ -20,7 +23,7 @@ NON-GAMEPLAY:
 
 0.1.3    Sep 10 2013
 GAMEPLAY:
-- It's not longer possible to avoid buildtimer by reconnecting.
+- It's no longer possible to avoid buildtimer by reconnecting.
 NON-GAMEPLAY:
 - Customizable vote percentages: g_[map/restart/draw]VotePercent, default: 67.
 - Customizable vote timelimits: g_[map/restart]Timelimit, default: 5 for map votes, 10 for restart votes.
@@ -115,7 +118,8 @@ models/cuboid/organic/organic.jpg     Darklegion Development, theinvsblman      
 models/cuboid/organic/organic_fx.jpg  Darklegion Development, theinvsblman       cc-by-sa
 models/cuboid/slime/fragment.tga      theinvsblman                               cc-by
 models/cuboid/slime/slime.jpg         theinvsblman                               cc-by
-models/players/human_base/h_helmet... theinvsblman                               cc0
+models/players/human_base/h_helmet... Darklegion Development, cron               cc-by-sa
+models/players/human_base/head_mk2... Darklegion Development, cron               cc-by-sa
 models/players/human_base/head_lig... Darklegion Development, theinvsblman       cc-by-sa
 models/weapons/flamer/fireloop_qui... Darklegion Development, theinvsblman       cc-by-sa
 models/weapons/flamer/weapon.cfg      Darklegion Development, theinvsblman       cc-by-sa

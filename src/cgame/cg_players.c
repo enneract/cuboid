@@ -2094,7 +2094,8 @@ void CG_Player( centity_t *cent )
     if( held & ( 1 << UP_HELMET_MK1 ) )
       head.customSkin = cgs.media.larmourHeadSkin;
     else if( held & ( 1 << UP_HELMET_MK2 ) )
-      head.customSkin = cgs.media.larmourMk2HeadSkin;
+      head.customSkin = cgs.media.larmourMk2HeadSkin,
+      head.hModel = cgs.media.headMk2Model; //hack
     else
       head.customSkin = ci->headSkin;
 
