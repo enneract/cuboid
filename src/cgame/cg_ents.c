@@ -939,12 +939,24 @@ static void CG_CalcEntityLerpPositions( centity_t *cent )
     return;
   }
 
-  if( cg_projectileNudge.integer &&
-      !cg.demoPlayback &&
-      cent->currentState.eType == ET_MISSILE &&
+  if( cent->currentState.eType == ET_MISSILE &&
       !( cg.snap->ps.pm_flags & PMF_FOLLOW ) )
   {
+    //Default setting, people don't like having to see
+    //projectilenudge with lagged as it screws up their aim 
+    if(cg_projectileNudge.integer == 1 &&
+      !cg.demoPlayback && cg_unlagged.integer)
     timeshift = cg.ping;
+    //Previous default
+    if(cg_projectileNudge.integer == 2 &&
+      !cg.demoPlayback)
+    timeshift = cg.ping;
+    //Extrapolate using the value instead of ping
+    //for those who think their ping isn't 'real'
+    else if( cg_projectileNudge.integer > 2)
+    timeshift = cg_projectileNudge.integer;
+
+    else timeshift = 0;
   }
 
   // just use the current frame and evaluate as best we can
