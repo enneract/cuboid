@@ -451,11 +451,13 @@ static qboolean admin_higher_admin( g_admin_admin_t *a, g_admin_admin_t *b )
     return qtrue;
 
   if( a == b )
-    return qfalse;
+    return qtrue;
   
   if( admin_permission( b->flags, ADMF_IMMUTABLE, &perm ) )
+  {
+    Com_Printf( "b is immutable, perm: %d\n", perm );
     return !perm;
-
+  }
   return b->level <= ( a ? a->level : 0 );
 }
 
@@ -473,7 +475,7 @@ static qboolean admin_higher( gentity_t *admin, gentity_t *victim )
     return qtrue;
   
   if( admin == victim )
-    return qfalse;
+    return qtrue;
 
   return admin_higher_admin( admin->client->pers.admin,
     victim->client->pers.admin );
@@ -3444,7 +3446,7 @@ qboolean G_admin_settitle( gentity_t *ent )
     return qfalse;
   }
 
-  if( ent && admin_higher_admin( a, ent->client->pers.admin ) )
+  if( ent && !admin_higher_admin( a, ent->client->pers.admin ) )
   {
      ADMP( "^3settitle: ^7indented victim is immune to your actions\n" );
      return qfalse;
