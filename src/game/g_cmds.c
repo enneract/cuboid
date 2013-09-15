@@ -2262,8 +2262,9 @@ void Cmd_Buy_f( gentity_t *ent )
       return;
     }
 
-    //have space to carry this?
-    if( !sellHelmet && BG_Upgrade( upgrade )->slots & BG_SlotsForInventory( ent->client->ps.stats ) )
+    if( BG_Upgrade( upgrade )->slots & BG_SlotsForInventory( ent->client->ps.stats ) &&
+        !( sellHelmet && ( BG_InventoryContainsUpgrade( UP_HELMET_MK1, ent->client->ps.stats ) ||
+                           BG_InventoryContainsUpgrade( UP_HELMET_MK2, ent->client->ps.stats ) ) ) )
     {
       G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOSLOTS );
       return;
