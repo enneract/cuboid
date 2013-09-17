@@ -683,7 +683,7 @@ void CG_InitBuildables( void )
       }
     }
 
-    cg.buildablesFraction = (float)i / (float)( BA_NUM_BUILDABLES - 1 );
+    cg.buildablesFraction = (float)i / (float)( CUBOID_FIRST - 1 );
     trap_UpdateScreen( );
   }
 
