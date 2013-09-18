@@ -45,7 +45,7 @@ void G_ForceWeaponChange( gentity_t *ent, weapon_t weapon )
     ps->weaponTime = 250;
     ps->weaponstate = WEAPON_READY;
   }
-  
+
   if( weapon == WP_NONE ||
       !BG_InventoryContainsWeapon( weapon, ps->stats ) )
   {
@@ -76,7 +76,7 @@ void G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo )
   for( i = WP_NONE + 1; i < WP_NUM_WEAPONS; i++ )
   {
     qboolean energyWeapon;
-  
+
     energyWeapon = BG_Weapon( i )->usesEnergy;
     if( !BG_InventoryContainsWeapon( i, ent->client->ps.stats ) ||
         BG_Weapon( i )->infiniteAmmo ||
@@ -84,10 +84,10 @@ void G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo )
                          ent->client->ps.ammo, ent->client->ps.clips ) ||
         ( buyingEnergyAmmo && !energyWeapon ) )
       continue;
-      
+
     maxAmmo = BG_Weapon( i )->maxAmmo;
     maxClips = BG_Weapon( i )->maxClips;
-    
+
     // Apply battery pack modifier
     if( energyWeapon &&
         BG_InventoryContainsUpgrade( UP_BATTPACK, ent->client->ps.stats ) )
@@ -142,7 +142,7 @@ static void G_WideTrace( trace_t *tr, gentity_t *ent, float range,
   vec3_t    end;
 
   VectorSet( mins, -width, -width, -height );
-  VectorSet( maxs, width, width, width );
+  VectorSet( maxs, width, width, height );
 
   *target = NULL;
 
@@ -459,8 +459,8 @@ void massDriverFire( gentity_t *ent )
   SnapVectorTowards( tr.endpos, muzzle );
 
   // send impact
-  if( traceEnt->takedamage && 
-      (traceEnt->s.eType == ET_BUILDABLE || 
+  if( traceEnt->takedamage &&
+      (traceEnt->s.eType == ET_BUILDABLE ||
        traceEnt->s.eType == ET_PLAYER ) )
   {
     BloodSpurt( ent, traceEnt, &tr );
@@ -507,7 +507,7 @@ void hiveFire( gentity_t *ent )
 
   // Fire from the hive tip, not the center
   VectorMA( muzzle, ent->r.maxs[ 2 ], ent->s.origin2, origin );
-  
+
   fire_hive( ent, origin, forward );
 }
 
@@ -549,7 +549,7 @@ void flamerFire( gentity_t *ent )
 {
   vec3_t origin;
 
-  // Correct muzzle so that the missile does not start in the ceiling 
+  // Correct muzzle so that the missile does not start in the ceiling
   VectorMA( muzzle, -7.0f, up, origin );
 
   // Correct muzzle so that the missile fires from the player's hand
@@ -606,8 +606,8 @@ void lasGunFire( gentity_t *ent )
   SnapVectorTowards( tr.endpos, muzzle );
 
   // send impact
-  if( traceEnt->takedamage && 
-      (traceEnt->s.eType == ET_BUILDABLE || 
+  if( traceEnt->takedamage &&
+      (traceEnt->s.eType == ET_BUILDABLE ||
        traceEnt->s.eType == ET_PLAYER ) )
   {
     BloodSpurt( ent, traceEnt, &tr );
@@ -771,9 +771,9 @@ void CheckCkitRepair( gentity_t *ent )
     if(BG_Buildable(traceEnt->s.modelindex,NULL)->cuboid)
       if(!BG_CuboidAttributes(traceEnt->s.modelindex)->repairable)
         return;
-      
+
     bHealth = BG_Buildable( traceEnt->s.modelindex, traceEnt->cuboidSize )->health;
-    
+
     if( traceEnt->health < bHealth )
     {
       traceEnt->health += HBUILD_HEALRATE;
@@ -960,7 +960,7 @@ void CheckGrabAttack( gentity_t *ent )
 
     if( traceEnt->client->ps.stats[ STAT_HEALTH ] <= 0 )
       return;
-    
+
     if( !( traceEnt->client->ps.stats[ STAT_STATE ] & SS_GRABBED ) )
     {
       AngleVectors( traceEnt->client->ps.viewangles, dir, NULL, NULL );
@@ -1001,7 +1001,7 @@ void poisonCloud( gentity_t *ent )
   for( i = 0; i < num; i++ )
   {
     humanPlayer = &g_entities[ entityList[ i ] ];
-    
+
     if( humanPlayer->client &&
         humanPlayer->client->pers.teamSelection == TEAM_HUMANS )
     {
@@ -1066,12 +1066,13 @@ static void G_FindZapChainTargets( zap_t *zap )
 
     distance = Distance( ent->s.origin, enemy->s.origin );
 
-    if((enemy->client&&enemy->client->ps.stats[STAT_TEAM]==TEAM_HUMANS) || 
-       (enemy->s.eType==ET_BUILDABLE&&BG_Buildable(enemy->s.modelindex,NULL)->team==TEAM_HUMANS && 
-       (!BG_Buildable(enemy->s.modelindex,NULL)->cuboid||BG_CuboidAttributes(enemy->s.modelindex)->zappable)) &&
-       enemy->health>0 && distance <= LEVEL2_AREAZAP_CHAIN_RANGE)
+    if ( ( enemy->client
+		&&
+		enemy->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS) ||
+       ( enemy->s.eType == ET_BUILDABLE && BG_Buildable( enemy->s.modelindex, NULL )->team == TEAM_HUMANS &&
+       ( !BG_Buildable(enemy->s.modelindex,NULL)->cuboid||BG_CuboidAttributes( enemy->s.modelindex )->zappable ) ) &&
+       enemy->health > 0 && distance <= LEVEL2_AREAZAP_CHAIN_RANGE )
     {
-     
       // world-LOS check: trace against the world, ignoring other BODY entities
       trap_Trace( &tr, ent->s.origin, NULL, NULL,
          enemy->s.origin, ent->s.number, CONTENTS_SOLID );
@@ -1136,9 +1137,7 @@ static void G_CreateNewZap( gentity_t *creator, gentity_t *target )
     if( target->health > 0 )
     {
       G_Damage( target, creator, creator, forward,
-                target->s.origin, LEVEL2_AREAZAP_DMG *
-                ( ( target->s.eType == ET_BUILDABLE )
-                    ? LEVEL2_AREAZAP_DMG_MOD : 1.0f ),
+                target->s.origin, LEVEL2_AREAZAP_DMG,
                 DAMAGE_NO_KNOCKBACK | DAMAGE_NO_LOCDAMAGE,
                 MOD_LEVEL2_ZAP );
 
@@ -1147,9 +1146,8 @@ static void G_CreateNewZap( gentity_t *creator, gentity_t *target )
       for( i = 1; i < zap->numTargets; i++ )
       {
         G_Damage( zap->targets[ i ], target, zap->creator, forward, target->s.origin,
-                  ( LEVEL2_AREAZAP_DMG * ( 1 - pow( (zap->distances[ i ] /
-                    LEVEL2_AREAZAP_CHAIN_RANGE ) , LEVEL2_AREAZAP_CHAIN_FALLOFF ) ) + 1 )
-                  * ( ( zap->targets[ i ]->s.eType == ET_BUILDABLE ) ? LEVEL2_AREAZAP_DMG_MOD : 1.0f ),
+                  LEVEL2_AREAZAP_DMG * ( 1 - pow( (zap->distances[ i ] /
+                    LEVEL2_AREAZAP_CHAIN_RANGE ), LEVEL2_AREAZAP_CHAIN_FALLOFF ) ) + 1,
                   DAMAGE_NO_KNOCKBACK | DAMAGE_NO_LOCDAMAGE,
                   MOD_LEVEL2_ZAP );
       }
@@ -1163,6 +1161,7 @@ static void G_CreateNewZap( gentity_t *creator, gentity_t *target )
     return;
   }
 }
+
 
 
 /*
@@ -1254,9 +1253,9 @@ void areaZapFire( gentity_t *ent )
   if( traceEnt == NULL )
     return;
 
-  if( ( traceEnt->client && traceEnt->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS ) ||
+  if( ( ( traceEnt->client && traceEnt->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS ) ||
       ( traceEnt->s.eType == ET_BUILDABLE &&
-        BG_Buildable( traceEnt->s.modelindex, NULL )->team == TEAM_HUMANS ) && 
+        BG_Buildable( traceEnt->s.modelindex, NULL )->team == TEAM_HUMANS ) ) &&
         ( !BG_Buildable( traceEnt->s.modelindex, NULL )->cuboid ||
           BG_CuboidAttributes( traceEnt->s.modelindex )->zappable ) )
   {
@@ -1310,7 +1309,7 @@ qboolean CheckPounceAttack( gentity_t *ent )
 
   if( !traceEnt->takedamage )
     return qfalse;
-    
+
   // Deal damage
   timeMax = ent->client->ps.weapon == WP_ALEVEL3 ? LEVEL3_POUNCE_TIME :
                                                    LEVEL3_POUNCE_TIME_UPG;
@@ -1412,7 +1411,7 @@ void G_CrushAttack( gentity_t *ent, gentity_t *victim )
 
   if( damage < 0 )
     damage = 0;
-    
+
   // Players also get damaged periodically
   if( victim->client &&
       ent->client->lastCrushTime + LEVEL4_CRUSH_REPEAT < level.time )
@@ -1420,7 +1419,7 @@ void G_CrushAttack( gentity_t *ent, gentity_t *victim )
     ent->client->lastCrushTime = level.time;
     damage += LEVEL4_CRUSH_DAMAGE;
   }
-  
+
   if( damage < 1 )
     return;
 
@@ -1528,7 +1527,7 @@ void FireWeapon2( gentity_t *ent )
     case WP_ALEVEL2_UPG:
       areaZapFire( ent );
       break;
-      
+
     case WP_ABUILD:
     case WP_ABUILD2:
     case WP_HBUILD:
@@ -1550,7 +1549,7 @@ void FireWeapon( gentity_t *ent )
   {
     // set aiming directions
     AngleVectors( ent->client->ps.viewangles, forward, right, up );
-    CalcMuzzlePoint( ent, forward, right, up, muzzle );    
+    CalcMuzzlePoint( ent, forward, right, up, muzzle );
   }
   else
   {

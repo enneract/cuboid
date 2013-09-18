@@ -82,7 +82,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL2_CLAW_K_SCALE         1.0f
 #define LEVEL2_CLAW_U_REPEAT        400
 #define LEVEL2_CLAW_U_K_SCALE       1.0f
-#define LEVEL2_AREAZAP_DMG          6 //ADM(60)
+#define LEVEL2_AREAZAP_DMG          ADM(60)
 #define LEVEL2_AREAZAP_RANGE        200.0f
 #define LEVEL2_AREAZAP_CHAIN_RANGE  150.0f
 #define LEVEL2_AREAZAP_CHAIN_FALLOFF 8.0f
@@ -95,7 +95,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define LEVEL3_CLAW_DMG             ADM(80)
 #define LEVEL3_CLAW_RANGE           80.0f
-#define LEVEL3_CLAW_UPG_RANGE       LEVEL3_CLAW_RANGE + 3.0f          
+#define LEVEL3_CLAW_UPG_RANGE       LEVEL3_CLAW_RANGE + 3.0f
 #define LEVEL3_CLAW_WIDTH           12.0f
 #define LEVEL3_CLAW_REPEAT          900
 #define LEVEL3_CLAW_K_SCALE         1.0f
@@ -107,7 +107,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL3_POUNCE_WIDTH         14.0f
 #define LEVEL3_POUNCE_TIME          800      // msec for full Dragoon pounce
 #define LEVEL3_POUNCE_TIME_UPG      800      // msec for full Adv. Dragoon pounce
-#define LEVEL3_POUNCE_TIME_MIN      200      // msec before which pounce cancels  
+#define LEVEL3_POUNCE_TIME_MIN      200      // msec before which pounce cancels
 #define LEVEL3_POUNCE_REPEAT        400      // msec before a new pounce starts
 #define LEVEL3_POUNCE_SPEED_MOD     0.75f    // walking speed modifier for pounce charging
 #define LEVEL3_POUNCE_JUMP_MAG      700      // Dragoon pounce jump power
@@ -139,7 +139,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL4_CRUSH_REPEAT            500   // player damage repeat
 
 #define LEVEL4_BOMB_DMG                150
-#define LEVEL4_BOMB_RADIUS             400 
+#define LEVEL4_BOMB_RADIUS             400
 #define LEVEL4_BOMB_SPEED              500.0f
 #define LEVEL4_BOMB_REGEN              120000 // minimum time between getting a bomb
 
@@ -692,7 +692,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define DAMAGE_FRACTION_FOR_KILL    0.5f //how much damage players (versus structures) need to
                                          //do to increment the stage kill counters
-                                         
+
 #define MAXIMUM_BUILD_TIME          20000 // used for pie timer
 
 /*
@@ -715,5 +715,5 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ALIEN_IMPLANT_MATURING_CHANCE         0.05f  //chance of maturing (every second)
 
 #define ALIEN_HATCHING_VELOCITY               250.0f
-#define ALIEN_HATCHING_MAX_BATTLESUIT_HEALTH  80 // alien dies if tried to spawn from a battlesuit at least this healthy 
+#define ALIEN_HATCHING_MAX_BATTLESUIT_HEALTH  80 // alien dies if tried to spawn from a battlesuit at least this healthy
 #define ALIEN_FAILED_HATCH_DAMAGE             65 // shouldn't be higher than the value above
