@@ -139,3 +139,12 @@ models/mapobjects/plant_life/grass
     rgbGen vertex
   }
 }
+
+bluesmoke
+{
+  nopicmip
+  {
+    map gfx/sprites/smoke_blue.tga
+    blendFunc Blend
+  }
+}
