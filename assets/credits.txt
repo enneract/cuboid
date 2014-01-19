@@ -6,7 +6,7 @@ Cuboid - a Tremulous 1.2 mod focused on cuboids and fixing balance issues.
 
 Version  Release date
 ______________________________________________________________________________________________
-0.1.6    Jan 19 2013
+0.1.6    Jan 19 2014
 GAMEPLAY:
 - Introduced the Basivision (Activate Upgrade, +button2). While enabled, Basilisks can see in dark and see humans and their buildings through walls.
 - Zap damage was corrected.
