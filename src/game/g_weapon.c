@@ -1136,9 +1136,7 @@ static void G_CreateNewZap( gentity_t *creator, gentity_t *target )
     if( target->health > 0 )
     {
       G_Damage( target, creator, creator, forward,
-                target->s.origin, LEVEL2_AREAZAP_DMG *
-                ( ( target->s.eType == ET_BUILDABLE )
-                    ? LEVEL2_AREAZAP_DMG_MOD : 1.0f ),
+                target->s.origin, LEVEL2_AREAZAP_DMG,
                 DAMAGE_NO_KNOCKBACK | DAMAGE_NO_LOCDAMAGE,
                 MOD_LEVEL2_ZAP );
 
@@ -1147,9 +1145,8 @@ static void G_CreateNewZap( gentity_t *creator, gentity_t *target )
       for( i = 1; i < zap->numTargets; i++ )
       {
         G_Damage( zap->targets[ i ], target, zap->creator, forward, target->s.origin,
-                  ( LEVEL2_AREAZAP_DMG * ( 1 - pow( (zap->distances[ i ] /
-                    LEVEL2_AREAZAP_CHAIN_RANGE ) , LEVEL2_AREAZAP_CHAIN_FALLOFF ) ) + 1 )
-                  * ( ( zap->targets[ i ]->s.eType == ET_BUILDABLE ) ? LEVEL2_AREAZAP_DMG_MOD : 1.0f ),
+                  LEVEL2_AREAZAP_DMG * ( 1 - pow( (zap->distances[ i ] /
+                  LEVEL2_AREAZAP_CHAIN_RANGE ) , LEVEL2_AREAZAP_CHAIN_FALLOFF ) ) + 1,
                   DAMAGE_NO_KNOCKBACK | DAMAGE_NO_LOCDAMAGE,
                   MOD_LEVEL2_ZAP );
       }

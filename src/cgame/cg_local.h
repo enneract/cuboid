@@ -809,6 +809,7 @@ typedef struct weaponInfoMode_s
   qhandle_t   impactParticleSystem;
   qhandle_t   impactMark;
   qhandle_t   impactMarkSize;
+  qboolean    impactMarkAlphaFade;
   sfxHandle_t impactSound[ 4 ]; //random impact sound
   sfxHandle_t impactFleshSound[ 4 ]; //random impact sound
 } weaponInfoMode_t;
@@ -1056,6 +1057,7 @@ typedef struct
   int           lastKillTime;
 
   // crosshair client ID
+  float         crosshairDistance;
   int           crosshairBuildable;
   int           crosshairClientNum;
   int           crosshairClientTime;
@@ -1184,9 +1186,10 @@ typedef struct
   int           nextWeaponClickTime;
 
   vec3_t        cuboidSelection;
-  qboolean      forbidCuboids; //if true then dont let player build a cuboid
-  int           latestCBNumber; //wait for this number from server before building a cuboid
-  int           lastCuboidError; //last time error sound was played
+  qboolean      waitForCB;
+  qboolean      cuboidValid;
+  int           latestCBNumber; // for syncing with the server
+  int           lastCuboidError; // last time an error sound was played
   
   qhandle_t     announcerStack[ MAX_ANNOUNCER_STACK ];
   int           announcerStackPos;
@@ -1371,6 +1374,10 @@ typedef struct
   qhandle_t   alienHatchPS;
   sfxHandle_t alienHatchSound;
   sfxHandle_t alienFailedHatchSound;
+  
+  qhandle_t   basivisionShader;
+  qhandle_t   basivisionBlipShader;
+  qhandle_t   basivisionFlareShader;
 } cgMedia_t;
 
 typedef struct
@@ -1582,10 +1589,6 @@ extern  vmCvar_t    cg_disableCommandDialogs;
 extern  vmCvar_t    cg_disableScannerPlane;
 extern  vmCvar_t    cg_tutorial;
 
-extern  vmCvar_t    cg_modTutorial;
-extern  vmCvar_t    cg_modTutorialReference;
-extern  vmCvar_t    cg_lastModVersion;
-
 extern  vmCvar_t    cg_painBlendUpRate;
 extern  vmCvar_t    cg_painBlendDownRate;
 extern  vmCvar_t    cg_painBlendMax;
@@ -1626,6 +1629,10 @@ extern  vmCvar_t    cg_cuboidInfoY;
 extern  vmCvar_t    cg_fuelInfoX;
 extern  vmCvar_t    cg_fuelInfoY;
 extern  vmCvar_t    cg_fuelInfoScale;
+
+extern  vmCvar_t    cg_announcer;
+
+extern  vmCvar_t    cg_cameraShakeMagnitude;
 
 //
 // cg_main.c
@@ -1748,6 +1755,7 @@ void        CG_HumanBuildableExplosion( vec3_t origin, vec3_t dir );
 void        CG_AlienBuildableExplosion( vec3_t origin, vec3_t dir );
 void        CG_CuboidAxis_f(void);
 void        CG_CuboidRotate_f(void);
+void        CG_CuboidSize_f(void);
 void        CG_Cuboid_Send(void);
 void        CG_Cuboid_Response(void);
 void        CG_CuboidResize( qboolean enlarge );
@@ -2185,15 +2193,4 @@ typedef enum
 
 
 // mod version data
-#define MODVER_CURRENT        6
-#define MODVER_C2_0_1_5       6
-#define MODVER_C2_0_1_4       5
-#define MODVER_C2_0_1_3       4
-#define MODVER_C2_0_1_2       3
-#define MODVER_C2_0_1_1       2
-#define MODVER_C2_0_1_0       1
-#define MODVER_TITLE          "0.1.5 (Sep 12)"
-
-
-
-
+#define SPLASH_VERSION          "0.1.6 (Jan 14)"

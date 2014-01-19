@@ -2468,7 +2468,7 @@ CG_DrawTutorial
 static void CG_DrawTutorial( rectDef_t *rect, float text_x, float text_y, vec4_t color,
                             float scale, int textalign, int textvalign, int textStyle )
 {
-  if( !cg_tutorial.integer && !cg_modTutorial.integer )
+  if( !cg_tutorial.integer )
     return;
 
   UI_DrawTextBlock( rect, text_x, text_y, color, scale, textalign, textvalign, textStyle, CG_TutorialText( ) );
@@ -2629,6 +2629,8 @@ static void CG_ScanForCrosshairEntity( void )
 
   CG_Trace( &trace, start, vec3_origin, vec3_origin, end,
     cg.snap->ps.clientNum, CONTENTS_SOLID|CONTENTS_BODY );
+
+  cg.crosshairDistance = Distance( start, trace.endpos );
 
   // if the player is in fog, don't show it
   content = trap_CM_PointContents( trace.endpos, 0 );
@@ -3108,6 +3110,9 @@ static void CG_DrawLighting( void )
     CG_DrawPic( 0, 0, 640, 480, cgs.media.whiteShader );
     trap_R_SetColor( NULL );
   }
+  
+  if( BG_UpgradeIsActive( UP_NIGHTVISION, cg.predictedPlayerState.stats ) )
+    CG_DrawPic( 0, 0, 640, 480, cgs.media.basivisionShader );
 }
 
 /*
@@ -3525,9 +3530,9 @@ void CG_DrawSplash( void )
     trap_R_SetColor( color );
 
     ts = 0.33f;
-    tw = UI_Text_Width( MODVER_TITLE, ts );
-    th = UI_Text_Height( MODVER_TITLE, ts );    
-    UI_Text_Paint( x + w/2 - tw/2, y + h + th, ts, color, MODVER_TITLE, 0, 0, ITEM_TEXTSTYLE_SHADOWEDMORE );
+    tw = UI_Text_Width( SPLASH_VERSION, ts );
+    th = UI_Text_Height( SPLASH_VERSION, ts );    
+    UI_Text_Paint( x + w/2 - tw/2, y + h + th, ts, color, SPLASH_VERSION, 0, 0, ITEM_TEXTSTYLE_SHADOWEDMORE );
   }
   
   color[ 3 ] = ( t > 3.0f ) ? 4.0f - t : 1.0f;

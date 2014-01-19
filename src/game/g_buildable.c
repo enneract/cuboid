@@ -2524,39 +2524,46 @@ void Cuboid_Think(gentity_t *self)
 }
 
 //Cuboids need a new die function because of the cuboid explosion effects.
-void Cuboid_Die(gentity_t *self,gentity_t *inflictor,gentity_t *attacker,int damage,int mod)
+void Cuboid_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod )
 {
   vec3_t dir;
-  qboolean event=qfalse;
+  qboolean event = qfalse;
   const cuboidAttributes_t *cuboid;
   
-  cuboid=BG_CuboidAttributes(self->s.modelindex);
-  G_SetBuildableAnim(self,BANIM_DESTROY1,qtrue); // just for sound
-  self->die=nullDieFunction;
-  self->killedBy=attacker-g_entities;
-  self->powered=qfalse;
-  self->s.eFlags&=~EF_FIRING;
-  G_LogDestruction(self,attacker,mod);
-  dir[0]=dir[1]=0;
-  dir[2]=1;
+  cuboid = BG_CuboidAttributes( self->s.modelindex );
+  G_SetBuildableAnim( self, BANIM_DESTROY1, qtrue ); // just for sound
+  self->die = nullDieFunction;
+  self->killedBy = attacker - g_entities;
+  self->powered = qfalse;
+  self->s.eFlags &= ~EF_FIRING;
+  G_LogDestruction( self, attacker, mod );
+  dir[ 0 ] =
+  dir[ 1 ] = 0;
+  dir[ 2 ] = 1;
   self->timestamp = level.time;
-  G_QueueBuildPoints(self);
-  if(mod!=MOD_DECONSTRUCT&&self->spawned)
+  G_QueueBuildPoints( self );
+  
+  if( mod != MOD_DECONSTRUCT && self->spawned )
   {
-    G_RewardAttackers(self);
-    G_RadiusDamage(self->s.pos.trBase,g_entities+self->killedBy,self->splashDamage,self->splashRadius,self,self->splashMethodOfDeath);
+    G_RewardAttackers( self );
+    G_RadiusDamage( self->s.pos.trBase,
+                    g_entities + self->killedBy,
+                    self->splashDamage,
+                    self->splashRadius,
+                    self,
+                    self->splashMethodOfDeath );
     //NOTE: all cuboid info is already packed
-    self->s.eType=ET_EVENTS+EV_CUBOID_EXPLOSION;
+    self->s.eType = ET_EVENTS + EV_CUBOID_EXPLOSION;
     self->freeAfterEvent = qtrue;
-    G_AddEvent(self,EV_HUMAN_BUILDABLE_EXPLOSION,DirToByte(dir));
-    event=qtrue;
-    self->r.contents=0;
-    trap_LinkEntity(self);
+    G_AddEvent( self, EV_HUMAN_BUILDABLE_EXPLOSION, DirToByte( dir ) );
+    event = qtrue;
+    self->r.contents = 0;
+    trap_LinkEntity( self );
   }
   else
   {
-    self->s.eType=0;
-    G_FreeEntity(self);
+    self->s.eType = 0;
+    G_FreeEntity( self );
   }
 }
 
@@ -3440,12 +3447,18 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   int               contents;
   playerState_t     *ps = &ent->client->ps;
 
-  if( BG_Buildable(buildable,NULL)->cuboid )
-    BG_CuboidBBox(cuboidSize,mins,maxs);
+  if( BG_Buildable( buildable, NULL )->cuboid )
+  {
+    if( !G_CheckCuboidSize( cuboidSize, buildable ) )
+      return IBE_INVALIDSIZE;
+    BG_CuboidBBox( cuboidSize, mins, maxs );
+  }
   else
     BG_BuildableBoundingBox( buildable, mins, maxs );
-
-  if(!BG_PositionBuildableRelativeToPlayer( ps, BG_Buildable(buildable,NULL)->cuboid, mins, maxs, trap_Trace, entity_origin, angles, &tr1 ))
+  
+  if( !BG_PositionBuildableRelativeToPlayer(
+        ps, BG_Buildable( buildable, NULL )->cuboid,
+        mins, maxs, trap_Trace, entity_origin, angles, &tr1 ) )
     return IBE_NOSURF;
   trap_Trace( &tr2, entity_origin, mins, maxs, entity_origin, -1, MASK_PLAYERSOLID );
   trap_Trace( &tr3, ps->origin, NULL, NULL, entity_origin, ent->s.number, MASK_PLAYERSOLID );
@@ -3964,13 +3977,17 @@ qboolean G_BuildIfValid( gentity_t *ent, buildable_t buildable, vec3_t cuboidSiz
     case IBE_LASTSPAWN:
       G_TriggerMenu( ent->client->ps.clientNum, MN_B_LASTSPAWN );
       return qfalse;
-      
+
     case IBE_NOSURF:
       G_TriggerMenu( ent->client->ps.clientNum, MN_B_NOSURF );
       return qfalse;
-      
+
     case IBE_TOODENSE:
       G_TriggerMenu( ent->client->ps.clientNum, MN_B_TOODENSE );
+      return qfalse;
+
+    case IBE_INVALIDSIZE:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_B_INVALIDSIZE );
       return qfalse;
 
     default:
@@ -4577,7 +4594,10 @@ void G_RemoveUnbuiltBuildables( gentity_t *self )
 
     if( ent->builtBy != self->client->ps.clientNum )
       continue;
-    
+
+    if( ent->s.modelindex < CUBOID_FIRST )
+      continue;
+
     G_Damage( ent, self, NULL, dir, dir, ent->health, 0, MOD_DECONSTRUCT );
   }
 }

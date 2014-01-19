@@ -639,21 +639,6 @@ const char *CG_TutorialText( void )
   playerState_t *ps;
   static char   text[ MAX_TUTORIAL_TEXT ];
   static int    refreshBindings = 0;
-  static qboolean checkedUpdate = qfalse;
-  
-  // force mod tutorial if new version
-  if( !checkedUpdate )
-  {
-    trap_Cvar_Update( &cg_lastModVersion );
-    
-    if( cg_lastModVersion.integer < MODVER_CURRENT )
-    {
-      trap_Cvar_Set( "cg_modTutorial", "1" );
-      trap_Cvar_Set( "cg_modTutorialReference", va( "%i", cg_lastModVersion.integer ) );
-      trap_Cvar_Set( "cg_lastModVersion", va( "%i", MODVER_CURRENT ) );
-    }
-    checkedUpdate = qtrue;
-  }
   
   if( refreshBindings == 0 )
     CG_GetBindings( );
@@ -663,14 +648,11 @@ const char *CG_TutorialText( void )
   text[ 0 ] = '\0';
   ps = &cg.snap->ps;
 
-  if( cg_modTutorial.integer )
-  {
-    CG_NewText( text, ps );
-    
-    if( !cg_tutorial.integer )
-      return text;
-  }
-  
+  CG_NewText( text, ps );
+
+  if( !cg_tutorial.integer )
+    return text;
+
   if( !cg.intermissionStarted && !cg.demoPlayback )
   {
     if( ps->persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT ||
@@ -800,38 +782,31 @@ static void CG_CuboidText( char *text, playerState_t *ps )
 
 static void CG_NewText( char *text, playerState_t *ps )
 {
-  int reference;
-  
-  reference = cg_modTutorialReference.integer;
-
   if( !cg.intermissionStarted && !cg.demoPlayback )
   {
     if( ps->persistant[ PERS_SPECSTATE ] == SPECTATOR_NOT &&
         !( ps->pm_flags & PMF_FOLLOW ) && 
         ps->stats[ STAT_HEALTH ] > 0 )
     {
-      if( reference >= MODVER_C2_0_1_0 )
+      if( BG_InventoryContainsUpgrade( UP_JETPACK, ps->stats ) )
       {
-        if( BG_InventoryContainsUpgrade( UP_JETPACK, ps->stats ) )
+        if( ps->stats[ STAT_FUEL ] > JETPACK_FUEL_JUMP )
         {
-          if( ps->stats[ STAT_FUEL ] > JETPACK_FUEL_JUMP )
-          {
-            Q_strcat( text, MAX_TUTORIAL_TEXT,
-                       va( "Press %s to perform a jetpack-aided jump. It uses fuel instead of stamina\n", 
-                           CG_KeyNameForCommand( "+moveup" ) ) );
-          }
-          if( ps->stats[ STAT_FUEL ] <= JETPACK_FUEL_LOW )
-          {
-            Q_strcat( text, MAX_TUTORIAL_TEXT,
-                      va( "You are running low on jet fuel. Find an Armoury and press %s to refuel\n",
-                          CG_KeyNameForCommand( "buy ammo" ) ) );
-          }
-          else if( ps->stats[ STAT_FUEL ] <= 0 )
-          {
-            Q_strcat( text, MAX_TUTORIAL_TEXT,
-                      va( "You are out of jet fuel. You can no longer fly. Find an Armoury and press %s to refuel\n",
-                          CG_KeyNameForCommand( "buy ammo" ) ) );
-          }
+          Q_strcat( text, MAX_TUTORIAL_TEXT,
+                     va( "Press %s to perform a jetpack-aided jump. It uses fuel instead of stamina\n", 
+                         CG_KeyNameForCommand( "+moveup" ) ) );
+        }
+        if( ps->stats[ STAT_FUEL ] <= JETPACK_FUEL_LOW )
+        {
+          Q_strcat( text, MAX_TUTORIAL_TEXT,
+                    va( "You are running low on jet fuel. Find an Armoury and press %s to refuel\n",
+                        CG_KeyNameForCommand( "buy ammo" ) ) );
+        }
+        else if( ps->stats[ STAT_FUEL ] <= 0 )
+        {
+          Q_strcat( text, MAX_TUTORIAL_TEXT,
+                    va( "You are out of jet fuel. You can no longer fly. Find an Armoury and press %s to refuel\n",
+                        CG_KeyNameForCommand( "buy ammo" ) ) );
         }
       }
 
@@ -840,22 +815,18 @@ static void CG_NewText( char *text, playerState_t *ps )
         case WP_ABUILD:
         case WP_ABUILD2:
         case WP_HBUILD:
-          if( reference >= MODVER_C2_0_1_0  )
-          {
-            CG_CuboidText( text, ps );
-            if( ps->weapon == WP_ABUILD2 )
-              Q_strcat( text, MAX_TUTORIAL_TEXT,
-                        "Spitting at a human has a chance of impregnating him\n"
-                        "with an alien egg. After a certain amount of time,\n"
-                        "the egg can be spawned from by aliens, killing the human.\n" );
-          }
+          CG_CuboidText( text, ps );
+          if( ps->weapon == WP_ABUILD2 )
+            Q_strcat( text, MAX_TUTORIAL_TEXT,
+                      "Spitting at a human has a chance of impregnating him\n"
+                      "with an alien egg. After a certain amount of time,\n"
+                      "the egg can be spawned from by aliens, killing the human.\n" );
           break;
 
         case WP_ALEVEL4:
-          if( reference >= MODVER_C2_0_1_0  )
-            Q_strcat( text, MAX_TUTORIAL_TEXT,
-                      va( "Press %s to drop a Tyrant Bomb. It can be regerated by touching a Booster.\n",
-                      CG_KeyNameForCommand( "+button2" ) ) );
+          Q_strcat( text, MAX_TUTORIAL_TEXT,
+                    va( "Press %s to drop a Tyrant Bomb. It can be regerated by touching a Booster.\n",
+                    CG_KeyNameForCommand( "+button2" ) ) );
           break;
       }
     }

@@ -2527,21 +2527,30 @@ void Cmd_Sell_f( gentity_t *ent )
 
 /*
 =================
-Cmd_CheckCuboidSize
+G_CheckCuboidSize
 
 Check if the specified dimensions are valid.
 =================
 */
-qboolean Cmd_CheckCuboidSize(vec3_t dims)
+qboolean G_CheckCuboidSize( vec3_t dims, buildable_t type )
 {
- if(g_cuboidSizeLimit.integer)
-  if(dims[0]>g_cuboidSizeLimit.integer||dims[1]>g_cuboidSizeLimit.integer||dims[2]>g_cuboidSizeLimit.integer)
-   return qfalse;
- if(dims[0]*dims[1]*dims[2]<CUBOID_MINVOLUME)
-   return qfalse;
- if(dims[0]<1||dims[1]<1||dims[2]<1)
-  return qfalse;
- return qtrue;
+  if( g_cuboidSizeLimit.integer )
+    if( dims[ 0 ] > g_cuboidSizeLimit.integer ||
+       dims[ 1 ] > g_cuboidSizeLimit.integer ||
+       dims[ 2 ] > g_cuboidSizeLimit.integer )
+      return qfalse;
+
+    if( dims[ 0 ] * dims[ 1 ] * dims[ 2 ] < CUBOID_MINVOLUME)
+    return qfalse;
+
+  if( dims[ 0 ] < 1 || dims[ 1 ] < 1 || dims[ 2 ] < 1 )
+    return qfalse;
+
+  if( g_cuboidHealthLimit.integer )
+    if( BG_Buildable( type, dims )->health > g_cuboidHealthLimit.integer )
+      return qfalse;
+
+  return qtrue;
 }
 
 /*
@@ -2554,33 +2563,32 @@ Update player's cuboid selection (after validation) with data sent over network.
 */
 void Cmd_Cb_f(gentity_t *ent)
 {
- char s[MAX_TOKEN_CHARS];
- int echo;
- vec3_t dims;
+  char s[MAX_TOKEN_CHARS];
+  int echo;
+  vec3_t dims;
  
- if(trap_Argc()!=5)
-  return;
- trap_Argv(1,s,sizeof(s));
- echo=atoi(s);
- trap_Argv(2,s,sizeof(s));
- dims[0]=atof(s);
- trap_Argv(3,s,sizeof(s));
- dims[1]=atof(s);
- trap_Argv(4,s,sizeof(s));
- dims[2]=atof(s);
- if(Cmd_CheckCuboidSize(dims))
- { 
-  VectorCopy(dims,ent->client->cuboidSelection);
-  trap_SendServerCommand(ent->client-level.clients,va("cb3 %i\n",echo));
-  G_RelayCuboidToSpectators(ent->client);
- }
- else
- {
-  if(Cmd_CheckCuboidSize(ent->client->cuboidSelection))
-   trap_SendServerCommand(ent->client-level.clients,va("cb3 %i %f %f %f\n",echo,ent->client->cuboidSelection[0],ent->client->cuboidSelection[1],ent->client->cuboidSelection[2]));
+  if( trap_Argc( ) != 5 )
+    return;
+
+  trap_Argv( 1, s, sizeof( s ) );
+  echo = atoi( s );
+  trap_Argv( 2, s, sizeof( s ) );
+  dims[ 0 ] = atof( s );
+  trap_Argv( 3, s, sizeof( s ) );
+  dims[ 1 ] = atof( s );
+  trap_Argv( 4, s, sizeof( s ) );
+  dims[ 2 ] = atof( s );
+
+  VectorCopy( dims, ent->client->cuboidSelection );
+  G_RelayCuboidToSpectators( ent->client );
+
+  if( G_CheckCuboidSize( dims, ent->client->ps.stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT ) )
+    trap_SendServerCommand( ent->client - level.clients, va( "cb3 %i\n", echo ) );
   else
-   trap_SendServerCommand(ent->client-level.clients,va("cb3 %i %f %f %f\n",echo,g_cuboidSizeLimit.integer,g_cuboidSizeLimit.integer,g_cuboidSizeLimit.integer));
- }
+  {
+    trap_SendServerCommand( ent->client - level.clients, va( "cb4 %i\n", echo ) );
+    ent->client->ps.stats[ STAT_BUILDABLE ] &= ~SB_VALID_TOGGLEBIT;
+  }
 }
 
 
@@ -2627,37 +2635,35 @@ void Cmd_Build_f( gentity_t *ent )
   {
     if( trap_Argc() >= 5 )
     {
-      trap_Argv(2,s,sizeof(s));
-      dims[0]=MAX(1,atof(s));
-      trap_Argv(3,s,sizeof(s));
-      dims[1]=MAX(1,atof(s));
-      trap_Argv(4,s,sizeof(s));
-      dims[2]=MAX(1,atof(s));
-      if(!Cmd_CheckCuboidSize(dims))
+      trap_Argv( 2, s, sizeof( s ) );
+      dims[ 0 ] = MAX( 1, atof( s ) );
+      trap_Argv( 3, s, sizeof( s ) );
+      dims[ 1 ] = MAX( 1, atof( s ) );
+      trap_Argv( 4, s, sizeof( s ) );
+      dims[ 2 ] = MAX( 1, atof( s ) );
+      if( !G_CheckCuboidSize( dims, buildable ) )
       {
-        Com_sprintf(buf,sizeof(buf),"print \"^1error: invalid cuboid size (min volume: %i, max size: %s)\n\"",
-                    CUBOID_MINVOLUME,(g_cuboidSizeLimit.integer?va("%ix%ix%i",g_cuboidSizeLimit.integer,g_cuboidSizeLimit.integer, g_cuboidSizeLimit.integer):"no limit"));
-        trap_SendServerCommand(ent->client-level.clients,buf);
+        G_TriggerMenu( ent->client->ps.clientNum, MN_B_INVALIDSIZE );
         return;
       }
-      VectorCopy(dims,ent->client->cuboidSelection);
+      VectorCopy( dims, ent->client->cuboidSelection );
     }
     // client is building a cuboid for the first time so reset the selection to default
-    if(!Cmd_CheckCuboidSize(ent->client->cuboidSelection))
+    if( !G_CheckCuboidSize(ent->client->cuboidSelection, buildable) )
     {
-      ent->client->cuboidSelection[0]=32;
-      ent->client->cuboidSelection[1]=32;
-      ent->client->cuboidSelection[2]=32;
-      trap_SendServerCommand(ent->client-level.clients,"cb2 32 32 32");
-      G_RelayCuboidToSpectators(ent->client);
+      ent->client->cuboidSelection[ 0 ] = 30;
+      ent->client->cuboidSelection[ 1 ] = 30;
+      ent->client->cuboidSelection[ 2 ] = 30;
+      trap_SendServerCommand( ent->client-level.clients, "cb2 30 30 30" );
+      G_RelayCuboidToSpectators( ent->client );
     }
     
-    if(!BG_CuboidAllowed((team==TEAM_ALIENS?g_alienStage.integer:g_humanStage.integer)))
+    if( !BG_CuboidAllowed( ( team == TEAM_ALIENS ? g_alienStage.integer : g_humanStage.integer ) ) )
     {
-      if(BG_CuboidMode()==1)
-        G_TriggerMenu(ent->client->ps.clientNum,MN_B_CUBOID_MODE1);
+      if( BG_CuboidMode() == 1 )
+        G_TriggerMenu(ent->client->ps.clientNum, MN_B_CUBOID_MODE1 );
       else
-        G_TriggerMenu(ent->client->ps.clientNum,MN_B_CUBOID_MODE2);
+        G_TriggerMenu(ent->client->ps.clientNum, MN_B_CUBOID_MODE2 );
       return;
     }
   }
@@ -2751,12 +2757,13 @@ void Cmd_Build_f( gentity_t *ent )
 
     if( err == MN_NONE || ent->client->pers.disableBlueprintErrors )
     {
-     trap_SendServerCommand(ent->client-level.clients,va("cb2 %f %f %f\n",
-                                                         ent->client->cuboidSelection[0],
-                                                         ent->client->cuboidSelection[1],
-                                                         ent->client->cuboidSelection[2]));
-     G_RelayCuboidToSpectators(ent->client);
-     ent->client->ps.stats[ STAT_BUILDABLE ] |= buildable;
+      trap_SendServerCommand( ent->client - level.clients,
+                              va( "cb2 %f %f %f\n",
+                                  ent->client->cuboidSelection[ 0 ],
+                                  ent->client->cuboidSelection[ 1 ],
+                                  ent->client->cuboidSelection[ 2 ] ) );
+      G_RelayCuboidToSpectators( ent->client );
+      ent->client->ps.stats[ STAT_BUILDABLE ] |= buildable;
     }
     else
       G_TriggerMenu( ent->client->ps.clientNum, err );
@@ -3298,12 +3305,7 @@ Cmd_Debug1_f
 */
 void Cmd_Debug1_f( gentity_t *other )
 {
-            other->client->isImpregnated = qtrue;
-            other->client->isImplantMature = qfalse;
-            other->client->impregnationTime = level.time;
-            other->client->impregnatedBy = -1;
-                  other->client->isImplantMature = qtrue;
-      other->client->ps.stats[ STAT_STATE ] |= SS_IMPLANTED;
+  other->client->ps.stats[ STAT_SHAKE ] += 70;
 }
 
 /*

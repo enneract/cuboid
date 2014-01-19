@@ -1,0 +1,58 @@
+Particle system variables
+--------------------------------------------------------------------------------
+    
+shader                   <fps> | sync  <shader1> <shader2> ... <shaderN>          - this specifies the shaders to use for the particle. The frame rate can be set to a static rate or the sync parameter can be used in which case the frame rate will be synchronised to the lifetime of the particle such that the first frame is displayed on birth and the last frame is displayed immediately before death.
+model                    <model1> <model2> ... <modelN>                           - use one of the specified models as the particle. This cannot be used in conjunction with the shader keyword.
+modelAnmation            <firstFrame> <numFrames> <loopFrames> <fps> | sync       - animation parameters to use when model particles are employed.
+
+lifeTime                 <time>                                                   - the lifetime of the particle.
+
+radius                   <delay> <initial> <final>                                - the size of the particle throughout its lifetime. The delay parameter specifies the time in msec before radius scaling begins. The initial and final parameters specify the radii of the particle in quake units.
+alpha                    <delay> <initial> <final>                                - the opacity of the particle throughout its lifetime. The delay parameter specifies the time in msec before alpha scaling begins. The initial and final parameters specify the alpha of the particle where 1.0 is totally opaque and 0.0 is totally transparent.
+rotation                 <delay> <initial> <final>                                - the rotation of the particle throughout its lifetime. The delay parameter specifies the time in msec before the rotation begins. The initial and final parameters specify the rotation of the particle in degrees.
+
+displacement             <x> <y> <z> <variance>                                   - a static displacement about the attachment point. The variance parameter specifies a random displacement in all axes.
+normalDisplacement       <displacement>                                           - for particle systems that have their normal set (impact particle systems for example) this specifies the magnitude of a displacement along the normal.
+
+velocityType             static | static_transform |tag |cent |normal             - this specifies how the particle will compute its initial velocity. static means it is specified statically in the .particle file, static_transform means the same, except that it is transformed by the orientation matrix of what it is attached to, tag means the velocity is in the direction of the tag it is attached to, cent means the velocity is in the direction of the cent it is attached to and normal means the velocity is in the direction of the particle system normal.
+velocityDir              linear | point                                           - this specifies whether the initial velocity is computed as a simple direction or as the direction towards a secondary point (defined by velocityPoint or dynamically through velocityType cent).
+velocity                 <x> <y> <z> <variance>                                   - for when velocityType static is present this specifies the direction. The variance here is specified in degrees e.g. "~5" - up to 5 degrees deviation.
+velocityMagnitude        <magnitude>                                              - the magnitude of the velocity.
+velocityPoint            <x> <y> <z> <variance>                                   - for when velocityType static and velocityDir point are present this specifies the point to move towards.
+parentVelocityFraction   <fraction>                                               - for when the particle system is attached to a cent this specifies the fraction of the cent’s velocity that is added to the particle’s velocity.
+    
+accelerationType         static | static_transform | tag | cent | normal          - this specifies how the particle will compute its acceleration. static means it is specified statically in the .particle file, static_transform means the same, except that it is transformed by the orientation matrix of what it is attached to, tag means the acceleration is in the direction of the tag it is attached to, cent means the acceleration is in the direction of the cent it is attached to and normal means the acceleration is in the direction of the particle system normal.
+accelerationDir          linear | point                                           - this specifies whether the acceleration is computed as a simple direction or as the direction towards a secondary point (defined by accelerationPoint or dynamically through accelerationType cent).
+acceleration             <x> <y> <z> <variance>                                   - for when accelerationType static is present this specifies the direction. The variance here is specified in degrees e.g. "~5" - up to 5 degrees deviation.
+accelerationMagnitude    <magnitude>                                              - the magnitude of the acceleration.
+accelerationPoint        <x> <y> <z> <variance>                                   - for when accelerationType static and accelerationDir point are present this specifies the point to move towards.
+bounce                   <fraction> | cull                                        - the fraction of velocity that is reflected when a particle collides. If this is set to 0.0 the particle won’t collide. When cull is used particles are culled as soon as they collide with objects.
+bounceMark               <count> <radius> <shader>                                - make a mark at each bounce point for up to <count> bounces.
+bounceSound              <count> <sound>                                          - make a sound at each bounce point for up to <count> bounces.
+    
+dynamicLight             <delayRadius> <startRadius> <endRadius> { <r> <g> <b> }  - attach a dynamic light to this particle.
+color                    <delay> { <ir> <ig> <ib> } { <fr> <fg> <fb> }            - color the particle where <i.> refers to the initial color component and <f.> refers to the final color component.
+    
+childSystem              <particle system>                                        - specifies a particle system to attach to this particle.
+childTrailSystem         <trail system>                                           - specifies a trail system to attach to this particle.
+onDeathSystem            <particle system>                                        - specifies a particle system to spawn at the point where this particle died.
+    
+overdrawProtection                                                                - cull particles that occupy a large amount of screen space.
+realLight                                                                         - light particles using the lightgrid instead of fullbright.
+cullOnStartSolid                                                                  - cull particles that are spawned inside brushes.
+    
+--------------------------------------------------------------------------------
+
+
+Notes:
+------
+
+* '|' means 'or'
+* setting magnitude to 0 might cause issues
+
+
+Numerical operators
+-------------------
+~ random
+- unspecified
+% percentage

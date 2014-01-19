@@ -62,9 +62,9 @@ void CG_UpdateEntityPositions( void )
      !( cent->currentState.eFlags & EF_DEAD ) )
     {
       if( BG_Buildable(cent->currentState.modelindex,NULL)->cuboid )
-	if( !BG_CuboidAttributes(cent->currentState.modelindex)->detectable )
-	  continue; //forget about undetectable cuboids
-	
+        if( !BG_CuboidAttributes(cent->currentState.modelindex)->detectable )
+          continue; //forget about undetectable cuboids
+
       // add to list of item positions (for creep)
       if( cent->currentState.modelindex2 == TEAM_ALIENS )
       {
@@ -218,6 +218,29 @@ static void CG_DrawDir( rectDef_t *rect, vec3_t origin, vec4_t colour )
 
 /*
 =============
+CG_BasivisionBlip
+=============
+*/
+void CG_BasivisionBlip( vec3_t origin, float size, qhandle_t shader, float flareSize, qhandle_t flare )
+{
+  float x, y, s;
+
+  if( !CG_WorldToScreen( origin, &x, &y ) )
+    return;
+
+  size = size * 1000 / Distance( origin, entityPositions.origin );
+
+  if( shader )
+    CG_DrawPic( x - ( size * cgDC.aspectScale ) / 2, y - size / 2, size * cgDC.aspectScale, size,
+               cgs.media.basivisionBlipShader );
+
+  if( flare )
+    CG_DrawPic( x - ( flareSize * cgDC.aspectScale ) / 2, y - flareSize / 2, flareSize * cgDC.aspectScale, flareSize,
+               cgs.media.basivisionFlareShader );
+}
+
+/*
+=============
 CG_AlienSense
 =============
 */
@@ -231,24 +254,39 @@ void CG_AlienSense( rectDef_t *rect )
 
   VectorCopy( entityPositions.origin, origin );
 
-  //draw human buildables
-  for( i = 0; i < entityPositions.numHumanBuildables; i++ )
+  if( BG_UpgradeIsActive( UP_NIGHTVISION, cg.predictedPlayerState.stats ) )
   {
-    VectorClear( relOrigin );
-    VectorSubtract( entityPositions.humanBuildablePos[ i ], origin, relOrigin );
+    for( i = 0; i < entityPositions.numHumanBuildables; i++ )
+      CG_BasivisionBlip( entityPositions.humanBuildablePos[ i ],
+                         0, 0,
+                         150, cgs.media.basivisionBlipShader );
 
-    if( VectorLength( relOrigin ) < ALIENSENSE_RANGE )
-      CG_DrawDir( rect, relOrigin, buildable );
+    for( i = 0; i < entityPositions.numHumanClients; i++ )
+      CG_BasivisionBlip( entityPositions.humanClientPos[ i ],
+                         60, cgs.media.basivisionBlipShader,
+                         80, cgs.media.basivisionFlareShader );
   }
-
-  //draw human clients
-  for( i = 0; i < entityPositions.numHumanClients; i++ )
+  else
   {
-    VectorClear( relOrigin );
-    VectorSubtract( entityPositions.humanClientPos[ i ], origin, relOrigin );
+    //draw human buildables
+    for( i = 0; i < entityPositions.numHumanBuildables; i++ )
+    {
+      VectorClear( relOrigin );
+      VectorSubtract( entityPositions.humanBuildablePos[ i ], origin, relOrigin );
 
-    if( VectorLength( relOrigin ) < ALIENSENSE_RANGE )
-      CG_DrawDir( rect, relOrigin, client );
+      if( VectorLength( relOrigin ) < ALIENSENSE_RANGE )
+        CG_DrawDir( rect, relOrigin, buildable );
+    }
+
+    //draw human clients
+    for( i = 0; i < entityPositions.numHumanClients; i++ )
+    {
+      VectorClear( relOrigin );
+      VectorSubtract( entityPositions.humanClientPos[ i ], origin, relOrigin );
+
+      if( VectorLength( relOrigin ) < ALIENSENSE_RANGE )
+        CG_DrawDir( rect, relOrigin, client );
+    }
   }
 }
 

@@ -254,3 +254,33 @@ gfx/cuboid/prebuild_alien
  }
 }
 
+gfx/2d/basivision
+{
+ {
+  map gfx/2d/basivision_1.jpg
+  blendFunc GL_ONE_MINUS_DST_COLOR GL_ONE_MINUS_SRC_COLOR
+ }
+}
+
+gfx/2d/basivisionBlip
+{
+ {
+  clampmap gfx/2d/basivision_blip.jpg
+  blendFunc add
+  tcMod rotate 26
+ }
+ {
+  clampmap gfx/2d/basivision_blip.jpg
+  blendFunc add
+  tcMod rotate -49
+ }
+}
+
+gfx/2d/basivisionFlare
+{
+ {
+  clampmap gfx/2d/basivision_flare.jpg
+  tcMod stretch sin 1 0.1 0 140
+  blendFunc add
+ }
+}

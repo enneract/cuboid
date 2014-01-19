@@ -1397,7 +1397,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, vec3_t origin, vec3_t angles
         // try to unblock the player
         if( tr.startsolid )
         {
-          Com_Printf("DEBUG: player is stuck!\n");
+          //Com_Printf("DEBUG: player is stuck!\n");
           for( i = 0; i < 16*2; i++ )
           {
             float a, r;
@@ -1414,7 +1414,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, vec3_t origin, vec3_t angles
             
             if( !tr.startsolid )
             {
-             Com_Printf("DEBUG: player position fixed at iteration %i\n",i);
+             //Com_Printf("DEBUG: player position fixed at iteration %i\n",i);
              VectorCopy( neworigin, spawn_origin );
              break;
             }
@@ -1546,6 +1546,11 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, vec3_t origin, vec3_t angles
     weapon = BG_Class( ent->client->pers.classSelection )->startWeapon;
   else
     weapon = WP_NONE;
+
+  // give nightvision to basilisks
+  if( ent->client->pers.classSelection == PCL_ALIEN_LEVEL1 ||
+      ent->client->pers.classSelection == PCL_ALIEN_LEVEL1_UPG )
+    BG_AddUpgradeToInventory( UP_NIGHTVISION, client->ps.stats );
 
   maxAmmo = BG_Weapon( weapon )->maxAmmo;
   maxClips = BG_Weapon( weapon )->maxClips;

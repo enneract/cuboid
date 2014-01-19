@@ -152,6 +152,7 @@ vmCvar_t  g_tag;
 vmCvar_t  g_unlimited;
 vmCvar_t  g_instantBuild;
 vmCvar_t  g_cuboidSizeLimit;
+vmCvar_t  g_cuboidHealthLimit;
 vmCvar_t  g_cuboidMode;
 
 vmCvar_t  g_buildableDensityLimit;
@@ -295,11 +296,12 @@ static cvarTable_t   gameCvarTable[ ] =
   
   { &g_unlimited, "g_unlimited", "0", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse },
   { &g_instantBuild, "g_instantBuild", "0", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse },
-  { &g_cuboidSizeLimit, "g_cuboidSizeLimit", "0", CVAR_ARCHIVE, 0, qfalse },
+  { &g_cuboidSizeLimit, "g_cuboidSizeLimit", "0", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse },
+  { &g_cuboidHealthLimit, "g_cuboidHealthLimit", "0", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse },
   { &g_cuboidMode, "g_cuboidMode", "0", CVAR_ARCHIVE, 0, qfalse },
   
-  { &g_buildableDensityLimit, "g_buildableDensityLimit", "0", CVAR_ARCHIVE, 0, qfalse },
-  { &g_buildableDensityLimitRange, "g_buildableDensityLimitRange", "0", CVAR_ARCHIVE, 0, qfalse }
+  { &g_buildableDensityLimit, "g_buildableDensityLimit", "0", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse },
+  { &g_buildableDensityLimitRange, "g_buildableDensityLimitRange", "0", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse }
 };
 
 static int gameCvarTableSize = sizeof( gameCvarTable ) / sizeof( gameCvarTable[ 0 ] );

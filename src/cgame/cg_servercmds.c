@@ -634,8 +634,8 @@ void CG_Menu( int menu, int arg )
    
     case MN_B_CUBOID_MODE1:
       longMsg   = "On this map noone is allowed to build a cuboid before reaching "
-                  "stage 2 to prevent players from cheating.";
-      shortMsg  = "Cuboids are disabled on stage 1";
+                  "Stage 2 to prevent players from cheating.";
+      shortMsg  = "Cuboids are disabled on Stage 1";
       break;
       
     case MN_B_CUBOID_MODE2:
@@ -648,6 +648,14 @@ void CG_Menu( int menu, int arg )
       longMsg   = "There are already too many buildings in your"
                   "vicinity. Remove some of them or build further.";
       shortMsg  = "Buildable density is too high here";
+      break;
+
+    case MN_B_INVALIDSIZE:
+      longMsg   = "You cannot build a cuboid of the selected size."
+                  "Most likely the size is too big, too small or "
+                  "invalid. Keep changing it until the preview "
+                  "turns green.";
+      shortMsg  = "Invalid cuboid size";
       break;
 
     //===============================
@@ -1274,12 +1282,13 @@ void CG_ProcessAnnouncer( void )
 
   if( last + ANNOUNCER_DELAY > cg.time )
     return;
-  
+
   cg.announcerStackPos++;
   cg.announcerStackPos %= MAX_ANNOUNCER_STACK;
-  
-  trap_S_StartLocalSound( cg.announcerStack[ cg.announcerStackPos ], CHAN_VOICE );
-  
+
+  if( cg_announcer.integer )
+   trap_S_StartLocalSound( cg.announcerStack[ cg.announcerStackPos ], CHAN_VOICE );
+
   last = cg.time;
 }
 
@@ -1293,12 +1302,15 @@ Play an announcer sound
 static void CG_Announce( void )
 {
   const char *event, *soundName;
-  
+
+  if( !cg_announcer.integer )
+    return;
+
   if( trap_Argc( ) != 2 )
     return;
-  
+
   event = CG_Argv( 1 );
-  
+
   if( !Q_stricmp( event, "votenow" ) ||
       !Q_stricmp( event, "votecancelled" ) ||
       !Q_stricmp( event, "votefailed" ) ||
@@ -1347,8 +1359,9 @@ static void CG_GameCmds_f( void )
 static consoleCommand_t svcommands[ ] =
 {
   { "announce", CG_Announce },
-  { "cb2", CG_Cuboid_Response }, // set local cuboid
-  { "cb3", CG_Cuboid_Response }, // set local cuboid and print a "limit exceeded" warning
+  { "cb2", CG_Cuboid_Response },
+  { "cb3", CG_Cuboid_Response },
+  { "cb4", CG_Cuboid_Response },
   { "chat", CG_Chat_f },
   { "clientLevelShot", CG_ClientLevelShot_f },
   { "cmds", CG_GameCmds_f },

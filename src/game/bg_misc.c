@@ -2804,6 +2804,19 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     qtrue,                  //qboolean purchasable
     qfalse,                 //qboolean usable
     TEAM_HUMANS             //team_t  team;
+  },
+  {
+    UP_NIGHTVISION,         //int   upgradeNum;
+    0,                      //int   price;
+    0,                      //int  stages
+    SLOT_NONE,              //int   slots;
+    "nightvision",          //char  *upgradeName;
+    "",                     //char  *humanName;
+    "",
+    0,
+    qfalse,                 //qboolean purchasable
+    qtrue,                  //qboolean usable
+    TEAM_ALIENS             //team_t  team;
   }
 };
 

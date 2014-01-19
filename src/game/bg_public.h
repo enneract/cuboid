@@ -233,8 +233,9 @@ typedef enum
   STAT_BUILDABLE, // which ghost model to display for building
   STAT_FALLDIST,  // the distance the player fell
   STAT_VIEWLOCK,  // direction to lock the view in
-  STAT_FUEL       // jetpacks
-  // netcode has space for 2 more
+  STAT_FUEL,      // jetpacks
+  STAT_SHAKE      // camera shake
+  // netcode has space for 1 more
 } statIndex_t;
 
 #define SCA_WALLCLIMBER         0x00000001
@@ -397,6 +398,8 @@ typedef enum
   UP_BIORES,
 
   UP_AMMO,
+  
+  UP_NIGHTVISION, // aliens
 
   UP_NUM_UPGRADES
 } upgrade_t;
@@ -630,6 +633,7 @@ typedef enum
   MN_B_CUBOID_MODE1,
   MN_B_CUBOID_MODE2,
   MN_B_TOODENSE,
+  MN_B_INVALIDSIZE,
   
   //alien build
   MN_A_ONEOVERMIND,

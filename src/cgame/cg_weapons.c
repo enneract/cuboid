@@ -414,6 +414,11 @@ static qboolean CG_ParseWeaponModeSection( weaponInfoMode_t *wim, char **text_p 
 
       continue;
     }
+    else if( !Q_stricmp( token, "impactMarkAlphaFade" ) )
+    {
+      wim->impactMarkAlphaFade = qtrue;
+      continue;
+    }
     else if( !Q_stricmp( token, "}" ) )
       return qtrue; //reached the end of this weapon section
     else
@@ -1253,6 +1258,10 @@ static qboolean CG_WeaponSelectable( weapon_t weapon )
   if( !BG_InventoryContainsWeapon( weapon, cg.snap->ps.stats ) )
     return qfalse;
 
+  // needed for basilisk nightvision
+  if( BG_Weapon( weapon )->team != TEAM_HUMANS )
+    return qfalse;
+
   return qtrue;
 }
 
@@ -1742,7 +1751,8 @@ void CG_MissileHitWall( weapon_t weaponNum, weaponMode_t weaponMode, int clientN
   // impact mark
   //
   if( radius > 0.0f )
-    CG_ImpactMark( mark, origin, dir, random( ) * 360, 1, 1, 1, 1, qfalse, radius, qfalse );
+    CG_ImpactMark( mark, origin, dir, random( ) * 360, 1, 1, 1, 1, 
+                   weapon->wim[ weaponMode ].impactMarkAlphaFade, radius, qfalse );
 }
 
 

@@ -641,7 +641,7 @@ static void admin_default_levels( void )
   l->level = level++;
   Q_strncpyz( l->name, "^4Unknown Player", sizeof( l->name ) );
   Q_strncpyz( l->flags,
-    "listplayers admintest adminhelp time",
+    "listplayers admintest adminhelp time register",
     sizeof( l->flags ) );
 
   l = l->next = BG_Alloc( sizeof( g_admin_level_t ) );
@@ -3498,6 +3498,8 @@ qboolean G_admin_register( gentity_t *ent )
   Q_strncpyz( ent->client->pers.admin->name, 
               ent->client->pers.netname, 
               sizeof( ent->client->pers.admin->name ) );
-  
+
+  admin_writeconfig( );
+
   return qtrue;
 }

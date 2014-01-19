@@ -192,10 +192,6 @@ vmCvar_t  cg_disableCommandDialogs;
 vmCvar_t  cg_disableScannerPlane;
 vmCvar_t  cg_tutorial;
 
-vmCvar_t  cg_modTutorial;
-vmCvar_t  cg_modTutorialReference;
-vmCvar_t  cg_lastModVersion;
-
 vmCvar_t  cg_painBlendUpRate;
 vmCvar_t  cg_painBlendDownRate;
 vmCvar_t  cg_painBlendMax;
@@ -236,6 +232,10 @@ vmCvar_t  cg_cuboidInfoY;
 vmCvar_t  cg_fuelInfoX;
 vmCvar_t  cg_fuelInfoY;
 vmCvar_t  cg_fuelInfoScale;
+
+vmCvar_t  cg_announcer;
+
+vmCvar_t  cg_cameraShakeMagnitude;
 
 typedef struct
 {
@@ -366,27 +366,26 @@ static cvarTable_t cvarTable[ ] =
   { &pmove_fixed, "pmove_fixed", "0", 0},
   { &pmove_msec, "pmove_msec", "8", 0},
   { &cg_noTaunt, "cg_noTaunt", "0", CVAR_ARCHIVE},
-  
+
   { &cg_voice, "voice", "default", CVAR_USERINFO|CVAR_ARCHIVE},
 
   { &cg_emoticons, "cg_emoticons", "1", CVAR_LATCH|CVAR_ARCHIVE},
 
   { &cg_chatTeamPrefix, "cg_chatTeamPrefix", "1", CVAR_ARCHIVE },
-  
+
   { &cg_cuboidResizeAxis, "cg_cuboidResizeAxis", "2", 0 },
   { &cg_cuboidResizeRate, "cg_cuboidResizeRate", "5", CVAR_ARCHIVE },
   { &cg_cuboidPSQuality, "cg_cuboidPSQuality", "3", CVAR_ARCHIVE },
-  
+
   { &cg_cuboidInfoX, "cg_cuboidInfoX" ,"0", CVAR_ARCHIVE },
   { &cg_cuboidInfoY, "cg_cuboidInfoY" ,"150", CVAR_ARCHIVE },
-  
-  { &cg_modTutorial, "cg_modTutorial", "1", CVAR_ARCHIVE },
-  { &cg_modTutorialReference, "cg_modTutorialReference", "0", CVAR_ARCHIVE },
-  { &cg_lastModVersion, "cg_lastModVersion", "0", CVAR_ARCHIVE },
-  
+
   { &cg_fuelInfoX, "cg_fuelInfoX" ,"0", CVAR_ARCHIVE },
   { &cg_fuelInfoY, "cg_fuelInfoY" ,"150", CVAR_ARCHIVE },
-  { &cg_fuelInfoScale, "cg_fuelInfoScale" ,"0.5", CVAR_ARCHIVE }  
+  { &cg_fuelInfoScale, "cg_fuelInfoScale" ,"0.5", CVAR_ARCHIVE },
+  { &cg_announcer, "cg_announcer", "1", CVAR_ARCHIVE },
+  
+  { &cg_cameraShakeMagnitude, "cg_cameraShakeMagnitude", "1", CVAR_ARCHIVE }
 };
 
 static int   cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );
@@ -819,26 +818,30 @@ static void CG_RegisterGraphics( void )
   cgs.media.greenBuildShader          = trap_R_RegisterShader("gfx/misc/greenbuild" );
   cgs.media.redBuildShader            = trap_R_RegisterShader("gfx/misc/redbuild" );
   cgs.media.humanSpawningShader       = trap_R_RegisterShader("models/buildables/telenode/rep_cyl" );
-  
+
   for( i = 0; i < CUBOID_CRACK_TEXTURES - 1; i++ )
     cgs.media.cuboidCracks[ i ] = trap_R_RegisterShader( va( "models/cuboid/cracks_%i", i ) );
-  
+
   cgs.media.cuboidModel               = trap_R_RegisterModel( "models/cuboid/cuboid.md3" );
   cgs.media.cuboidRedBuildShader      = trap_R_RegisterShader( "gfx/cuboid/build_red" );
   cgs.media.cuboidYellowBuildShader   = trap_R_RegisterShader( "gfx/cuboid/build_yellow" );
   cgs.media.cuboidGreenBuildShader    = trap_R_RegisterShader( "gfx/cuboid/build_green" );
   cgs.media.cuboidAxis                = trap_R_RegisterShader( "gfx/cuboid/build_axis" );
   cgs.media.cuboidAlienPrebuild       = trap_R_RegisterShader( "gfx/cuboid/prebuild_alien" );
- 
-  cg.forbidCuboids=qfalse;
-  cg.latestCBNumber=0;
-  
+
+  cg.waitForCB = qfalse;
+  cg.cuboidValid = qfalse;
+  cg.latestCBNumber = 0;
+
   for( i = 0; i < 15; i++ )
     cgs.media.splashLogo[ i ] = trap_R_RegisterShader( va( "cuboid/logo_%i.tga", i ) );
   cgs.media.splashLeft                = trap_R_RegisterShader( "cuboid/logo_left.tga" );
   cgs.media.splashRight               = trap_R_RegisterShader( "cuboid/logo_right.tga" );
-  
-  
+
+  cgs.media.basivisionShader          = trap_R_RegisterShader( "gfx/2d/basivision" );
+  cgs.media.basivisionBlipShader      = trap_R_RegisterShader( "gfx/2d/basivisionBlip" );
+  cgs.media.basivisionFlareShader     = trap_R_RegisterShader( "gfx/2d/basivisionFlare" );
+
   for( i = 0; i < 8; i++ )
     cgs.media.buildWeaponTimerPie[ i ] = trap_R_RegisterShader( buildWeaponTimerPieShaders[ i ] );
 

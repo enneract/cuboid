@@ -790,6 +790,7 @@ typedef enum
   IBE_LASTSPAWN,
   IBE_NOSURF,
   IBE_TOODENSE,
+  IBE_INVALIDSIZE,
   
   IBE_MAXERRORS
 } itemBuildError_t;
@@ -1221,6 +1222,7 @@ extern  vmCvar_t  g_censorship;
 extern  vmCvar_t  g_unlimited;
 extern  vmCvar_t  g_instantBuild;
 extern  vmCvar_t  g_cuboidSizeLimit;
+extern  vmCvar_t  g_cuboidHealthLimit;
 
 extern  vmCvar_t  g_buildableDensityLimit;
 extern  vmCvar_t  g_buildableDensityLimitRange;

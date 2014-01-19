@@ -683,7 +683,7 @@ void CG_InitBuildables( void )
       }
     }
 
-    cg.buildablesFraction = (float)i / (float)( BA_NUM_BUILDABLES - 1 );
+    cg.buildablesFraction = (float)i / (float)( CUBOID_FIRST - 1 );
     trap_UpdateScreen( );
   }
 
@@ -1024,19 +1024,20 @@ void CG_GhostBuildable( buildable_t buildable, vec3_t dims )
 
   if(BG_Buildable(buildable, NULL)->cuboid)
   { 
-   qhandle_t shader, ashader;
-  
-   CG_Cuboid_Send(); //NOTE: CG_Cuboid_Send has its own timer so we don't spam server with commands every frame
-   
-   if(cg.forbidCuboids)
-    shader=cgs.media.cuboidYellowBuildShader;
-   else if(ps->stats[STAT_BUILDABLE]&SB_VALID_TOGGLEBIT)
-    shader=cgs.media.cuboidGreenBuildShader;
-   else
-    shader=cgs.media.cuboidRedBuildShader;
-   CG_DrawCuboid(entity_origin,dims,shader,0);
-   CG_DrawCuboidAxis(entity_origin,dims,cg_cuboidResizeAxis.integer,cgs.media.cuboidAxis);
-   return;
+    qhandle_t shader, ashader;
+
+    CG_Cuboid_Send( ); //NOTE: CG_Cuboid_Send has its own timer so we don't spam server with commands every frame
+
+    if( cg.waitForCB )
+      shader = cgs.media.cuboidYellowBuildShader;
+    else if( cg.cuboidValid && ps->stats[ STAT_BUILDABLE ] & SB_VALID_TOGGLEBIT )
+      shader = cgs.media.cuboidGreenBuildShader;
+    else
+      shader = cgs.media.cuboidRedBuildShader;
+
+    CG_DrawCuboid( entity_origin, dims, shader, 0 );
+    CG_DrawCuboidAxis( entity_origin, dims, cg_cuboidResizeAxis.integer, cgs.media.cuboidAxis );
+    return;
   }
 
   VectorCopy(ps->viewangles,viewangles);
@@ -1896,7 +1897,16 @@ void CG_Buildable( centity_t *cent )
 
     CG_PositionEntityOnTag( &turretBarrel, &ent, ent.hModel, "tag_turret" );
     VectorCopy( cent->lerpOrigin, turretBarrel.lightingOrigin );
-    AnglesToAxis( es->angles2, flatAxis );
+
+    {
+      vec3_t interpolated;
+      int i;
+
+      for( i = 0; i < 3 ; i++ )
+        interpolated[ i ] = LerpAngle( es->angles2[ i ], cent->nextState.angles2[ i ], cg.frameInterpolation );
+
+      AnglesToAxis( interpolated, flatAxis );
+    }
 
     RotatePointAroundVector( turretBarrel.axis[ 0 ], xNormal, flatAxis[ 0 ], -rotAngle );
     RotatePointAroundVector( turretBarrel.axis[ 1 ], xNormal, flatAxis[ 1 ], -rotAngle );
@@ -2090,32 +2100,36 @@ Send the cuboid selection via commands.
 */
 void CG_Cuboid_Send(void)
 {
- static qboolean init=qfalse;
+ static qboolean init = qfalse;
  static int lastupdate;
  static vec3_t lastcuboid;
  
- if(!BG_Buildable(cg.predictedPlayerState.stats[STAT_BUILDABLE]&~SB_VALID_TOGGLEBIT,NULL)->cuboid)
-  return;
+ if( !BG_Buildable( cg.predictedPlayerState.stats[ STAT_BUILDABLE ] &~ SB_VALID_TOGGLEBIT, NULL)->cuboid)
+   return;
  
- if(!init)
+ if( !init )
  {
-  lastupdate=cg.time;
-  VectorCopy(cg.cuboidSelection,lastcuboid);
-  init=qtrue;
+   lastupdate = cg.time;
+   VectorCopy( cg.cuboidSelection, lastcuboid );
+   init = qtrue;
  }
 
- if(lastupdate+100>cg.time)
-  return;
+ if( lastupdate + 100 > cg.time )
+   return;
  
- if(!VectorCompareEpsilon(lastcuboid,cg.cuboidSelection,1e-3))
+ if( !VectorCompareEpsilon( lastcuboid, cg.cuboidSelection, 1e-3 ) )
  {
-  cg.latestCBNumber++;
-  cg.latestCBNumber%=100;
-  trap_SendClientCommand(va("cb %i %f %f %f\n",cg.latestCBNumber,cg.cuboidSelection[0],cg.cuboidSelection[1],cg.cuboidSelection[2]));
-  cg.forbidCuboids=qtrue; //wait for response
+   cg.latestCBNumber++;
+   cg.latestCBNumber %= 100;
+   trap_SendClientCommand( va("cb %i %f %f %f\n",
+                              cg.latestCBNumber,
+                              cg.cuboidSelection[ 0 ],
+                              cg.cuboidSelection[ 1 ],
+                              cg.cuboidSelection[ 2 ] ) );
+   cg.waitForCB = qtrue; //wait for response
  }
- lastupdate=cg.time;
- VectorCopy(cg.cuboidSelection,lastcuboid);
+ lastupdate = cg.time;
+ VectorCopy( cg.cuboidSelection, lastcuboid );
 }
 
 /*
@@ -2127,47 +2141,55 @@ Server responded to our cb with either cb2 or cb3.
 */
 void CG_Cuboid_Response(void)
 {
-  // cb2 <a> <b> <c>         : server sets client-side cuboid
-  // cb3 <echo>              : server agrees on player's cuboid
-  // cb3 <echo> <a> <b> <c>  : server doesnt agree on player's cuboid and corrects it
-  static qboolean init = qfalse;
+  // cb2 <a> <b> <c> : server sets client-side cuboid
+  // cb3 <echo>      : server agrees on player's cuboid
+  // cb4 <echo>      : server disagrees on player's cuboid
+  int offs;
   
   if( !BG_Buildable( cg.predictedPlayerState.stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT, NULL )->cuboid )
     return;
  
   if( !Q_stricmp( CG_Argv( 0 ), "cb2" ) && trap_Argc( ) == 4 )
   {
-    cg.cuboidSelection[ 0 ] = atof( CG_Argv( 1 ) );
-    cg.cuboidSelection[ 1 ] = atof( CG_Argv( 2 ) );
-    cg.cuboidSelection[ 2 ] = atof( CG_Argv( 3 ) );
-    return;
+    if( trap_Argc( ) == 4 ||
+        ( offs = 1, trap_Argc() == 5 && atoi( CG_Argv( 1 ) ) == cg.latestCBNumber ) )
+    {
+      cg.cuboidValid = qtrue;
+      cg.cuboidSelection[ 0 ] = atof( CG_Argv( 1 + offs ) );
+      cg.cuboidSelection[ 1 ] = atof( CG_Argv( 2 + offs ) );
+      cg.cuboidSelection[ 2 ] = atof( CG_Argv( 3 + offs ) );
+      return;
+    }
   }
   else if( !Q_stricmp( CG_Argv( 0 ), "cb3" ) )
   {
     if( trap_Argc( ) == 2 )
     {
       if( atoi( CG_Argv( 1 ) ) == cg.latestCBNumber )
-        cg.forbidCuboids = qfalse;
+        cg.waitForCB = qfalse;
+        cg.cuboidValid = qtrue;
       return;
     }
-    else if( trap_Argc() == 5)
+  }
+  else if( !Q_stricmp( CG_Argv( 0 ), "cb4" ) )
+  {
+    if( trap_Argc() == 2 )
     {
-      cg.cuboidSelection[ 0 ] = atof( CG_Argv( 2 ) );
-      cg.cuboidSelection[ 1 ] = atof( CG_Argv( 3 ) );
-      cg.cuboidSelection[ 2 ] = atof( CG_Argv( 4 ) );
       if( atoi( CG_Argv( 1 ) ) == cg.latestCBNumber )
-      { 
-        cg.forbidCuboids = qfalse;
+      {
+        cg.waitForCB = qfalse;
+        cg.cuboidValid = qfalse;
+
         if( cg.lastCuboidError + 250 < cg.time )
         {
           trap_S_StartLocalSound( cgs.media.cuboidErrorSound, CHAN_LOCAL_SOUND );
           cg.lastCuboidError = cg.time;
-        }     
+        }
       }
-    return;
+      return;
    }
  }
- Com_Printf( "^3warning: wrong cb2/cb3 from server\n" );
+ Com_Printf( "^3warning: wrong cb from server\n" );
 }
 
 /*
@@ -2237,7 +2259,6 @@ void CG_CuboidRotate_f(void)
       break;
   }
   trap_S_StartLocalSound( cgs.media.cuboidRotateSound, CHAN_LOCAL_SOUND );
-  CG_Cuboid_Send( );
 }
 
 /*
@@ -2257,7 +2278,7 @@ void CG_CuboidAxis_f(void)
   axis = cg_cuboidResizeAxis.integer;
   if( !BG_Buildable( cg.predictedPlayerState.stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT, NULL )->cuboid)
     return;
-  if( !CG_Argv( 1 ) )
+  if( trap_Argc( ) < 2 )
   {
     Com_Printf( "cuboidAxis next|0|1|2 : set axis on which you want to resize your cuboid selection (0 - X, 1 - Y, 2 - Z)\n" );
     return;
@@ -2272,20 +2293,51 @@ void CG_CuboidAxis_f(void)
 
 /*
 ======================
+CG_CuboidSize_f
+
+Set the cuboid selection
+Syntax:
+ cuboidAxis x y z
+======================
+*/
+void CG_CuboidSize_f(void)
+{
+  int axis;
+
+  if( trap_Argc( ) < 4 )
+  {
+    Com_Printf( "cuboidAxis x y z : set the cuboid selection\n" );
+    return;
+  }
+
+  VectorSet( cg.cuboidSelection,
+             atof( CG_Argv( 1 ) ),
+             atof( CG_Argv( 2 ) ),
+             atof( CG_Argv( 3 ) ) );
+
+  trap_S_StartLocalSound( cgs.media.cuboidResizeSoundA, CHAN_LOCAL_SOUND );
+}
+
+/*
+======================
 CG_CuboidAttack_f
 
 Replaces +attack/-attack.
 If building a cuboid and the selection is somehow invalid, play an error sound.
-Otherwise send the normal +attack / -attack;
+Otherwise send the normal +attack / -attack.
 ======================
 */
 void CG_CuboidAttack_f(void)
 {
-  if( BG_Buildable( cg.predictedPlayerState.stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT, NULL )->cuboid && 
-      cg.forbidCuboids )
+  if( BG_Buildable( cg.predictedPlayerState.stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT, NULL )->cuboid )
   {
-    trap_S_StartLocalSound( cgs.media.cuboidErrorSound, CHAN_LOCAL_SOUND );
-    return;
+    if( cg.waitForCB )
+      return;
+    else if( !cg.cuboidValid )
+    {
+      trap_S_StartLocalSound( cgs.media.cuboidErrorSound, CHAN_LOCAL_SOUND );
+      return;
+    }
   }
   trap_SendClientCommand( va( "%s", CG_Argv(0) ) );
 }

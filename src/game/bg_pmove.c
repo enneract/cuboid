@@ -672,6 +672,9 @@ static qboolean PM_CheckWallJump( void )
   float   upFraction = 1.5f;
   trace_t trace;
 
+  if( pm->waterlevel )
+    return qfalse;
+  
   if( !( BG_Class( pm->ps->stats[ STAT_CLASS ] )->abilities & SCA_WALLJUMPER ) )
     return qfalse;
 
@@ -935,27 +938,45 @@ static qboolean PM_CheckWaterJump( void )
   vec3_t  spot;
   int     cont;
   vec3_t  flatforward;
+  vec3_t  mins, maxs;
+  float   a, r;
 
   if( pm->ps->pm_time )
     return qfalse;
 
-  // check for water jump
-  if( pm->waterlevel != 2 )
+  if( pm->cmd.upmove < 10 )
+    // not holding jump
     return qfalse;
+
+  // check for water jump
+  //if( pm->waterlevel != 2 )
+  //  return qfalse;
 
   flatforward[ 0 ] = pml.forward[ 0 ];
   flatforward[ 1 ] = pml.forward[ 1 ];
   flatforward[ 2 ] = 0;
   VectorNormalize( flatforward );
 
-  VectorMA( pm->ps->origin, 30, flatforward, spot );
-  spot[ 2 ] += 4;
+  BG_ClassBoundingBox( pm->ps->stats[ STAT_CLASS ], mins, maxs, NULL, NULL, NULL );
+  
+  // bbox bottom
+  spot[ 0 ] = pm->ps->origin[ 0 ];
+  spot[ 1 ] = pm->ps->origin[ 1 ];
+  spot[ 2 ] = pm->ps->origin[ 2 ] + mins[ 2 ];
+
+  // project the flatforward vector onto the bbox (just a bit longer, so we'll actually hit a wall)
+  // then add it to spot
+  #define fmod(a,n) ((a)-(n)*floor((a)/(n)))
+  a = pm->ps->viewangles[ YAW ] / ( 180.0f / M_PI );
+  r = ( maxs[ 0 ] + 1 ) * 1.0f / cos( fmod( a+0.25f*M_PI, 0.5f*M_PI ) - 0.25f*M_PI );
+  VectorMA( spot, r, flatforward, spot );
+
   cont = pm->pointcontents( spot, pm->ps->clientNum );
 
   if( !( cont & CONTENTS_SOLID ) )
     return qfalse;
 
-  spot[ 2 ] += 16;
+  spot[ 2 ] = pm->ps->origin[ 2 ] + maxs[ 2 ];
   cont = pm->pointcontents( spot, pm->ps->clientNum );
 
   if( cont )
@@ -2409,32 +2430,35 @@ static void PM_SetWaterLevel( void )
   int     cont;
   int     sample1;
   int     sample2;
+  vec3_t  mins;
 
   //
   // get waterlevel, accounting for ducking
   //
   pm->waterlevel = 0;
   pm->watertype = 0;
+  
+  BG_ClassBoundingBox( pm->ps->stats[ STAT_CLASS ], mins, NULL, NULL, NULL, NULL );
 
   point[ 0 ] = pm->ps->origin[ 0 ];
   point[ 1 ] = pm->ps->origin[ 1 ];
-  point[ 2 ] = pm->ps->origin[ 2 ] + MINS_Z + 1;
+  point[ 2 ] = pm->ps->origin[ 2 ] + mins[2] + 1;
   cont = pm->pointcontents( point, pm->ps->clientNum );
 
   if( cont & MASK_WATER )
   {
-    sample2 = pm->ps->viewheight - MINS_Z;
+    sample2 = pm->ps->viewheight - mins[2];
     sample1 = sample2 / 2;
 
     pm->watertype = cont;
     pm->waterlevel = 1;
-    point[ 2 ] = pm->ps->origin[ 2 ] + MINS_Z + sample1;
+    point[ 2 ] = pm->ps->origin[ 2 ] + mins[2] + sample1;
     cont = pm->pointcontents( point, pm->ps->clientNum );
 
     if( cont & MASK_WATER )
     {
       pm->waterlevel = 2;
-      point[ 2 ] = pm->ps->origin[ 2 ] + MINS_Z + sample2;
+      point[ 2 ] = pm->ps->origin[ 2 ] + mins[2] + sample2;
       cont = pm->pointcontents( point, pm->ps->clientNum );
 
       if( cont & MASK_WATER )

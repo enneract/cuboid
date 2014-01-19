@@ -1,0 +1,35 @@
+humanBleedPS
+{
+  ejector
+  {
+    particle
+    {
+      shader sync blood01frame01 blood01frame02 blood01frame03 blood01frame04 blood01frame05 blood01frame06 blood01frame07 blood01frame08 
+      
+						displacement 0 0 0 0
+
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 15
+      velocity 0 0 0 ~35
+
+      accelerationType static
+      accelerationDir linear
+      acceleration 0 0 -1 ~5
+      accelerationMagnitude 25
+
+      radius 0 5 8
+      alpha 250 .75 0
+      rotation 0 ~-15 ~15
+      bounce cull
+
+      lifeTime 400~100
+    }
+
+    count   1
+    delay   0
+    period  0 - 0
+  }
+		
+  thirdPersonOnly
+}

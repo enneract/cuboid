@@ -1428,8 +1428,34 @@ static void CG_PlayerUpgrades( centity_t *cent, refEntity_t *torso )
 
   held = es->modelindex;
   active = es->modelindex2;
-  
+
   jetjump = ( cent->jetPackJumpTime + 100 > cg.time && !( active & ( 1 << UP_JETPACK ) ) );
+
+  if( es->number == cg.snap->ps.clientNum )
+  {
+    static int lastTime=0;
+    static float last=0.0f;
+
+    if( active & ( 1 << UP_NIGHTVISION ) )
+    {
+      float dt, cur, target;
+       dt = 0.001f * ( cg.time - lastTime );
+      target = sqrt( cg.crosshairDistance * 3.0f );
+      cur = last + ( target - last ) * dt * 15.0f;
+ 
+      last = cur;
+      lastTime = cg.time;
+ 
+      cur = pow( cur, 2 );
+      trap_R_AddAdditiveLightToScene( cent->lerpOrigin, cur, 1, 1, 1 );
+    }
+    else
+    {
+      lastTime = cg.time;
+      last = 0.0f;
+    }
+  }
+
 
   if( held & ( 1 << UP_JETPACK ) )
   {

@@ -168,6 +168,19 @@ void P_WorldEffects( gentity_t *ent )
     ent->client->airOutTime = level.time + 12000;
     ent->damage = 2;
   }
+}
+
+void P_WorldEffects_Fast( gentity_t *ent )
+{
+  int       waterlevel;
+
+  if( ent->client->noclip )
+  {
+    ent->client->airOutTime = level.time + 12000; // don't need air
+    return;
+  }
+
+  waterlevel = ent->waterlevel;
 
   //
   // check for sizzle damage (move to pmove?)
@@ -175,24 +188,22 @@ void P_WorldEffects( gentity_t *ent )
   if( waterlevel &&
       ( ent->watertype & ( CONTENTS_LAVA | CONTENTS_SLIME ) ) )
   {
-    if( ent->health > 0 &&
-        ent->pain_debounce_time <= level.time  )
+    if( ent->health > 0 )
     {
       if( ent->watertype & CONTENTS_LAVA )
       {
         G_Damage( ent, NULL, NULL, NULL, NULL,
-          30 * waterlevel, 0, MOD_LAVA );
+          3 * waterlevel, 0, MOD_LAVA );
       }
 
       if( ent->watertype & CONTENTS_SLIME )
       {
         G_Damage( ent, NULL, NULL, NULL, NULL,
-          10 * waterlevel, 0, MOD_SLIME );
+          1 * waterlevel, 0, MOD_SLIME );
       }
     }
   }
 }
-
 
 
 /*
@@ -629,6 +640,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
     weapon_t weapon = BG_GetPlayerWeapon( &client->ps );
   
     client->time100 -= 100;
+    
+    P_WorldEffects_Fast( ent );
 
     // Restore or subtract stamina
     if( stopped || client->ps.pm_type == PM_JETPACK )
@@ -757,13 +770,16 @@ void ClientTimerActions( gentity_t *ent, int msec )
     if( ent->client->bioresHealTimer >= 100 )
     {
       int delta;
-      
+
       delta = ent->client->bioresHealTimer / 100;
       ent->health = MAX( MIN( ent->health+delta, ent->client->ps.stats[ STAT_MAX_HEALTH ] ), 1 );
-      
+
       ent->client->bioresHealTimer %= 100;
     }
-      
+
+    ent->client->ps.stats[ STAT_SHAKE ] *= 0.77f;
+    if( ent->client->ps.stats[ STAT_SHAKE ] < 0 )
+      ent->client->ps.stats[ STAT_SHAKE ] = 0;
   }
 
   while( client->time1000 >= 1000 )

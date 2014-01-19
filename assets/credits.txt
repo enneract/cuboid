@@ -6,6 +6,27 @@ Cuboid - a Tremulous 1.2 mod focused on cuboids and fixing balance issues.
 
 Version  Release date
 ______________________________________________________________________________________________
+0.1.6    Jan 19 2013
+GAMEPLAY:
+- Introduced the Basivision (Activate Upgrade, +button2). While enabled, Basilisks can see in dark and see humans and their buildings through walls.
+- Zap damage was corrected.
+- Admins can choose to limit the maximum health for cuboids (g_cuboidHealthLimit).
+- Lava and slime now deal damage smoothly.
+- Reworked the jumping-out-of-water system: Tyrants and Dragoons should now be able to exit water easily.
+- Dretches, Basislisk and Tyrants are no longer calculated as "out of water" if on the bottom of a liquid tank (removes a lot of exploits, notably walking on the bottom of Ancient Remains lava pool).
+- Non-cuboids that haven't finished building are no longer removed after builder's death.
+NON-GAMEPLAY:
+- Various new images, particle systems and sounds.
+- Cleaned up the cuboid protocol (thing responsible for the green/yellow/red preview while placing a cuboid).
+- One of the loading bars no longer stops at 75%.
+- Announcer can be disabled (cg_announcer or the Options menu).
+- Turret angles are now interpolated (smooth).
+- Removed the mod tutorial system (which didn't work at all).
+- /register now forces a write to disk after registering. The server should no longer "forget" about registrations.
+- New weapon.cfg weapon mode keyword: "impactMarkAlphaFade" - if it's defined, the weapon's impact mark fades out using alpha compositing (so it can properly fade out alphaFunc shaders).
+- Added camera shake effect near explosions (magnitude controlled by cg_cameraShakeMagnitude, set to 0 to disable).
+- Added /cuboidSize <x> <y> <z> which makes it possible to resize the cuboid via console commands.
+
 0.1.5    Sep 12 2013
 GAMEPLAY:
 - Reverted both Lucifer Cannon and Advanced Marauder zap back to the GPP state.
@@ -84,15 +105,12 @@ NON-GAMEPLAY:
     CREDITS
 
   Programming:
-theinvsblman (lead programmer)
-ViruS (a.k.a. ZdrytchX) (implementing CPMA physics)
+theinvsblman
+ViruS (a.k.a. ZdrytchX)
+DolceTriade
 
 Source code and assets are available at https://github.com/enneract/cuboid under the terms of the GNU GPL.
 This mod is based on Tremulous (Darklegion Development), which is based on Quake III: Arena (id Software).
-  
-   Art
-Pikachu, http//spiney.me/ (sounds)
-theinvsblman (Cuboid-related stuff)
 
 Below is the full list of all resources used by the mod.
 
@@ -103,6 +121,19 @@ credits.txt                           theinvsblman                              
 cuboid/logo_1.tga - logo_15.tga       theinvsblman                               cc-by
 cuboid/logo_left.tga, logo_right.tga  Bitstream                                  Bistream Vera Fonts Copyright
 emoticons/*                           theinvsblman                               cc-by
+gfx/2d/basivision_*.jpg               theinvsblman                               cc-by
+gfx/blood/*                           Pikachu                                    cc0
+gfx/cuboid/*                          theinvsblman                               cc-by
+gfx/fire/*                            Pikachu                                    cc0
+gfx/fireball/*                        Pikachu                                    cc0
+gfx/flash/*                           Pikachu                                    cc0
+gfx/gas/*                             Pikachu                                    cc0
+gfx/lcannon/*                         Pikachu                                    cc0
+gfx/misc/*build.tga                   Pikachu                                    cc0
+gfx/misc/creep.tga                    Darklegion Development, Pikachu            cc-by-sa
+gfx/smoke/*                           Pikachu                                    cc0
+gfx/spark/*                           Pikachu                                    cc0
+gfx/sprites/*                         Pikachu                                    cc0
 icons/iconu_biokit.tga                Purga                                      cc0
 icons/iconu_helmet_mk2.tga            Darklegion Development, theinvsblman       cc-by-sa
 models/cuboid/concrete/concrete.jpg   Randy Reddig @ shaderlab.com               shaderlab*
@@ -121,6 +152,10 @@ models/cuboid/slime/slime.jpg         theinvsblman                              
 models/players/human_base/h_helmet... Darklegion Development, cron               cc-by-sa
 models/players/human_base/head_mk2... Darklegion Development, cron               cc-by-sa
 models/players/human_base/head_lig... Darklegion Development, theinvsblman       cc-by-sa
+models/weapons/abuildupg/weapon.cfg   Darklegion Development, theinvsblman       cc-by-sa
+models/weapons/blaster/flash0.wav     Quake2World                                gpl2
+models/weapons/blaster/hit.wav        Pikachu                                    cc0
+models/weapons/blaster/weapon.cfg      Darklegion Development, theinvsblman       cc-by-sa
 models/weapons/flamer/fireloop_qui... Darklegion Development, theinvsblman       cc-by-sa
 models/weapons/flamer/weapon.cfg      Darklegion Development, theinvsblman       cc-by-sa
 models/weapons/level4/weapon.cfg      Darklegion Development, theinvsblman       cc-by-sa
@@ -129,6 +164,8 @@ scripts/cuboid.particle               Darklegion Development, theinvsblman      
 sound/buildables/mgturret/spinup_a... Darklegion Development, Pikachu            cc-by-sa
 sound/buildables/mgturret/spinup_b... Darklegion Development, Pikachu            cc-by-sa
 sound/buildables/mgturret/turretki... Pikachu                                    cc0
+sound/buildables/acid_tube/acidspl... Pikachu                                    cc0
+sound/buildables/tesla/idle1.wav      Darklegion Development, Pikachu            cc-by-sa
 sound/cuboid/axischange.wav           Ongitak @ freesound.org                    cc-by
 sound/cuboid/concrete/dstr0.wav       Michael Manzke @ freesound.org             cc-by-nc
 sound/cuboid/concrete/pain0.wav       Benboncan @ freesound.org                  cc-by
@@ -159,6 +196,7 @@ sound/cuboid/slime/pain1.wav          anechoix @ freesound.org                  
 sound/feedback/*.wav                  Pikachu                                    cc0
 sound/player/alienhatch.wav           Darklegion Development, theinvsblman       cc-by-sa
 sound/player/alienfailedhatch.wav     Darklegion Development, theinvsblman       cc-by-sa
+sound/player/human_bsuit/*            Darklegion Development, Pikachu            cc-by-sa
 sound/upgrades/jetpack/hi.wav         Pikachu                                    cc0
 sound/upgrades/jetpack/idle.wav       Pikachu                                    cc0
 sound/upgrades/jetpack/low.wav        Pikachu                                    cc0

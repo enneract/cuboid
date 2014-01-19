@@ -1,0 +1,334 @@
+alienBleedPS // alien blood
+{
+  ejector
+  {
+    particle
+    {
+      shader sync greenblood01frame01 greenblood01frame02 greenblood01frame03 greenblood01frame04 greenblood01frame05 greenblood01frame06 greenblood01frame07 greenblood01frame08 
+      
+	     displacement 0 0 0 ~8
+
+      radius 0 6~2 9~2
+      alpha 0 1 0
+      rotation 0 ~360 -
+      bounce 0
+
+      lifeTime 250~50
+    }
+    count 1
+    delay 0
+    period 0 - 0
+  }
+  thirdPersonOnly
+}
+
+alienBuildableBleedPS // alien building blood
+{
+  ejector
+  {
+    particle
+    {
+      shader sync			greenblood01frame01 greenblood01frame02 greenblood01frame03 greenblood01frame04 greenblood01frame05 greenblood01frame06 greenblood01frame07 greenblood01frame08 
+      
+	     displacement 0 0 0 ~8
+
+      radius 0 6~2 9~2
+      alpha 0 1 0
+      rotation 0 ~360 -
+      bounce 0
+
+      lifeTime 250~50
+    }
+    count   1
+    delay   0
+    period  0 - 0
+  }
+  thirdPersonOnly
+}
+
+alienBuildableDamagedPS // alien building almost destroyed
+{
+  ejector
+  {
+    particle
+    {
+      shader sync greenblood03frame01 greenblood03frame02 greenblood03frame03 greenblood03frame04 greenblood03frame05 greenblood03frame06 greenblood03frame07
+
+	     displacement 0 0 0 ~4
+	  
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 100
+      velocity 0 0 0 ~20
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 200
+      acceleration 0 0 -2 0
+
+      radius 0 4 12~6
+      alpha 0 1 1
+      rotation 0 ~360 -
+	  
+      lifeTime 300~50%
+    }
+				
+				particle
+    {
+      shader sync greenblood01frame01 greenblood01frame02 greenblood01frame03 greenblood01frame04 greenblood01frame05 greenblood01frame06 greenblood01frame07 greenblood01frame08
+
+	     displacement 0 0 0 ~6
+	  
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 100
+      velocity 0 0 0 ~20
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 200
+      acceleration 0 0 -2 0
+
+      radius				0 4 12~4
+      alpha  				0 1 1
+      rotation				0 ~360 -
+	  
+      lifeTime 300~50%
+    }
+    count infinite
+    delay 0
+    period 600 - 0
+  }
+  
+		ejector
+		{
+    particle
+    {
+      shader sync greenblood01frame01 greenblood01frame02 greenblood01frame03 greenblood01frame04 greenblood01frame05 greenblood01frame06 greenblood01frame07 greenblood01frame08
+
+	     displacement 0 0 0 ~20
+	  
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 100
+      velocity 0 0 0 ~20
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 200
+      acceleration 0 0 -2 0
+
+      radius 0 4.0 4.0
+      alpha 0 1 1
+      rotation 0 ~360 -
+	  
+      lifeTime 300~50%
+    }
+				
+				particle
+    {
+      shader sync greenblood01frame01 greenblood01frame02 greenblood01frame03 greenblood01frame04 greenblood01frame05 greenblood01frame06 greenblood01frame07 greenblood01frame08
+
+	     displacement 0 0 0 ~20
+	  
+      velocityType normal
+      velocityDir linear
+      velocityMagnitude 100
+      velocity 0 0 0 ~20
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 200
+      acceleration 0 0 -2 0
+
+      radius 0 4 4
+      alpha 0 1 1
+      rotation 0 ~360 -
+	  
+      lifeTime 300~50%
+    }
+				count infinite
+    delay 300
+    period 600 - 0
+  }
+}
+
+alienBuildableDestroyedPS // alien building destroyed
+{
+  ejector
+  {
+    particle
+    {
+      shader sync greenblood01frame01 greenblood01frame02 greenblood01frame03 greenblood01frame04 greenblood01frame05 greenblood01frame06 greenblood01frame07 greenblood01frame08
+
+      displacement 0 0 0 ~0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 300~75%
+      velocity 0 0 0.05 ~40
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 800
+      acceleration 0 0 -2 0
+
+      radius 0 10 15
+      alpha 0 1 1
+      rotation 0 ~360 -
+      bounce cull
+
+      lifeTime 600
+    }
+
+    count 32
+    delay 0
+    period 0 - 0
+  }
+		ejector
+  {
+    particle
+    {
+      shader sync greenblood03frame01
+
+      displacement 0 0 30 ~0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 300~75%
+      velocity 0 0 1 ~40
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 800
+      acceleration 0 0 -2 0
+
+      radius 600 8 0
+      alpha 0 1 1
+      rotation 0 ~360 -
+      bounce 0.1
+						bouncemark 1 24~8 greensplat2
+
+      lifeTime 1200
+    }
+				
+				particle
+    {
+      shader sync greenblood03frame01
+
+      displacement 0 0 30 0
+						
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 300~75%
+      velocity 0 0 1 ~40
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 800
+      acceleration 0 0 -2 0
+
+      radius 600 8 0
+      alpha 0 1 1
+      rotation 0 ~360 -
+      bounce 0.1
+						bouncemark 1 24~8 greensplat3
+
+      lifeTime 1200
+    }
+				
+				particle
+    {
+      shader sync greenblood03frame01
+
+      displacement 0 0 30 0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 300~75%
+      velocity 0 0 1 ~40
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 800
+      acceleration 0 0 -2 0
+
+      radius 500 10 0
+      alpha 0 1 1
+      rotation 0 ~360 -
+      bounce 0.1
+						bouncemark 1 24~8 greensplat4
+
+      lifeTime 1000
+    }
+
+    count 3
+    delay 0
+    period 0 - 0
+  }
+  ejector // gibs
+  {
+    particle
+    {
+      model models/fx/alien_gibs/a_gib1.md3 models/fx/alien_gibs/a_gib2.md3 models/fx/alien_gibs/a_gib3.md3 models/fx/alien_gibs/a_gib4.md3
+
+      displacement 0~20 0~20 40~10 0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 300~75%
+      velocity 0 0 1 ~60
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 800
+      acceleration 0 0 -1 0
+
+      radius 2000 1 0
+      bounce 0.2
+      bounceMark 1~1 24 greensplat3
+      bounceSound ~1 sound/misc/organic_bounce.wav
+
+      lifeTime 3000~500
+    }
+
+    count 3
+    delay 0
+    period 0 - 0
+  }
+}
+
+alienEvolvePS // alien evolution blood
+{
+  ejector
+  {
+    particle
+    {
+      shader sync greenblood01frame01 greenblood01frame02 greenblood01frame03 greenblood01frame04 greenblood01frame05 greenblood01frame06 greenblood01frame07 greenblood01frame08 
+
+      displacement 0 0 0 ~0
+
+      velocityType static
+      velocityDir linear
+      velocityMagnitude 150~75%
+      velocity 0 0 1 ~50
+
+      accelerationType static
+      accelerationDir linear
+      accelerationMagnitude 800
+      acceleration 0 0 -1 0
+
+      radius 0 5 30
+      alpha 0 1 0
+      rotation 0 ~360 -
+      bounce 0.2
+
+      lifeTime 1000
+    }
+
+    count 30
+    delay 0
+    period 5 - 0
+  }
+		thirdPersonOnly
+}

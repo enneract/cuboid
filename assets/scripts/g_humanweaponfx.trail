@@ -1,0 +1,25 @@
+models/weapons/mdriver/fireTS
+{
+  beam
+  {
+    shader gfx/mdriver/trail
+    width 3.0 3.0
+    textureType stretch 0.94 0.03
+  }
+  lifeTime 70
+}
+
+models/weapons/prifle/missileTS
+{
+  beam
+  {
+    shader gfx/prifle/red_streak
+
+    segments 2
+    width 6.0 4.0
+    alpha 1.0 0.1
+    segmentTime 120
+
+    textureType stretch 0.0 1.0
+  }
+}

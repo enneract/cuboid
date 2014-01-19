@@ -195,6 +195,7 @@ static consoleCommand_t commands[ ] =
   { "clientlist", CG_ClientList_f },
   { "cuboidAxis", CG_CuboidAxis_f },
   { "cuboidRotate", CG_CuboidRotate_f },
+  { "cuboidSize", CG_CuboidSize_f },
   { "destroyTestPS", CG_DestroyTestPS_f },
   { "destroyTestTS", CG_DestroyTestTS_f },
   { "nextframe", CG_TestModelNextFrame_f },

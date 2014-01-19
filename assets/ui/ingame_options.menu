@@ -310,6 +310,27 @@
       }
     }
 
+    itemDef
+    {
+      name player
+      group optionsGrp
+      type ITEM_TYPE_MULTI
+      text "Announcer:"
+      cvar "cg_announcer"
+      cvarFloatList { "Enabled" 1 "Disabled" 0 }
+      rect CONTENT_X (CONTENT_Y+(8*ELEM_H)) CONTENT_W ELEM_H
+      textalign ALIGN_RIGHT
+      textvalign VALIGN_CENTER
+      textalignx CONTENT_OFF
+      textscale .25
+      forecolor 1 1 1 1
+      visible MENU_FALSE
+      action
+      {
+        play "sound/misc/menu1.wav";
+      }
+    }
+
 //////// HUD
 
     itemDef
@@ -1604,7 +1625,7 @@
       name cuboid
       group optionsGrp
       type ITEM_TYPE_MULTI
-      text "Resizing rate::"
+      text "Resizing rate:"
       cvar "cg_cuboidResizeRate"
       cvarFloatList { "0.1" 0.1 "0.2" 0.2 "0.5" 0.5 "1" 1 "2" 2 "5" 5 "10" 10 }
       rect SCONTENT_X (SCONTENT_Y+(2*ELEM_H)) SCONTENT_W ELEM_H
