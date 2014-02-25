@@ -652,8 +652,8 @@ void G_UpdatePowerGrid( float dt )
         ent->voltage -= ent->current * dt / CAPBANK_CAPACITY;
 
       //zapping effect
-      #define MIN_ZAP_CURRENT 2.0f
-      #define ZAP_CHANCE_FACTOR 0.01f
+      #define MIN_ZAP_CURRENT 8.0f
+      #define ZAP_CHANCE_FACTOR 0.007f
       if( ent->current > MIN_ZAP_CURRENT )
       {
         float chance;
@@ -2196,8 +2196,8 @@ qboolean HMGTurret_CheckTarget( gentity_t *self, gentity_t *target,
   trace_t   tr;
   vec3_t    dir, end;
   
-  if( !target || target->health <= 0 || !target->client /*||
-      target->client->pers.teamSelection != TEAM_ALIENS */) //debug: target humans too for now
+  if( !target || target->health <= 0 || !target->client ||
+      target->client->pers.teamSelection != TEAM_ALIENS )
     return qfalse;
 
   if( target->flags & FL_NOTARGET )
@@ -2520,7 +2520,7 @@ void HTeslaGen_Think( gentity_t *self )
       continue;
 
     if( self->enemy->client && self->enemy->health > 0 &&
-        /*self->enemy->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&*/
+        self->enemy->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
         Distance( origin, self->enemy->s.pos.trBase ) <= TESLAGEN_RANGE )
     {
       if( !G_Surge( self, TESLAGEN_I_ACTIVE ) )
