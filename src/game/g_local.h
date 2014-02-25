@@ -198,16 +198,12 @@ struct gentity_s
   gentity_t         *parentNode;        // for creep and defence/spawn dependencies
   qboolean          active;             // for power repeater, but could be useful elsewhere
   qboolean          locked;             // used for turret tracking
-  qboolean          powered;            // for human buildables
   int               builtBy;            // clientNum of person that built this
-  int               dcc;                // number of controlling dccs
   qboolean          spawned;            // whether or not this buildable has finished spawning
   int               shrunkTime;         // time when a barricade shrunk or zero
   int               buildTime;          // when this buildable was built
   int               animTime;           // last animation change
   int               time1000;           // timer evaluated every second
-  qboolean          deconstruct;        // deconstruct if no BP left
-  int               deconstructTime;    // time at which structure marked
   int               overmindAttackTimer;
   int               overmindDyingTimer;
   int               overmindSpawnsTimer;
@@ -243,10 +239,24 @@ struct gentity_s
 
   qboolean          pointAgainstWorld;              // don't use the bbox for map collisions
 
-  int               buildPointZone;                 // index for zone
-  int               usesBuildPointZone;             // does it use a zone?
+  vec3_t            cuboidSize;
   
-  vec3_t      cuboidSize;
+  //power grid
+  qboolean          requiresPower; // false for telenodes, cuboids, etc.
+  qboolean          isPowerSource; // true for all active elements (including the capbank)
+  
+  int               powerNetwork;  // which network is it in (0 is no network)
+  qboolean          powered;       // is this buildable powered?
+  qboolean          surge;         // true if the buildable requests high amount of power (resistance=surgeResistance)
+                                   // IMPORTANT NOTE: it should NOT depend on anything power-related to avoid
+                                   //                 unstable network states
+  qboolean          surgePowered;  // is surge powered?
+  float             voltage;       // voltage drop (load) or gain (source)
+  float             current;       // current flow
+  float             resistance;    // resistance (for sources it's their internal resistance)
+  
+  //mass
+  float             storedBP;
 };
 
 typedef enum
@@ -485,16 +495,6 @@ void      G_PrintSpawnQueue( spawnQueue_t *sq );
 #define MAX_DAMAGE_REGION_TEXT    8192
 #define MAX_DAMAGE_REGIONS 16
 
-// build point zone
-typedef struct
-{
-  int active;
-
-  int totalBuildPoints;
-  int queuedBuildPoints;
-  int nextQueueTime;
-} buildPointZone_t;
-
 // store locational damage regions
 typedef struct damageRegion_s
 {
@@ -641,14 +641,6 @@ typedef struct
   int               alienBuildPoints;
   int               alienBuildPointQueue;
   int               alienNextQueueTime;
-  int               humanBuildPoints;
-  int               humanBuildPointQueue;
-  int               humanNextQueueTime;
-
-  buildPointZone_t  *buildPointZones;
-
-  gentity_t         *markedBuildables[ MAX_GENTITIES ];
-  int               numBuildablesForRemoval;
 
   int               alienKills;
   int               humanKills;
@@ -801,8 +793,8 @@ gentity_t         *G_CheckSpawnPoint( int spawnNum, const vec3_t origin,
 
 buildable_t       G_IsPowered( vec3_t origin );
 qboolean          G_IsDCCBuilt( void );
-int               G_FindDCC( gentity_t *self );
-gentity_t         *G_Reactor( void );
+qboolean          G_IsRTGBuilt( void );
+qboolean          G_FindDCC( gentity_t *self );
 gentity_t         *G_Overmind( void );
 qboolean          G_FindCreep( gentity_t *self );
 
@@ -823,12 +815,7 @@ void              G_BaseSelfDestruct( team_t team );
 int               G_NextQueueTime( int queuedBP, int totalBP, int queueBaseRate );
 void              G_QueueBuildPoints( gentity_t *self );
 int               G_GetBuildPoints( const vec3_t pos, team_t team );
-int               G_GetMarkedBuildPoints( const vec3_t pos, team_t team );
 qboolean          G_FindPower( gentity_t *self, qboolean searchUnspawned );
-gentity_t         *G_PowerEntityForPoint( const vec3_t origin );
-gentity_t         *G_PowerEntityForEntity( gentity_t *ent );
-gentity_t         *G_RepeaterEntityForPoint( vec3_t origin );
-gentity_t         *G_InPowerZone( gentity_t *self );
 buildLog_t        *G_BuildLogNew( gentity_t *actor, buildFate_t fate );
 void              G_BuildLogSet( buildLog_t *log, gentity_t *ent );
 void              G_BuildLogAuto( gentity_t *actor, gentity_t *buildable, buildFate_t fate );
@@ -836,6 +823,7 @@ void              G_BuildLogRevert( int id );
 const char        *G_CuboidName(buildable_t buildable, const vec3_t cuboidSize, qboolean verbose);
 void              G_LayoutBuildItem( buildable_t buildable, vec3_t origin, vec3_t angles, vec3_t origin2, vec3_t angles2 );
 void              G_RemoveUnbuiltBuildables( gentity_t *self );
+void              G_UpdatePowerGrid( float dt );
 
 //
 // g_utils.c
@@ -1158,11 +1146,6 @@ extern  vmCvar_t  pmove_msec;
 
 extern  vmCvar_t  g_alienBuildPoints;
 extern  vmCvar_t  g_alienBuildQueueTime;
-extern  vmCvar_t  g_humanBuildPoints;
-extern  vmCvar_t  g_humanBuildQueueTime;
-extern  vmCvar_t  g_humanRepeaterBuildPoints;
-extern  vmCvar_t  g_humanRepeaterBuildQueueTime;
-extern  vmCvar_t  g_humanRepeaterMaxZones;
 extern  vmCvar_t  g_humanStage;
 extern  vmCvar_t  g_humanCredits;
 extern  vmCvar_t  g_humanMaxStage;
@@ -1181,8 +1164,6 @@ extern  vmCvar_t  g_unlagged;
 extern  vmCvar_t  g_disabledEquipment;
 extern  vmCvar_t  g_disabledClasses;
 extern  vmCvar_t  g_disabledBuildables;
-
-extern  vmCvar_t  g_markDeconstruct;
 
 extern  vmCvar_t  g_debugMapRotation;
 extern  vmCvar_t  g_currentMapRotation;
@@ -1226,6 +1207,11 @@ extern  vmCvar_t  g_cuboidHealthLimit;
 
 extern  vmCvar_t  g_buildableDensityLimit;
 extern  vmCvar_t  g_buildableDensityLimitRange;
+
+extern  vmCvar_t  g_buildableValueModifier;
+extern  vmCvar_t  g_playerValueModifier;
+extern  vmCvar_t  g_massYieldModifier;
+extern  vmCvar_t  g_voltageModifier;
 
 
 void      trap_Print( const char *fmt );

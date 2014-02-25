@@ -600,10 +600,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define DC_SPLASHDAMAGE             50
 #define DC_SPLASHRADIUS             100
 #define DC_ATTACK_PERIOD            10000 // how often to spam "under attack"
-#define DC_HEALRATE                 4
+#define DC_HEALRATE                 250 // +1 HP every this amount of time
 #define DC_RANGE                    1000
 #define DC_VALUE                    HBVM(DC_BP)
-#define MAX_DCS_PER_BUILDABLE       2
 
 #define ARMOURY_BP                  10
 #define ARMOURY_BT                  15000
@@ -612,7 +611,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ARMOURY_SPLASHRADIUS        100
 #define ARMOURY_VALUE               HBVM(ARMOURY_BP)
 
-#define REACTOR_BP                  0
+#define REACTOR_BP                  36
 #define REACTOR_BT                  30000
 #define REACTOR_HEALTH              HBHM(930)
 #define REACTOR_SPLASHDAMAGE        200
@@ -623,7 +622,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define REACTOR_ATTACK_DCC_REPEAT   1000
 #define REACTOR_ATTACK_DCC_RANGE    150.0f
 #define REACTOR_ATTACK_DCC_DAMAGE   40
-#define REACTOR_VALUE               HBVM(30)
+#define REACTOR_VALUE               HBVM(REACTOR_BP)
 
 #define REPEATER_BP                 4
 #define REPEATER_BT                 15000
@@ -631,6 +630,86 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define REPEATER_SPLASHDAMAGE       50
 #define REPEATER_SPLASHRADIUS       100
 #define REPEATER_VALUE              HBVM(REPEATER_BP)
+
+#define CAPBANK_BP                  10
+#define CAPBANK_BT                  20000
+#define CAPBANK_HEALTH              HBHM(310)
+#define CAPBANK_SPLASHDAMAGE        70
+#define CAPBANK_SPLASHRADIUS        140
+#define CAPBANK_VALUE               HBVM(CAPBANK_BP)
+
+#define RTG_BP                      14
+#define RTG_BT                      20000
+#define RTG_HEALTH                  HBHM(460)
+#define RTG_SPLASHDAMAGE            120
+#define RTG_SPLASHRADIUS            150
+#define RTG_VALUE                   HBVM(15)
+#define RTG_YIELD                   0.15
+#define RTG_STORAGE                 15
+
+#define REFINERY_BP                 16
+#define REFINERY_BT                 20000
+#define REFINERY_HEALTH             HBHM(310)
+#define REFINERY_SPLASHDAMAGE       100
+#define REFINERY_SPLASHRADIUS       150
+#define REFINERY_VALUE              HBVM(REFINERY_BP)
+#define REFINERY_YIELD              0.35 // at 2Hz
+#define REFINERY_STORAGE            30
+
+/*
+ * POWER GRID settings 
+ * 
+ * All units are SI:
+ *  resistance (R) - ohms
+ *  voltage    (V) - volts
+ *  current    (I) - amperes
+ *  capacity   (C) - farads
+ */
+
+//settings for buildables that are not a part of the power grid
+#define DEFAULT_POWER_SETTINGS qfalse, qfalse, 0.0f, 0.0f, qfalse
+
+#define RESISTANCE(i,pc) (POWER_VOLTAGE/(i)*(pc))
+
+#define POWER_VOLTAGE        100.0f
+
+#define RTG_RESISTANCE       5.0f
+
+#define REACTOR_RESISTANCE   1.0f
+
+#define CAPBANK_RESISTANCE   0.05f
+#define CAPBANK_CAPACITY     2.0f
+
+#define PREBUILD_CURRENT     7.0f
+#define PREBUILD_RESISTANCE  RESISTANCE(PREBUILD_CURRENT,0.8f)
+
+#define MEDISTAT_I_IDLE      0.25f
+#define MEDISTAT_R_IDLE      RESISTANCE(MEDISTAT_I_IDLE,0.35f)
+#define MEDISTAT_I_ACTIVE    1.0f
+#define MEDISTAT_R_ACTIVE    RESISTANCE(MEDISTAT_I_ACTIVE,0.75f)
+
+#define ARMOURY_CURRENT      0.1f
+#define ARMOURY_RESISTANCE   RESISTANCE(ARMOURY_CURRENT,0.25f)
+
+#define TESLAGEN_I_IDLE      0.6f
+#define TESLAGEN_R_IDLE      RESISTANCE(TESLAGEN_I_IDLE,0.52f)
+#define TESLAGEN_I_ACTIVE    5.0f
+#define TESLAGEN_R_ACTIVE    RESISTANCE(TESLAGEN_I_ACTIVE,0.75f)
+
+#define MGTURRET_I_IDLE      0.3f
+#define MGTURRET_R_IDLE      RESISTANCE(MGTURRET_I_IDLE,0.6f)
+#define MGTURRET_I_ACTIVE    2.0f
+#define MGTURRET_R_ACTIVE    RESISTANCE(MGTURRET_I_ACTIVE,0.75f)
+
+#define DC_I_IDLE            0.4f
+#define DC_R_IDLE            RESISTANCE(DC_I_IDLE,0.5f)
+#define DC_I_ACTIVE          5.0f
+#define DC_R_ACTIVE          RESISTANCE(DC_I_ACTIVE,0.75f)
+
+#define REFINERY_I_IDLE      0.25f
+#define REFINERY_R_IDLE      RESISTANCE(REFINERY_I_IDLE,0.55f)
+#define REFINERY_I_ACTIVE    4.0f
+#define REFINERY_R_ACTIVE    RESISTANCE(REFINERY_I_ACTIVE,0.75f)
 
 /*
  * HUMAN misc
@@ -663,6 +742,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ALIEN_BUILDER_SCOREINC      AVM(100)  // builders receive this many points every 10 seconds
 
 #define HUMAN_BUILDABLE_INACTIVE_TIME 90000
+
+#define CKIT_STORAGE                36
 
 /*
  * Misc

@@ -195,17 +195,18 @@ float G_RewardAttackers( gentity_t *self )
 
       AddScore( player, stageValue );
 
-      // killing buildables earns score, but not credits
-      if( self->s.eType != ET_BUILDABLE )
-      {
-        G_AddCreditToClient( player->client, stageValue, qtrue );
+      if( self->s.eType == ET_BUILDABLE )
+        stageValue *= g_buildableValueModifier.value;
+      else
+        stageValue *= g_playerValueModifier.value;
+      
+      G_AddCreditToClient( player->client, stageValue, qtrue );
 
-        // add to stage counters
-        if( player->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
-          alienCredits += stageValue;
-        else if( player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
-          humanCredits += stageValue;
-      }
+      // add to stage counters
+      if( player->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
+        alienCredits += stageValue;
+      else if( player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+        humanCredits += stageValue;
     }
     self->credits[ i ] = 0;
   }
@@ -1069,7 +1070,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       }
 
       // base is under attack warning if DCC'd
-      if( targ->buildableTeam == TEAM_HUMANS && G_FindDCC( targ ) &&
+      if( targ->buildableTeam == TEAM_HUMANS && G_IsDCCBuilt( ) &&
           level.time > level.humanBaseAttackTimer )
       {
         level.humanBaseAttackTimer = level.time + DC_ATTACK_PERIOD;
@@ -1085,7 +1086,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   // add to the attacker's hit counter
   if( attacker->client && targ != attacker && targ->health > 0
       && targ->s.eType != ET_MISSILE
-      && targ->s.eType != ET_GENERAL )
+      && targ->s.eType != ET_GENERAL
+      && mod != MOD_DECONSTRUCT )
   {
     if( OnSameTeam( targ, attacker ) )
       attacker->client->ps.persistant[ PERS_HITS ]--;

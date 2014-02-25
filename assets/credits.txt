@@ -6,6 +6,45 @@ Cuboid - a Tremulous 1.2 mod focused on cuboids and fixing balance issues.
 
 Version  Release date
 ______________________________________________________________________________________________
+0.1.7    Feb 25 2014
+NOTES:
+- Because of a bug in Tremulous code, cuboid and power info might behave weirdly if g_synchronousClients is disabled.
+GAMEPLAY:
+- Destroying buildables is now rewarded with credits (g_buildableValueModifier, default 0.16).
+- Rewards for killing players significantly decreased (g_playerValueModifier, default 0.5).
+- Complete overhaul of the Human building system:
+ * Build points are now per-player and are obtained from special buildings. The points are now referred to as "mass".
+ * To obtain mass, approach an RTG Unit or a Refinery. The CKit will display the amount of mass stored within the building next to the box with arrows around icon. To get the mass, issue a reload (the 'R' button).
+ * It is possible to transfer mass between players. Issuing a reload with a Human player on the crosshair will transfer mass to the player.
+ * Power is now simulated using a physically-correct model - the terms "voltage", "current" and "resistance" now apply to all Human buildings. The model is as follows:
+   + All power sources (including the Capacitor Bank) and their internal resistance (in series) are connected in parallel to each other.
+   + These, in turn, are connected in series with all other buildables (which are resistances, in parallel).
+   + The circuit is solved using multiple applications of Ohm's law and Kirchhoff's laws.
+   + Buildings draw much more power while active and will not work if there's not enough power.
+   + Buildings require power in order to be built. This disqualifies Reactor as the first buildable (as it requires power to be built).
+ * Added the RTG unit, which replaces every Reactor in all default layouts. It produces some power and some mass and does not require power or mass in order to be built.
+ * Multiple Reactors can be built, Reactors now require mass.
+ * DCs now heal buildables smoothly and there is no limit on how many DCs can heal a single buildable. Instead, DCs drain a lot of power from the power grid.
+ * Overloaded power sources emit zapping sounds and sparks. At the moment, the effect is only aesthetic (power sources don't explode when overloaded).
+ * On Sudden Death it is still possible to build, but no more mass will be available in Refineries and RTG Units.
+ * g_massYieldModifier (default: 1) can be used to increase/decrease mass yield in RTG Units and Refineries for balancing purposes.
+ * g_voltageModifier (default: 1) can be used to increase/decrease the voltage in all power grids. Do not change it unless the current settings turn out to be incredibly unbalanced.
+- CKit now features a fully-functional dynamic display on the model, which shows information about buildables (health, power info, etc.) and also replaces the ugly cuboid info text.
+- Removed the deconstruction marking system.
+- Decreased building time for all Human cuboids.
+- Direct line-of-sight is now needed to activate a buildable (to avoid accidental power switching).
+- Moved Glass to S2, Ladder to S3, Slime to S2.
+- Decreased Marauder's air aceleration by 50%.
+- Increased Human's air accelereation by 30% and speed by 10%.
+- Added hit sounds.
+NON-GAMEPLAY:
+- Fixed a bug related to voting.
+- Merged with KoRx's emoticon pack - now there's a shitload of emoticons available!
+- Cuboids are now rendered differently - the textures are no longer stretched (their UV maps are aligned to world). Also, most of their textures were redone and a much higher resolution.
+- New crosshairs with hit indication.
+- Alien animations now match their footsteps better.
+- Fixed a minor bug in Medistation's animations.
+
 0.1.6    Jan 19 2014
 GAMEPLAY:
 - Introduced the Basivision (Activate Upgrade, +button2). While enabled, Basilisks can see in dark and see humans and their buildings through walls.
@@ -116,12 +155,16 @@ Below is the full list of all resources used by the mod.
 
 File                                  Author                                     Licence
 ______________________________________________________________________________________________
-configs/cuboids/*                     theinvsblman                               cc-by
+configs/*                             theinvsblman                               cc-by
 credits.txt                           theinvsblman                               cc-by
 cuboid/logo_1.tga - logo_15.tga       theinvsblman                               cc-by
 cuboid/logo_left.tga, logo_right.tga  Bitstream                                  Bistream Vera Fonts Copyright
-emoticons/*                           theinvsblman                               cc-by
+default.cfg                           Darklegion Development                     cc-by-sa
 gfx/2d/basivision_*.jpg               theinvsblman                               cc-by
+gfx/2d/blip.tga                       Pikachu                                    cc0
+gfx/2d/ckit/*                         theinvsblman                               cc-by
+gfx/2d/ch_*                           Pikachu                                    cc0
+gfx/2d/digital/*                      Paul Flo Williams                          OFL
 gfx/blood/*                           Pikachu                                    cc0
 gfx/cuboid/*                          theinvsblman                               cc-by
 gfx/fire/*                            Pikachu                                    cc0
@@ -129,6 +172,7 @@ gfx/fireball/*                        Pikachu                                   
 gfx/flash/*                           Pikachu                                    cc0
 gfx/gas/*                             Pikachu                                    cc0
 gfx/lcannon/*                         Pikachu                                    cc0
+gfx/lighting/*                        Pikachu                                    cc0
 gfx/misc/*build.tga                   Pikachu                                    cc0
 gfx/misc/creep.tga                    Darklegion Development, Pikachu            cc-by-sa
 gfx/smoke/*                           Pikachu                                    cc0
@@ -136,35 +180,40 @@ gfx/spark/*                           Pikachu                                   
 gfx/sprites/*                         Pikachu                                    cc0
 icons/iconu_biokit.tga                Purga                                      cc0
 icons/iconu_helmet_mk2.tga            Darklegion Development, theinvsblman       cc-by-sa
-models/cuboid/concrete/concrete.jpg   Randy Reddig @ shaderlab.com               shaderlab*
+models/buildables/medistat/animati... Darklegion Development, Pikachu            cc-by-sa
+models/buildables/capbank/*           theinvsblman                               cc-by
+models/buildables/refinery/*          Nalf
+models/buildables/rtg/*               theinvsblman                               cc-by
+models/cuboid/concrete/concrete.jpg   theinvsblman                               cc-by
 models/cuboid/concrete/fragment.tga   Randy Reddig @ shaderlab.com, theinvsblman shaderlab*
-models/cuboid/cracks*                 theinvsblman                               cc-by
-models/cuboid/cuboid.md3              theinvsblman                               cc-by
-models/cuboid/glass/fragment.tga      theinvsblman                               cc-by
-models/cuboid/glass/glass.jpg         theinvsblman                               cc-by
+models/cuboid/cracks.tga              theinvsblman                               cc-by
+models/cuboid/glass/*                 theinvsblman                               cc-by
 models/cuboid/ladder/fragment.tga     Randy Reddig @ shaderlab.com, theinvsblman shaderlab*
 models/cuboid/ladder/ladder.jpg       Randy Reddig @ shaderlab.com               shaderlab*
-models/cuboid/organic/fragment.tga    Darklegion Development, theinvsblman       cc-by-sa
-models/cuboid/organic/organic.jpg     Darklegion Development, theinvsblman       cc-by-sa
-models/cuboid/organic/organic_fx.jpg  Darklegion Development, theinvsblman       cc-by-sa
-models/cuboid/slime/fragment.tga      theinvsblman                               cc-by
-models/cuboid/slime/slime.jpg         theinvsblman                               cc-by
+models/cuboid/organic/*               theinvsblman                               cc-by
+models/cuboid/slime/*                 theinvsblman                               cc-by
+models/players/*/animation.cfg        Darklegion Development, Pikachu            cc-by-sa
 models/players/human_base/h_helmet... Darklegion Development, cron               cc-by-sa
 models/players/human_base/head_mk2... Darklegion Development, cron               cc-by-sa
 models/players/human_base/head_lig... Darklegion Development, theinvsblman       cc-by-sa
-models/weapons/abuildupg/weapon.cfg   Darklegion Development, theinvsblman       cc-by-sa
+models/weapons/*/weapon.cfg           Darklegion Development, theinvsblman       cc-by-sa
 models/weapons/blaster/flash0.wav     Quake2World                                gpl2
 models/weapons/blaster/hit.wav        Pikachu                                    cc0
-models/weapons/blaster/weapon.cfg      Darklegion Development, theinvsblman       cc-by-sa
+models/weapons/ckit/*.md3             Darklegion Development, theinvsblman       cc-by-sa
 models/weapons/flamer/fireloop_qui... Darklegion Development, theinvsblman       cc-by-sa
-models/weapons/flamer/weapon.cfg      Darklegion Development, theinvsblman       cc-by-sa
-models/weapons/level4/weapon.cfg      Darklegion Development, theinvsblman       cc-by-sa
 scripts/cuboid.shader                 theinvsblman                               cc-by
 scripts/cuboid.particle               Darklegion Development, theinvsblman       cc-by-sa
+sound/buildables/acid_tube/acidspl... Pikachu                                    cc0
+sound/buildables/capbank/sound.cfg    theinvsblman                               cc-by
+sound/buildables/human/powerzap*.wav  club sound @ freesound.org                 cc-by-nc
+sound/buildables/human/switch.wav     jessepash, Pooleside @ freesound.org       cc-by
+sound/buildables/human/unpowered_s... Tomlija, Halleck @ freesound.org                    cc-by
 sound/buildables/mgturret/spinup_a... Darklegion Development, Pikachu            cc-by-sa
 sound/buildables/mgturret/spinup_b... Darklegion Development, Pikachu            cc-by-sa
 sound/buildables/mgturret/turretki... Pikachu                                    cc0
-sound/buildables/acid_tube/acidspl... Pikachu                                    cc0
+sound/buildables/refinery/*           Nalf
+sound/buildables/rtg/idle1.wav        jasonthomasd, Empty Bell @ freesound.org   cc-by
+sound/buildables/rtg/sound.cfg        theinvsblman                               cc-by
 sound/buildables/tesla/idle1.wav      Darklegion Development, Pikachu            cc-by-sa
 sound/cuboid/axischange.wav           Ongitak @ freesound.org                    cc-by
 sound/cuboid/concrete/dstr0.wav       Michael Manzke @ freesound.org             cc-by-nc
@@ -193,7 +242,8 @@ sound/cuboid/slime/dstr0.wav          Michael Manzke @ freesound.org            
 sound/cuboid/slime/dstr1.wav          Audionautics @ freesound.org               cc-by
 sound/cuboid/slime/pain0.wav          anechoix @ freesound.org                   cc-by-nc
 sound/cuboid/slime/pain1.wav          anechoix @ freesound.org                   cc-by-nc
-sound/feedback/*.wav                  Pikachu                                    cc0
+sound/feedback/*.wav (except hit.wav) Pikachu                                    cc0
+sound/feedback/hit.wav                Xonotic                                    gpl2+
 sound/player/alienhatch.wav           Darklegion Development, theinvsblman       cc-by-sa
 sound/player/alienfailedhatch.wav     Darklegion Development, theinvsblman       cc-by-sa
 sound/player/human_bsuit/*            Darklegion Development, Pikachu            cc-by-sa
@@ -201,17 +251,23 @@ sound/upgrades/jetpack/hi.wav         Pikachu                                   
 sound/upgrades/jetpack/idle.wav       Pikachu                                    cc0
 sound/upgrades/jetpack/low.wav        Pikachu                                    cc0
 sound/upgrades/jetpack/jump.wav       alexmol @ freesound.org, Q009,
-                                      Pikachu                                    cc-by-sa 3
+                                      Pikachu                                    cc-by-sa 3.0
 sound/upgrades/jetpack/lowfuel.wav    Pikachu                                    cc0
 sound/upgrades/jetpack/nojumpfuel.wav Pikachu                                    cc0 
 sound/upgrades/jetpack/refuel.wav     joeseshon @ freesound.org, 
                                       alexmol @ freesound.org, Pikachu           cc-by
+ui/assets/human/scanner.tga           Pikachu                                    cc0                                      
 ui/assets/neutral/cross_implanted.tga Darklegion Development, theinvsblman       cc-by-sa
 ui/help.txt                           theinvsblman                               cc-by
 ui/ingame_options.menu                Darklegion Development, theinvsblman       cc-by-sa
 ui/teamscore.menu                     Darklegion Development, theinvsblman       cc-by-sa
 ui/menudef.h                          Darklegion Development                     cc-by-sa
+video/ckit.roq                        theinvsblman                               cc-by
 vm/*.qvm                              authors denoted in Programming section     GPL
+
+EMOTICONS:
+  Cuboid-related emoticons (concrete, cuboid, glass, ladder, organic, slime) were created by the invisible man and are licensed under the terms of CC-BY.
+  All other emoticons come from KoRx's 0.3.3r2 emoticons pack.
 
 Terms of the Creative Commons licenses (includes the Sampling Plus license) can be found at: http://creativecommons.org/licenses/.
 

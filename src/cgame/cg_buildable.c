@@ -45,6 +45,77 @@ char *cg_buildableSoundNames[ MAX_BUILDABLE_ANIMATIONS ] =
 static sfxHandle_t defaultAlienSounds[ MAX_BUILDABLE_ANIMATIONS ];
 static sfxHandle_t defaultHumanSounds[ MAX_BUILDABLE_ANIMATIONS ];
 
+/*
+======================
+CG_RenderCuboid
+
+Render a cuboid with proper lighting and UV maps
+======================
+*/
+static void CG_RenderCuboid_Face( vec3_t a, vec3_t b, vec3_t c, vec3_t d, 
+                                  int da, int db,
+                                  vec4_t color,
+                                  float texscale, qhandle_t shader )
+{
+  polyVert_t verts[ 4 ];
+  
+  VectorCopy( d, verts[ 0 ].xyz );
+  verts[ 0 ].st[ 0 ] = d[ da ] * texscale;
+  verts[ 0 ].st[ 1 ] = d[ db ] * texscale;
+  Vector4Copy( color, verts[ 0 ].modulate );
+  VectorCopy( c, verts[ 1 ].xyz );
+  verts[ 1 ].st[ 0 ] = c[ da ] * texscale;
+  verts[ 1 ].st[ 1 ] = c[ db ] * texscale;
+  Vector4Copy( color, verts[ 1 ].modulate );
+  VectorCopy( b, verts[ 2 ].xyz );
+  verts[ 2 ].st[ 0 ] = b[ da ] * texscale;
+  verts[ 2 ].st[ 1 ] = b[ db ] * texscale;
+  Vector4Copy( color, verts[ 2 ].modulate );
+  VectorCopy( a, verts[ 3 ].xyz );
+  verts[ 3 ].st[ 0 ] = a[ da ] * texscale;
+  verts[ 3 ].st[ 1 ] = a[ db ] * texscale;
+  Vector4Copy( color, verts[ 3 ].modulate );
+
+  trap_R_AddPolyToScene( shader, 4, verts );
+}
+
+static void CG_RenderCuboid( vec3_t mins, vec3_t maxs, float texscale, qhandle_t shader )
+{
+  int i;
+  vec3_t midpoint, ambient, directed, idc;
+  vec4_t color = { 255.0f, 255.0f, 255.0f, 255.0f };
+  vec3_t ppp, ppn, pnp, pnn, npp, npn, nnp, nnn;
+ 
+  //lighting
+  VectorAdd( mins, maxs, midpoint );
+  VectorScale( midpoint, 0.5f, midpoint ); 
+  trap_R_LightForPoint( midpoint, ambient, directed, idc );
+  VectorAdd( ambient, directed, color );
+  for( i = 0; i < 3; i++ )
+    if( color[ i ] > 255.0f )
+      color[ i ] = 255.0f;
+  
+  //vertices 
+  VectorSet( ppp, maxs[ 0 ], maxs[ 1 ], maxs[ 2 ] );
+  VectorSet( ppn, maxs[ 0 ], maxs[ 1 ], mins[ 2 ] );
+  VectorSet( pnp, maxs[ 0 ], mins[ 1 ], maxs[ 2 ] );
+  VectorSet( pnn, maxs[ 0 ], mins[ 1 ], mins[ 2 ] );
+  VectorSet( npp, mins[ 0 ], maxs[ 1 ], maxs[ 2 ] );
+  VectorSet( npn, mins[ 0 ], maxs[ 1 ], mins[ 2 ] );
+  VectorSet( nnp, mins[ 0 ], mins[ 1 ], maxs[ 2 ] );
+  VectorSet( nnn, mins[ 0 ], mins[ 1 ], mins[ 2 ] );
+
+  //faces
+  //+-x
+  CG_RenderCuboid_Face( ppn, ppp, pnp, pnn, 1, 2, color, texscale, shader );
+  CG_RenderCuboid_Face( nnn, nnp, npp, npn, 1, 2, color, texscale, shader );
+  //+-y
+  CG_RenderCuboid_Face( ppp, ppn, npn, npp, 0, 2, color, texscale, shader );
+  CG_RenderCuboid_Face( nnp, nnn, pnn, pnp, 0, 2, color, texscale, shader );
+  //+-z
+  CG_RenderCuboid_Face( npp, nnp, pnp, ppp, 0, 1, color, texscale, shader );
+  CG_RenderCuboid_Face( ppn, pnn, nnn, npn, 0, 1, color, texscale, shader );
+}
 
 /*
 ======================
@@ -1283,7 +1354,6 @@ static void CG_BuildableStatusDisplay( centity_t *cent, qboolean cuboid, vec3_t 
   int             health;
   float           x, y;
   vec4_t          color;
-  qboolean        powered, marked;
   trace_t         tr;
   float           d;
   buildStat_t     *bs;
@@ -1378,8 +1448,8 @@ static void CG_BuildableStatusDisplay( centity_t *cent, qboolean cuboid, vec3_t 
     }
   }
   
-  if(cuboid)
-    visible=qtrue;
+  if( cuboid )
+    visible = qtrue;
   
   // hack to make the kit obscure view
   if( cg_drawGun.integer && visible &&
@@ -1429,13 +1499,13 @@ static void CG_BuildableStatusDisplay( centity_t *cent, qboolean cuboid, vec3_t 
   else if( healthScale > 1.0f )
     healthScale = 1.0f;
 
-  if(cuboid)
+  if( cuboid )
   {
-    x=320;
-    y=240;
-    d=Distance(cg.refdef.vieworg,trac);
-    if(d<64.0f)
-     d=64.0f;
+    x = 320;
+    y = 240;
+    d = Distance( cg.refdef.vieworg, trac );
+    if( d < 64.0f )
+      d = 64.0f ;
   }
   else
     if( !CG_WorldToScreen( origin, &x, &y ) )
@@ -1453,9 +1523,6 @@ static void CG_BuildableStatusDisplay( centity_t *cent, qboolean cuboid, vec3_t 
 
     // this is fudged to get the width/height in the cfg to be more realistic
     scale = ( picH / d ) * 3;
-
-    powered = es->eFlags & EF_B_POWERED;
-    marked = es->eFlags & EF_B_MARKED;
 
     picH *= scale;
     picW *= scale;
@@ -1527,20 +1594,21 @@ static void CG_BuildableStatusDisplay( centity_t *cent, qboolean cuboid, vec3_t 
     }
 
     trap_R_SetColor( color );
-    if( !powered )
+    
     {
       float pX;
-
+      
       pX = picX + ( subH * bs->horizontalMargin );
-      CG_DrawPic( pX, subY, subH, subH, bs->noPowerShader );
-    }
-
-    if( marked )
-    {
-      float mX;
-
-      mX = picX + picW - ( subH * bs->horizontalMargin ) - subH;
-      CG_DrawPic( mX, subY, subH, subH, bs->markedShader );
+    
+      if( BG_Buildable( es->modelindex, NULL )->team == TEAM_HUMANS )
+      {
+        float offs = 2000.0f / d;
+        CG_DrawPic( pX - offs, subY - offs,
+                    subH + 2.0f * offs, subH + 2.0f * offs, 
+                    CG_BuildablePowerStatusIcon( es ) );
+      }
+      else if( !( es->eFlags & EF_B_POWERED ) )
+        CG_DrawPic( pX, subY, subH, subH, bs->noPowerShader );
     }
 
     //NOTE: dont use CG_DrawField, too few digits
@@ -1555,19 +1623,22 @@ static void CG_BuildableStatusDisplay( centity_t *cent, qboolean cuboid, vec3_t 
       if( health > 0 && healthPoints < 1 )
         healthPoints = 1;
       
-      Com_sprintf(buf,sizeof(buf),"%i",healthPoints);
-      bufl=strlen(buf);
-      cW=subH*cgDC.aspectScale;
-      cH=subH;
-      nX=picX+picW*0.5f-cW*bufl*0.5f;
+      Com_sprintf( buf, sizeof( buf ), "%i", healthPoints );
+      bufl = strlen(buf);
+      cW = subH*cgDC.aspectScale;
+      cH = subH;
+      nX = picX + picW * 0.5f - cW * bufl * 0.5f;
       
-      for(i=0;i<bufl;i++)
+      for( i = 0; i < bufl; i++ )
       {
-       if(buf[i]=='-')
-        frame=STAT_MINUS;
-       else
-        frame=buf[i]-'0';
-       CG_DrawPic(nX+i*cW,y+bs->verticalMargin-subH*0.5f,cW,cH,cgs.media.numberShaders[frame]);
+        if( buf[ i ] == '-' )
+          frame = STAT_MINUS;
+        else
+          frame = buf[ i ] - '0';
+          CG_DrawPic( nX + i * cW,
+                      y + bs->verticalMargin - subH * 0.5f,
+                      cW, cH,
+                      cgs.media.numberShaders[ frame ] );
       }
     }
 
@@ -1620,28 +1691,6 @@ static qboolean CG_PlayerIsBuilder( buildable_t buildable )
 
 /*
 ==================
-CG_BuildableRemovalPending
-==================
-*/
-static qboolean CG_BuildableRemovalPending( int entityNum )
-{
-  int           i;
-  playerState_t *ps = &cg.snap->ps;
-
-  if( !( ps->stats[ STAT_BUILDABLE ] & SB_VALID_TOGGLEBIT ) )
-    return qfalse;
-
-  for( i = 0; i < MAX_MISC; i++ )
-  {
-    if( ps->misc[ i ] == entityNum )
-      return qtrue;
-  }
-
-  return qfalse;
-}
-
-/*
-==================
 CG_DrawBuildableStatus
 ==================
 */
@@ -1656,7 +1705,7 @@ void CG_DrawBuildableStatus( void )
   trace_t         tr;
   qboolean        cuboid;
   
-  if((cg.predictedPlayerState.stats[STAT_BUILDABLE]&~SB_VALID_TOGGLEBIT)>BA_NONE)
+  if( ( cg.predictedPlayerState.stats[STAT_BUILDABLE] & ~SB_VALID_TOGGLEBIT) > BA_NONE )
    return; //hide buildstats if we're placing a buildable
   
   for( i = 0; i < cg.snap->numEntities; i++ )
@@ -1674,8 +1723,8 @@ void CG_DrawBuildableStatus( void )
   qsort( buildableList, buildables, sizeof( int ), CG_SortDistance );
   for( i = 0; i < buildables; i++ )
   {
-    cuboid = BG_Buildable(cg_entities[buildableList[i]].currentState.modelindex,NULL)->cuboid;
-    if(cuboid && tr.entityNum!=buildableList[i] )
+    cuboid = BG_IsCuboid( cg_entities[ buildableList[ i ] ].currentState.modelindex );
+    if(cuboid && tr.entityNum != buildableList[ i ] )
       continue;
     CG_BuildableStatusDisplay( &cg_entities[ buildableList[ i ] ], cuboid, tr.endpos );
   }
@@ -1713,11 +1762,11 @@ void CG_Buildable( centity_t *cent )
     return;
   }
   
-  // cuboids use a bit different rendering code !@#CUBOID
+  // cuboids use a bit different rendering code
   if( BG_IsCuboid( es->modelindex ) )
   {
-    qhandle_t texture=0,cracks=0;
-    vec3_t    dims;
+    qhandle_t texture = 0,cracks = 0;
+    vec3_t    dims, mins, maxs;
     const cuboidAttributes_t *cuboidAttr;
     const cuboidInfo_t *cuboidInfo;
     int       i, health, sound;
@@ -1733,12 +1782,30 @@ void CG_Buildable( centity_t *cent )
     else if ( healthPct < 0.0f )
       healthPct = 0.0f;
     
-    if( cuboidInfo->useCracks )
+    if( ( es->eFlags & EF_B_SPAWNED ) && cuboidInfo->useCracks && healthPct < 0.95f )
     {
+      float progress;
+      const float o = 1.02f; //md3 rendering is not exact, so render it bigger to compensate
+      
       if( cuboidInfo->textureCount )
         texture = cuboidInfo->textures[ 0 ];
-      if( healthPct < 0.75f )
-        cracks = cgs.media.cuboidCracks[ (int)( CUBOID_CRACK_TEXTURES - 1 - floor( CUBOID_CRACK_TEXTURES * healthPct ) ) - 1 ];
+      
+      memset( &ent, 0, sizeof( ent ) );
+      ent.reType = RT_MODEL;
+      VectorCopy( cent->lerpOrigin, ent.origin );
+
+      ent.axis[0][0]=-dims[0]/2.0f*o;ent.axis[0][1]=0.0f;           ent.axis[0][2]=0.0f;
+      ent.axis[1][0]=0.0f;           ent.axis[1][1]=-dims[1]/2.0f*o;ent.axis[1][2]=0.0f;
+      ent.axis[2][0]=0.0f;           ent.axis[2][1]=0.0f;           ent.axis[2][2]=dims[2]/2.0f*o;
+      ent.nonNormalizedAxes = qtrue;
+      
+      progress = healthPct;
+  
+      ent.customShader = cgs.media.cuboidCracks;
+      ent.shaderTime = 0.001f * cg.time + progress;
+      
+      ent.hModel = cgs.media.cuboidModel;
+      trap_R_AddRefEntityToScene( &ent );
     }
     else
       for( i = 0; i < cuboidInfo->textureCount; i++ )
@@ -1750,13 +1817,22 @@ void CG_Buildable( centity_t *cent )
         
     if( !( es->eFlags & EF_B_SPAWNED ) )
     {
-      sfxHandle_t prebuildSound=cgs.media.humanBuildablePrebuild;
+      sfxHandle_t prebuildSound;
+
       if( team == TEAM_HUMANS )
       {
-        texture = cgs.media.humanSpawningShader;
-        prebuildSound = cgs.media.humanBuildablePrebuild;
+        if( es->eFlags & EF_B_POWERED )
+        {
+          texture = cgs.media.humanSpawningShader;
+          prebuildSound = cgs.media.humanBuildablePrebuild;
+        }
+        else
+        {
+          texture = cgs.media.humanUnpoweredSpawningShader;
+          prebuildSound = cgs.media.unpoweredSurgeLoop;
+        }
       }
-      else if(team==TEAM_ALIENS)
+      else if( team == TEAM_ALIENS )
       {
         texture = cgs.media.cuboidAlienPrebuild;
         prebuildSound = cgs.media.alienBuildablePrebuild;
@@ -1764,24 +1840,11 @@ void CG_Buildable( centity_t *cent )
       cracks = 0;
       trap_S_AddLoopingSound( es->number, cent->lerpOrigin, vec3_origin, prebuildSound );
     }
-    
-    memset( &ent, 0, sizeof( ent ) );
-    ent.reType = RT_MODEL;
-    VectorCopy( cent->lerpOrigin, ent.origin );
-    VectorCopy( cent->lerpOrigin, ent.oldorigin );
-    VectorCopy( cent->lerpOrigin, ent.lightingOrigin );
-    
-    //NOTE: don't use CG_PositionAndOrientateBuildable, it screws up everything
-    ent.axis[0][0]=-dims[0]/2.0f;ent.axis[0][1]=0.0f;         ent.axis[0][2]=0.0f;
-    ent.axis[1][0]=0.0f;         ent.axis[1][1]=-dims[1]/2.0f;ent.axis[1][2]=0.0f;
-    ent.axis[2][0]=0.0f;         ent.axis[2][1]=0.0f;         ent.axis[2][2]=dims[2]/2.0f;
-    ent.nonNormalizedAxes = qtrue;
-  
-    ent.customShader = texture;
-    ent.hModel = cgs.media.cuboidModel;
-    trap_R_AddRefEntityToScene( &ent );
-    if( cracks )
-      CG_DrawCuboid( ent.origin, dims, cracks, 1 );
+      
+    BG_CuboidBBox( dims, mins, maxs );
+    VectorAdd( mins, cent->lerpOrigin, mins );
+    VectorAdd( maxs, cent->lerpOrigin, maxs );
+    CG_RenderCuboid( mins, maxs, 0.01f, texture );
    
     if( health < cent->lastBuildableHealth && ( es->eFlags & EF_B_SPAWNED ) )
     {
@@ -1795,247 +1858,253 @@ void CG_Buildable( centity_t *cent )
     }
   }
   else
-  {
-
-  memset ( &ent, 0, sizeof( ent ) );
-
-  VectorCopy( cent->lerpOrigin, ent.origin );
-  VectorCopy( cent->lerpOrigin, ent.oldorigin );
-  VectorCopy( cent->lerpOrigin, ent.lightingOrigin );
-
-  VectorCopy( es->origin2, surfNormal );
-
-  VectorCopy( es->angles, angles );
-  BG_BuildableBoundingBox( es->modelindex, mins, maxs );
-
-  if( es->pos.trType == TR_STATIONARY )
-  {
-    // Positioning a buildable involves potentially up to two traces, and
-    // seeing as buildables rarely move, we cache the results and recalculate
-    // only if the buildable moves or changes orientation
-    if( VectorCompare( cent->buildableCache.cachedOrigin, cent->lerpOrigin ) &&
-        VectorCompare( cent->buildableCache.cachedNormal, surfNormal ) )
     {
-      VectorCopy( cent->buildableCache.axis[ 0 ], ent.axis[ 0 ] );
-      VectorCopy( cent->buildableCache.axis[ 1 ], ent.axis[ 1 ] );
-      VectorCopy( cent->buildableCache.axis[ 2 ], ent.axis[ 2 ] );
-      VectorCopy( cent->buildableCache.origin, ent.origin );
-    }
-    else
+    memset ( &ent, 0, sizeof( ent ) );
+
+    VectorCopy( cent->lerpOrigin, ent.origin );
+    VectorCopy( cent->lerpOrigin, ent.oldorigin );
+    VectorCopy( cent->lerpOrigin, ent.lightingOrigin );
+
+    VectorCopy( es->origin2, surfNormal );
+
+    VectorCopy( es->angles, angles );
+    BG_BuildableBoundingBox( es->modelindex, mins, maxs );
+
+    if( es->pos.trType == TR_STATIONARY )
     {
-      CG_PositionAndOrientateBuildable( angles, ent.origin, surfNormal,
-                                        es->number, mins, maxs, ent.axis,
-                                        ent.origin, qfalse );
-      VectorCopy( ent.axis[ 0 ], cent->buildableCache.axis[ 0 ] );
-      VectorCopy( ent.axis[ 1 ], cent->buildableCache.axis[ 1 ] );
-      VectorCopy( ent.axis[ 2 ], cent->buildableCache.axis[ 2 ] );
-      VectorCopy( ent.origin, cent->buildableCache.origin );
-      VectorCopy( cent->lerpOrigin, cent->buildableCache.cachedOrigin );
-      VectorCopy( surfNormal, cent->buildableCache.cachedNormal );
+      // Positioning a buildable involves potentially up to two traces, and
+      // seeing as buildables rarely move, we cache the results and recalculate
+      // only if the buildable moves or changes orientation
+      if( VectorCompare( cent->buildableCache.cachedOrigin, cent->lerpOrigin ) &&
+          VectorCompare( cent->buildableCache.cachedNormal, surfNormal ) )
+      {
+        VectorCopy( cent->buildableCache.axis[ 0 ], ent.axis[ 0 ] );
+        VectorCopy( cent->buildableCache.axis[ 1 ], ent.axis[ 1 ] );
+        VectorCopy( cent->buildableCache.axis[ 2 ], ent.axis[ 2 ] );
+        VectorCopy( cent->buildableCache.origin, ent.origin );
+      }
+      else
+      {
+        CG_PositionAndOrientateBuildable( angles, ent.origin, surfNormal,
+                                          es->number, mins, maxs, ent.axis,
+                                          ent.origin, qfalse );
+        VectorCopy( ent.axis[ 0 ], cent->buildableCache.axis[ 0 ] );
+        VectorCopy( ent.axis[ 1 ], cent->buildableCache.axis[ 1 ] );
+        VectorCopy( ent.axis[ 2 ], cent->buildableCache.axis[ 2 ] );
+        VectorCopy( ent.origin, cent->buildableCache.origin );
+        VectorCopy( cent->lerpOrigin, cent->buildableCache.cachedOrigin );
+        VectorCopy( surfNormal, cent->buildableCache.cachedNormal );
+      }
     }
-  }
 
-  VectorMA( ent.origin, BG_BuildableConfig( es->modelindex )->zOffset, surfNormal, ent.origin );
-  
-
-  VectorCopy( ent.origin, ent.oldorigin ); // don't positionally lerp at all
-  VectorCopy( ent.origin, ent.lightingOrigin );
-
-  ent.hModel = cg_buildables[ es->modelindex ].models[ 0 ];
-
-  if( !( es->eFlags & EF_B_SPAWNED ) )
-  {
-    sfxHandle_t prebuildSound = cgs.media.humanBuildablePrebuild;
-
-    if( team == TEAM_HUMANS )
-    {
-      ent.customShader = cgs.media.humanSpawningShader;
-      prebuildSound = cgs.media.humanBuildablePrebuild;
-    }
-    else if( team == TEAM_ALIENS )
-      prebuildSound = cgs.media.alienBuildablePrebuild;
-
-    trap_S_AddLoopingSound( es->number, cent->lerpOrigin, vec3_origin, prebuildSound );
-  }
-
-  CG_BuildableAnimation( cent, &ent.oldframe, &ent.frame, &ent.backlerp );
-
-  //rescale the model
-  scale = BG_BuildableConfig( es->modelindex )->modelScale;
-
-  if( scale != 1.0f )
-  {
-    VectorScale( ent.axis[ 0 ], scale, ent.axis[ 0 ] );
-    VectorScale( ent.axis[ 1 ], scale, ent.axis[ 1 ] );
-    VectorScale( ent.axis[ 2 ], scale, ent.axis[ 2 ] );
-
-    ent.nonNormalizedAxes = qtrue;
-  }
-  else
-   ent.nonNormalizedAxes = qfalse;
+    VectorMA( ent.origin, BG_BuildableConfig( es->modelindex )->zOffset, surfNormal, ent.origin );
     
 
-  if( CG_PlayerIsBuilder( es->modelindex ) && CG_BuildableRemovalPending( es->number ) )
-    ent.customShader = cgs.media.redBuildShader;
+    VectorCopy( ent.origin, ent.oldorigin ); // don't positionally lerp at all
+    VectorCopy( ent.origin, ent.lightingOrigin );
 
-  //add to refresh list
-  trap_R_AddRefEntityToScene( &ent );
+    ent.hModel = cg_buildables[ es->modelindex ].models[ 0 ];
 
-  CrossProduct( surfNormal, refNormal, xNormal );
-  VectorNormalize( xNormal );
-  rotAngle = RAD2DEG( acos( DotProduct( surfNormal, refNormal ) ) );
-
-  //turret barrel bit
-  if( cg_buildables[ es->modelindex ].models[ 1 ] )
-  {
-    refEntity_t turretBarrel;
-    vec3_t      flatAxis[ 3 ];
-
-    memset( &turretBarrel, 0, sizeof( turretBarrel ) );
-
-    turretBarrel.hModel = cg_buildables[ es->modelindex ].models[ 1 ];
-
-    CG_PositionEntityOnTag( &turretBarrel, &ent, ent.hModel, "tag_turret" );
-    VectorCopy( cent->lerpOrigin, turretBarrel.lightingOrigin );
-
+    if( !( es->eFlags & EF_B_SPAWNED ) )
     {
-      vec3_t interpolated;
-      int i;
+      sfxHandle_t prebuildSound = cgs.media.humanBuildablePrebuild;
 
-      for( i = 0; i < 3 ; i++ )
-        interpolated[ i ] = LerpAngle( es->angles2[ i ], cent->nextState.angles2[ i ], cg.frameInterpolation );
-
-      AnglesToAxis( interpolated, flatAxis );
-    }
-
-    RotatePointAroundVector( turretBarrel.axis[ 0 ], xNormal, flatAxis[ 0 ], -rotAngle );
-    RotatePointAroundVector( turretBarrel.axis[ 1 ], xNormal, flatAxis[ 1 ], -rotAngle );
-    RotatePointAroundVector( turretBarrel.axis[ 2 ], xNormal, flatAxis[ 2 ], -rotAngle );
-
-    turretBarrel.oldframe = ent.oldframe;
-    turretBarrel.frame    = ent.frame;
-    turretBarrel.backlerp = ent.backlerp;
-
-    turretBarrel.customShader = ent.customShader;
-
-    if( scale != 1.0f )
-    {
-      VectorScale( turretBarrel.axis[ 0 ], scale, turretBarrel.axis[ 0 ] );
-      VectorScale( turretBarrel.axis[ 1 ], scale, turretBarrel.axis[ 1 ] );
-      VectorScale( turretBarrel.axis[ 2 ], scale, turretBarrel.axis[ 2 ] );
-
-      turretBarrel.nonNormalizedAxes = qtrue;
-    }
-    else
-      turretBarrel.nonNormalizedAxes = qfalse;
-
-    if( CG_PlayerIsBuilder( es->modelindex ) && CG_BuildableRemovalPending( es->number ) )
-      turretBarrel.customShader = cgs.media.redBuildShader;
-
-    trap_R_AddRefEntityToScene( &turretBarrel );
-  }
-
-  //turret barrel bit
-  if( cg_buildables[ es->modelindex ].models[ 2 ] )
-  {
-    refEntity_t turretTop;
-    vec3_t      flatAxis[ 3 ];
-    vec3_t      swivelAngles;
-
-    memset( &turretTop, 0, sizeof( turretTop ) );
-
-    VectorCopy( es->angles2, swivelAngles );
-    swivelAngles[ PITCH ] = 0.0f;
-
-    turretTop.hModel = cg_buildables[ es->modelindex ].models[ 2 ];
-
-    CG_PositionRotatedEntityOnTag( &turretTop, &ent, ent.hModel, "tag_turret" );
-    VectorCopy( cent->lerpOrigin, turretTop.lightingOrigin );
-    AnglesToAxis( swivelAngles, flatAxis );
-
-    RotatePointAroundVector( turretTop.axis[ 0 ], xNormal, flatAxis[ 0 ], -rotAngle );
-    RotatePointAroundVector( turretTop.axis[ 1 ], xNormal, flatAxis[ 1 ], -rotAngle );
-    RotatePointAroundVector( turretTop.axis[ 2 ], xNormal, flatAxis[ 2 ], -rotAngle );
-
-    turretTop.oldframe = ent.oldframe;
-    turretTop.frame    = ent.frame;
-    turretTop.backlerp = ent.backlerp;
-
-    turretTop.customShader = ent.customShader;
-
-    if( scale != 1.0f )
-    {
-      VectorScale( turretTop.axis[ 0 ], scale, turretTop.axis[ 0 ] );
-      VectorScale( turretTop.axis[ 1 ], scale, turretTop.axis[ 1 ] );
-      VectorScale( turretTop.axis[ 2 ], scale, turretTop.axis[ 2 ] );
-
-      turretTop.nonNormalizedAxes = qtrue;
-    }
-    else
-      turretTop.nonNormalizedAxes = qfalse;
-
-    if( CG_PlayerIsBuilder( es->modelindex ) && CG_BuildableRemovalPending( es->number ) )
-      turretTop.customShader = cgs.media.redBuildShader;
-
-    trap_R_AddRefEntityToScene( &turretTop );
-  }
-
-  //weapon effects for turrets
-  if( es->eFlags & EF_FIRING )
-  {
-    weaponInfo_t  *weapon = &cg_weapons[ es->weapon ];
-
-    if( cg.time - cent->muzzleFlashTime > MUZZLE_FLASH_TIME ||
-        BG_Buildable( es->modelindex, NULL )->turretProjType == WP_TESLAGEN )
-    {
-      if( weapon->wim[ WPM_PRIMARY ].flashDlightColor[ 0 ] ||
-          weapon->wim[ WPM_PRIMARY ].flashDlightColor[ 1 ] ||
-          weapon->wim[ WPM_PRIMARY ].flashDlightColor[ 2 ] )
-      {
-        trap_R_AddLightToScene( cent->lerpOrigin, 300 + ( rand( ) & 31 ),
-            weapon->wim[ WPM_PRIMARY ].flashDlightColor[ 0 ],
-            weapon->wim[ WPM_PRIMARY ].flashDlightColor[ 1 ],
-            weapon->wim[ WPM_PRIMARY ].flashDlightColor[ 2 ] );
-      }
-    }
-
-    if( weapon->wim[ WPM_PRIMARY ].firingSound )
-    {
-      trap_S_AddLoopingSound( es->number, cent->lerpOrigin, vec3_origin,
-          weapon->wim[ WPM_PRIMARY ].firingSound );
-    }
-    else if( weapon->readySound )
-      trap_S_AddLoopingSound( es->number, cent->lerpOrigin, vec3_origin, weapon->readySound );
-  }
-  
-  //smoke etc for damaged buildables
-  CG_BuildableParticleEffects( cent );
-  
-  
-
-  
-  health = es->generic1;
-
-  if( health < cent->lastBuildableHealth &&
-      ( es->eFlags & EF_B_SPAWNED ) )
-  {
-    if( cent->lastBuildableDamageSoundTime + BUILDABLE_SOUND_PERIOD < cg.time )
-    {
       if( team == TEAM_HUMANS )
       {
-        int i = rand( ) % 4;
-        trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.humanBuildableDamage[ i ] );
+        if( es->eFlags & EF_B_POWERED )
+        {
+          ent.customShader = cgs.media.humanSpawningShader;
+          prebuildSound = cgs.media.humanBuildablePrebuild;
+        }
+        else
+        {
+          ent.customShader = cgs.media.humanUnpoweredSpawningShader;
+          prebuildSound = cgs.media.unpoweredSurgeLoop;
+        }
       }
       else if( team == TEAM_ALIENS )
-        trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.alienBuildableDamage );
+        prebuildSound = cgs.media.alienBuildablePrebuild;
 
-      cent->lastBuildableDamageSoundTime = cg.time;
+      trap_S_AddLoopingSound( es->number, cent->lerpOrigin, vec3_origin, prebuildSound );
     }
-  }
 
-  cent->lastBuildableHealth = health;
+    CG_BuildableAnimation( cent, &ent.oldframe, &ent.frame, &ent.backlerp );
 
+    //rescale the model
+    scale = BG_BuildableConfig( es->modelindex )->modelScale;
+
+    if( scale != 1.0f )
+    {
+      VectorScale( ent.axis[ 0 ], scale, ent.axis[ 0 ] );
+      VectorScale( ent.axis[ 1 ], scale, ent.axis[ 1 ] );
+      VectorScale( ent.axis[ 2 ], scale, ent.axis[ 2 ] );
+
+      ent.nonNormalizedAxes = qtrue;
+    }
+    else
+     ent.nonNormalizedAxes = qfalse;
+
+    //add to refresh list
+    trap_R_AddRefEntityToScene( &ent );
+
+    CrossProduct( surfNormal, refNormal, xNormal );
+    VectorNormalize( xNormal );
+    rotAngle = RAD2DEG( acos( DotProduct( surfNormal, refNormal ) ) );
+
+    //turret barrel bit
+    if( cg_buildables[ es->modelindex ].models[ 1 ] )
+    {
+      refEntity_t turretBarrel;
+      vec3_t      flatAxis[ 3 ];
+
+      memset( &turretBarrel, 0, sizeof( turretBarrel ) );
+
+      turretBarrel.hModel = cg_buildables[ es->modelindex ].models[ 1 ];
+
+      CG_PositionEntityOnTag( &turretBarrel, &ent, ent.hModel, "tag_turret" );
+      VectorCopy( cent->lerpOrigin, turretBarrel.lightingOrigin );
+
+      {
+        vec3_t interpolated;
+        int i;
+
+        for( i = 0; i < 3 ; i++ )
+          interpolated[ i ] = LerpAngle( es->angles2[ i ], cent->nextState.angles2[ i ], cg.frameInterpolation );
+
+        AnglesToAxis( interpolated, flatAxis );
+      }
+
+      RotatePointAroundVector( turretBarrel.axis[ 0 ], xNormal, flatAxis[ 0 ], -rotAngle );
+      RotatePointAroundVector( turretBarrel.axis[ 1 ], xNormal, flatAxis[ 1 ], -rotAngle );
+      RotatePointAroundVector( turretBarrel.axis[ 2 ], xNormal, flatAxis[ 2 ], -rotAngle );
+
+      turretBarrel.oldframe = ent.oldframe;
+      turretBarrel.frame    = ent.frame;
+      turretBarrel.backlerp = ent.backlerp;
+
+      turretBarrel.customShader = ent.customShader;
+
+      if( scale != 1.0f )
+      {
+        VectorScale( turretBarrel.axis[ 0 ], scale, turretBarrel.axis[ 0 ] );
+        VectorScale( turretBarrel.axis[ 1 ], scale, turretBarrel.axis[ 1 ] );
+        VectorScale( turretBarrel.axis[ 2 ], scale, turretBarrel.axis[ 2 ] );
+
+        turretBarrel.nonNormalizedAxes = qtrue;
+      }
+      else
+        turretBarrel.nonNormalizedAxes = qfalse;
+
+      trap_R_AddRefEntityToScene( &turretBarrel );
+    }
+
+    //turret barrel bit
+    if( cg_buildables[ es->modelindex ].models[ 2 ] )
+    {
+      refEntity_t turretTop;
+      vec3_t      flatAxis[ 3 ];
+      vec3_t      swivelAngles;
+
+      memset( &turretTop, 0, sizeof( turretTop ) );
+
+      VectorCopy( es->angles2, swivelAngles );
+      swivelAngles[ PITCH ] = 0.0f;
+
+      turretTop.hModel = cg_buildables[ es->modelindex ].models[ 2 ];
+
+      CG_PositionRotatedEntityOnTag( &turretTop, &ent, ent.hModel, "tag_turret" );
+      VectorCopy( cent->lerpOrigin, turretTop.lightingOrigin );
+      AnglesToAxis( swivelAngles, flatAxis );
+
+      RotatePointAroundVector( turretTop.axis[ 0 ], xNormal, flatAxis[ 0 ], -rotAngle );
+      RotatePointAroundVector( turretTop.axis[ 1 ], xNormal, flatAxis[ 1 ], -rotAngle );
+      RotatePointAroundVector( turretTop.axis[ 2 ], xNormal, flatAxis[ 2 ], -rotAngle );
+
+      turretTop.oldframe = ent.oldframe;
+      turretTop.frame    = ent.frame;
+      turretTop.backlerp = ent.backlerp;
+
+      turretTop.customShader = ent.customShader;
+
+      if( scale != 1.0f )
+      {
+        VectorScale( turretTop.axis[ 0 ], scale, turretTop.axis[ 0 ] );
+        VectorScale( turretTop.axis[ 1 ], scale, turretTop.axis[ 1 ] );
+        VectorScale( turretTop.axis[ 2 ], scale, turretTop.axis[ 2 ] );
+
+        turretTop.nonNormalizedAxes = qtrue;
+      }
+      else
+        turretTop.nonNormalizedAxes = qfalse;
+
+      trap_R_AddRefEntityToScene( &turretTop );
+    }
+
+    //weapon effects for turrets
+    if( es->eFlags & EF_FIRING )
+    {
+      weaponInfo_t  *weapon = &cg_weapons[ es->weapon ];
+
+      if( cg.time - cent->muzzleFlashTime > MUZZLE_FLASH_TIME ||
+          BG_Buildable( es->modelindex, NULL )->turretProjType == WP_TESLAGEN )
+      {
+        if( weapon->wim[ WPM_PRIMARY ].flashDlightColor[ 0 ] ||
+            weapon->wim[ WPM_PRIMARY ].flashDlightColor[ 1 ] ||
+            weapon->wim[ WPM_PRIMARY ].flashDlightColor[ 2 ] )
+        {
+          trap_R_AddLightToScene( cent->lerpOrigin, 300 + ( rand( ) & 31 ),
+              weapon->wim[ WPM_PRIMARY ].flashDlightColor[ 0 ],
+              weapon->wim[ WPM_PRIMARY ].flashDlightColor[ 1 ],
+              weapon->wim[ WPM_PRIMARY ].flashDlightColor[ 2 ] );
+        }
+      }
+
+      if( weapon->wim[ WPM_PRIMARY ].firingSound )
+      {
+        trap_S_AddLoopingSound( es->number, cent->lerpOrigin, vec3_origin,
+            weapon->wim[ WPM_PRIMARY ].firingSound );
+      }
+      else if( weapon->readySound )
+        trap_S_AddLoopingSound( es->number, cent->lerpOrigin, vec3_origin, weapon->readySound );
+    }
+    
+    //smoke etc for damaged buildables
+    CG_BuildableParticleEffects( cent );
+    
+    
+
+    
+    health = es->generic1;
+
+    if( health < cent->lastBuildableHealth &&
+        ( es->eFlags & EF_B_SPAWNED ) )
+    {
+      if( cent->lastBuildableDamageSoundTime + BUILDABLE_SOUND_PERIOD < cg.time )
+      {
+        if( team == TEAM_HUMANS )
+        {
+          int i = rand( ) % 4;
+          trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.humanBuildableDamage[ i ] );
+        }
+        else if( team == TEAM_ALIENS )
+          trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.alienBuildableDamage );
+
+        cent->lastBuildableDamageSoundTime = cg.time;
+      }
+    }
+
+    cent->lastBuildableHealth = health;
   } //if (is a cuboid)
+  
+    
+  // play a loop if there's not enough power for it to build / activate
+  if( ( !( es->eFlags & EF_B_SPAWNED ) &&
+        !( es->eFlags & EF_B_POWERED ) ) ||
+      ( ( BG_Buildable( es->modelindex, NULL )->requiresPower ||
+      es->modelindex != BA_H_REPEATER ) &&
+      !( es->eFlags & EF_B_POWERED ) &&
+      ( es->eFlags & EF_B_SURGE ) ) )
+    trap_S_AddLoopingSound( es->number, cent->lerpOrigin, vec3_origin, cgs.media.unpoweredSurgeLoop );
 }
 
 char cuboidInfo[128];
@@ -2049,17 +2118,21 @@ Draw the cuboid info string generated by CG_Cuboid_Info.
 */
 void CG_Cuboid_DrawInfo(void)
 {
- float x,y,w,h,s=0.5f;
+  float x,y,w,h,s=0.5f;
+  
+  // disabled by default (replaced by ckit's display)
+  if( !cg_drawCuboidInfo.integer )
+    return;
  
- if(!BG_Buildable(cg.predictedPlayerState.stats[STAT_BUILDABLE]&~SB_VALID_TOGGLEBIT,NULL)->cuboid)
-  return;
+  if( !BG_Buildable( cg.predictedPlayerState.stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT, NULL )->cuboid )
+    return;
  
- w=UI_Text_Width(cuboidInfo,s);
- h=UI_Text_Height(cuboidInfo,s);
- x=320.0f-w/2.0f+cg_cuboidInfoX.value;
- y=240.0f-h/2.0f+cg_cuboidInfoY.value;
+  w= UI_Text_Width( cuboidInfo, s );
+  h= UI_Text_Height( cuboidInfo,  s );
+  x= 320.0f - w / 2.0f + cg_cuboidInfoX.value;
+  y= 240.0f - h / 2.0f + cg_cuboidInfoY.value;
  
- UI_Text_Paint(x,y,s,colorWhite,cuboidInfo,0,0,ITEM_TEXTSTYLE_SHADOWEDMORE);
+  UI_Text_Paint( x, y, s, colorWhite, cuboidInfo, 0, 0, ITEM_TEXTSTYLE_SHADOWEDMORE );
 }
 
 /*
@@ -2075,6 +2148,9 @@ void CG_Cuboid_Info(void)
 {
  const buildableAttributes_t *attr;
  int axis=cg_cuboidResizeAxis.integer;
+ 
+ if( !cg_drawCuboidInfo.integer )
+  return;
  
  attr=BG_Buildable(cg.predictedPlayerState.stats[STAT_BUILDABLE]&~SB_VALID_TOGGLEBIT,cg.cuboidSelection);
  Com_sprintf(cuboidInfo,sizeof(cuboidInfo),
@@ -2342,3 +2418,53 @@ void CG_CuboidAttack_f(void)
   trap_SendClientCommand( va( "%s", CG_Argv(0) ) );
 }
 
+/*
+======================
+CG_BuildablePowerStatusIcon
+
+Figures out the power status icon for a buildable
+======================
+*/
+qhandle_t CG_BuildablePowerStatusIcon( entityState_t *es )
+{
+  qboolean powered = ( es->eFlags & EF_B_POWERED );
+  
+  if( !( es->eFlags & EF_B_SPAWNED ) )
+  {
+    if( powered )
+      return cgs.media.ckit_icon_surge;
+    else
+      return cgs.media.ckit_icon_nosurge;
+  }
+  
+  if( BG_Buildable( es->modelindex, NULL )->isPowerSource ||
+      es->modelindex == BA_H_REPEATER )
+  {
+    qboolean active = ( es->eFlags & EF_B_SURGE );
+    
+    if( !active )
+      return cgs.media.ckit_icon_off;
+    else if( powered )
+      return cgs.media.ckit_icon_power;
+    else
+      return cgs.media.ckit_icon_nopower;
+  }
+  else
+  {
+    if( !( es->eFlags & EF_B_SURGE ) )
+    {
+      if( powered )
+        return cgs.media.ckit_icon_power;
+      else
+        return cgs.media.ckit_icon_nopower;
+    }
+    else
+    {
+      if( powered )
+        return cgs.media.ckit_icon_surge;
+      else
+        return cgs.media.ckit_icon_nosurge;
+    }
+  }
+  return 0;
+}

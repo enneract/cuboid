@@ -605,15 +605,27 @@ static qboolean CG_ParseWeaponFile( const char *filename, weaponInfo_t *wi )
       if( size < 0 )
         size = 0;
 
+      wi->crossHairSize = size;
+
       token = COM_Parse( &text_p );
       if( !token )
         break;
 
-      wi->crossHair = trap_R_RegisterShader( token );
-      wi->crossHairSize = size;
-
-      if( !wi->crossHair )
-        CG_Printf( S_COLOR_RED "ERROR: weapon crosshair not found %s\n", token );
+      if( !Q_stricmp( token, "none" ) )
+        wi->crossHairType = CH_NONE;
+      else if( !Q_stricmp( token, "dot" ) )
+        wi->crossHairType = CH_DOT;
+      else if( !Q_stricmp( token, "circle" ) )
+        wi->crossHairType = CH_CIRCLE;
+      else if( !Q_stricmp( token, "circleddot" ) )
+        wi->crossHairType = CH_CIRCLEDDOT;
+      else if( !Q_stricmp( token, "alien" ) )
+        wi->crossHairType = CH_ALIEN;
+      else
+      {
+        Com_Printf( S_COLOR_YELLOW "WARNING: unknown cross hair type '%s'\n", token );
+        wi->crossHairType = CH_NONE;
+      }
 
       continue;
     }
@@ -869,6 +881,180 @@ static float CG_MachinegunSpinAngle( centity_t *cent, qboolean firing )
   return angle;
 }
 
+/*
+=============
+CG_GenerateCKitDisplay
+
+Figures out what should be displayed on the CKit's display
+=============
+*/
+static void CG_GenerateCKitDisplay( void )
+{
+  int row = 0;
+  ckitDisplay_t *cd = &cg.ckitDisp;
+  entityState_t *es;
+  playerState_t *ps = &cg.predictedPlayerState;
+  qboolean target = qfalse; // true if looking at something
+  qboolean player = qfalse; // true if looking at a player (buildable otherwise)
+  int buildable; // buildable type
+  qboolean probing = qfalse; // measures voltages and currents
+  int powerNetwork;
+  int probeEntity;
+  qboolean building; // displays buildable's info
+  qboolean cuboid; // true if building cuboid
+  const buildableAttributes_t *battr;
+  int buildTimer;
+  
+  memset( &cg.ckitDisp, 0, sizeof( cg.ckitDisp ) );
+
+  /* 
+     part 1: figure out what we're dealing with
+  */
+  
+  powerNetwork = ( ps->misc[ MISC_INFOHEAD ] & 1023 );
+  
+  probeEntity =  ( ps->misc[ MISC_INFOHEAD ] >> 10 ) & 1023;
+  if( probeEntity != 1023 )
+  {
+    target = qtrue;
+    if( probeEntity < MAX_CLIENTS )
+    {
+      target = qtrue;
+      player = qtrue;
+      probing = ( cg.crosshairClientNum == probeEntity );
+    }
+    else 
+      probing = ( cg.crosshairBuildable == probeEntity );
+      
+    es = &cg_entities[ probeEntity ].currentState;
+  }
+  
+  buildable = cg.predictedPlayerState.stats[ STAT_BUILDABLE ] &~ SB_VALID_TOGGLEBIT;
+  building = ( buildable != BA_NONE );
+  if( building )
+  {
+    battr = BG_Buildable( buildable, cg.cuboidSelection );
+    cuboid = battr->cuboid;
+  }
+  
+  buildTimer = ps->stats[ STAT_MISC ];
+  
+  /* 
+     part 2: set up icons & text 
+  */
+  
+  cd->background = cgs.media.ckitBackgroundShader;
+  
+  // first big icon indicates if power is available
+  if( powerNetwork )
+    cd->bigicona = cgs.media.ckit_icon_power;
+  else
+    cd->bigicona = cgs.media.ckit_icon_nopower;
+  
+  // second big icon always shows the building's state
+  if( target && !player )
+    cd->bigiconb = CG_BuildablePowerStatusIcon( es );
+  
+  if( building )
+  {
+    if( cuboid )
+    {
+      //width
+      cd->lines[ row ].icon = cgs.media.ckit_icon_width;
+      Com_sprintf( cd->lines[ row++ ].text, MAX_CKIT_TEXT, "%.1f", cg.cuboidSelection[ 0 ] );
+      
+      //height
+      cd->lines[ row ].icon = cgs.media.ckit_icon_depth;
+      Com_sprintf( cd->lines[ row++ ].text, MAX_CKIT_TEXT, "%.1f", cg.cuboidSelection[ 1 ] );
+      
+      //depth
+      cd->lines[ row ].icon = cgs.media.ckit_icon_height;
+      Com_sprintf( cd->lines[ row++ ].text, MAX_CKIT_TEXT, "%.1f", cg.cuboidSelection[ 2 ] );
+    }
+
+    //build points
+    cd->lines[ row ].icon = cgs.media.ckit_icon_bp;
+    Com_sprintf( cd->lines[ row++ ].text, MAX_CKIT_TEXT, "%i", battr->buildPoints );
+    
+    //health
+    cd->lines[ row ].icon = cgs.media.ckit_icon_health;
+    Com_sprintf( cd->lines[ row++ ].text, MAX_CKIT_TEXT, "%i", battr->health );
+    
+    //build time
+    cd->lines[ row ].icon = cgs.media.ckit_icon_time;
+    Com_sprintf( cd->lines[ row++ ].text, MAX_CKIT_TEXT, "%.1f", 0.001f * battr->buildTime );
+  }
+  else
+  {
+    if( buildTimer )
+    {
+      //build timer
+      cd->lines[ row ].icon = cgs.media.ckit_icon_time;
+      Com_sprintf( cd->lines[ row++ ].text, MAX_CKIT_TEXT, "%.1f", 0.001f * buildTimer );
+    }
+    
+    // power network detector
+    cd->lines[ row ].icon = cgs.media.ckit_icon_network;
+    if( powerNetwork )
+      Com_sprintf( cd->lines[ row++ ].text, MAX_CKIT_TEXT, "%i", powerNetwork );
+    else
+      Com_sprintf( cd->lines[ row++ ].text, MAX_CKIT_TEXT, "--------------------" );
+
+    
+    if( target )
+    {
+      battr = BG_Buildable( es->modelindex, es->angles );
+      
+      if( probing )
+      {
+        if( !player )
+        {
+          // ammeter
+          cd->lines[ row ].icon = cgs.media.ckit_icon_current;
+          Com_sprintf( cd->lines[ row++ ].text, MAX_CKIT_TEXT, "%.2f", 0.001f * ps->misc[ MISC_INFO1 ] );
+        
+          // voltmeter
+          cd->lines[ row ].icon = cgs.media.ckit_icon_voltage;
+          Com_sprintf( cd->lines[ row++ ].text, MAX_CKIT_TEXT, "%.2f", 0.001f * ps->misc[ MISC_INFO2 ] );
+
+          // stored BP
+          if( BG_Buildable( es->modelindex, NULL )->hasStorage )
+          {
+            cd->lines[ row ].icon = cgs.media.ckit_icon_storedbp;
+            Com_sprintf( cd->lines[ row++ ].text, MAX_CKIT_TEXT, "%.1f", 0.1f * ps->misc[ MISC_INFO3 ] );
+          }
+        }
+        else
+        {
+          // health
+          cd->lines[ row ].icon = cgs.media.ckit_icon_health;
+          Com_sprintf( cd->lines[ row++ ].text, MAX_CKIT_TEXT, "%i", ps->misc[ MISC_INFO1 ] );
+                    
+          // stored BP
+          if( ps->misc[ MISC_INFO3 ] != -1 )
+          {
+            cd->lines[ row ].icon = cgs.media.ckit_icon_storedbp;
+            Com_sprintf( cd->lines[ row++ ].text, MAX_CKIT_TEXT, "%i", ps->misc[ MISC_INFO2 ] );
+          }
+        }
+      }
+      
+      if( !player )
+      {
+        //health
+        cd->lines[ row ].icon = cgs.media.ckit_icon_health;
+        if( battr->cuboid )
+          Com_sprintf( cd->lines[ row++ ].text, MAX_CKIT_TEXT, "%i", es->constantLight );
+        else
+          Com_sprintf( cd->lines[ row++ ].text, MAX_CKIT_TEXT, "%i", es->generic1 );
+
+        //build points
+        cd->lines[ row ].icon = cgs.media.ckit_icon_bp;
+        Com_sprintf( cd->lines[ row++ ].text, MAX_CKIT_TEXT, "%i", battr->buildPoints );
+      }
+    }
+  }
+}
 
 /*
 =============
@@ -1033,6 +1219,100 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
       CG_DestroyParticleSystem( &cent->muzzlePS );
   }
 
+  // NOTE: this thing is full of magic numbers - they were determined by trial and error, do not modify
+  if( ps && weaponNum == WP_HBUILD )
+  {
+    refEntity_t ent;
+    vec3_t origin;
+    float y;
+    int i, j, l;
+    
+    CG_GenerateCKitDisplay( );
+    
+    memset( &ent, 0, sizeof( ent ) );
+    ent.renderfx = parent->renderfx;
+    CG_PositionEntityOnTag( &ent, parent, parent->hModel, "tag_weapon" );
+    
+    // offset it a bit
+    VectorMA( ent.origin, -0.1f, ent.axis[ 0 ], ent.origin );
+
+    // background
+    if( ( ent.customShader = cg.ckitDisp.background ) )
+    {
+      ent.hModel = cgs.media.ckit_background;
+      trap_R_AddRefEntityToScene( &ent ); 
+    }
+    
+    // overlay
+    ent.hModel = cgs.media.ckit_overlay;
+    ent.customShader = cgs.media.ckitOverlayShader;
+    trap_R_AddRefEntityToScene( &ent );
+
+    // big icons
+    if( ( ent.customShader = cg.ckitDisp.bigicona ) )
+    {
+      ent.hModel = cgs.media.ckit_bigicona;
+      trap_R_AddRefEntityToScene( &ent ); 
+    }
+
+    if( ( ent.customShader = cg.ckitDisp.bigiconb ) )
+    {
+      ent.hModel = cgs.media.ckit_bigiconb;
+      trap_R_AddRefEntityToScene( &ent ); 
+    }
+    
+    // backup the origin
+    VectorCopy( ent.origin, origin );
+    
+    // draw all 6 rows
+    for( y = 0.0f, i = 0; i < MAX_CKIT_ROWS; i++, y += -0.48f )
+    {
+      VectorMA( origin, y * 0.42f, ent.axis[ 0 ], ent.origin );
+      VectorMA( ent.origin, y, ent.axis[ 2 ], ent.origin );
+      
+      if( ( ent.customShader = cg.ckitDisp.lines[ i ].icon ) )
+      {
+        ent.hModel = cgs.media.ckit_icon;
+        trap_R_AddRefEntityToScene( &ent );
+      }
+      
+      ent.hModel = cgs.media.ckit_digit;
+      l = strlen( cg.ckitDisp.lines[ i ].text );
+      
+      if( l > MAX_CKIT_COLUMNS )
+        l = MAX_CKIT_COLUMNS; 
+      
+      VectorMA( ent.origin, -0.3f * ( MAX_CKIT_COLUMNS - l - 1 ), ent.axis[ 1 ], ent.origin );
+      
+      for( j = 0; j < l && j < MAX_CKIT_COLUMNS; j++ )
+      {
+        int index;
+        char ch;
+        
+        ch = cg.ckitDisp.lines[ i ].text[ j ];
+        
+        if( ch >= '0' && ch <= '9' )
+          index = ch - '0';
+        else if( ch == '-' )
+          index = 10;
+        else if( ch == '.' )
+          index = 11;
+        else
+          index = 0;
+
+        if( random() > 0.995f )
+        {
+          index += (int)( random() * 11 );
+          index %= 11;
+        }
+        
+        ent.customShader = cgs.media.digitalNumberShaders[ index ];
+        VectorMA( ent.origin, -0.3f, ent.axis[ 1 ], ent.origin );
+        trap_R_AddRefEntityToScene( &ent );
+      }
+    }
+  }
+
   // add the flash
   if( !weapon->wim[ weaponMode ].continuousFlash || !firing )
   {
@@ -1124,7 +1404,7 @@ void CG_AddViewWeapon( playerState_t *ps )
   weaponInfo_t  *wi;
   weapon_t      weapon = ps->weapon;
   weaponMode_t  weaponMode = ps->generic1;
-  vec3_t cuboidSize;
+  vec3_t        cuboidSize;
 
   // no weapon carried - can't draw it
   if( weapon == WP_NONE )

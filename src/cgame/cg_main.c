@@ -226,8 +226,10 @@ vmCvar_t  cg_chatTeamPrefix;
 vmCvar_t  cg_cuboidResizeAxis;
 vmCvar_t  cg_cuboidResizeRate;
 vmCvar_t  cg_cuboidPSQuality;
+
 vmCvar_t  cg_cuboidInfoX;
 vmCvar_t  cg_cuboidInfoY;
+vmCvar_t  cg_drawCuboidInfo;
 
 vmCvar_t  cg_fuelInfoX;
 vmCvar_t  cg_fuelInfoY;
@@ -236,6 +238,11 @@ vmCvar_t  cg_fuelInfoScale;
 vmCvar_t  cg_announcer;
 
 vmCvar_t  cg_cameraShakeMagnitude;
+
+vmCvar_t  cg_debug1;
+vmCvar_t  cg_debug2;
+vmCvar_t  cg_debug3;
+vmCvar_t  cg_debug4;
 
 typedef struct
 {
@@ -379,13 +386,19 @@ static cvarTable_t cvarTable[ ] =
 
   { &cg_cuboidInfoX, "cg_cuboidInfoX" ,"0", CVAR_ARCHIVE },
   { &cg_cuboidInfoY, "cg_cuboidInfoY" ,"150", CVAR_ARCHIVE },
+  { &cg_drawCuboidInfo, "cg_drawCuboidInfo" ,"0", CVAR_ARCHIVE },
 
   { &cg_fuelInfoX, "cg_fuelInfoX" ,"0", CVAR_ARCHIVE },
   { &cg_fuelInfoY, "cg_fuelInfoY" ,"150", CVAR_ARCHIVE },
   { &cg_fuelInfoScale, "cg_fuelInfoScale" ,"0.5", CVAR_ARCHIVE },
   { &cg_announcer, "cg_announcer", "1", CVAR_ARCHIVE },
   
-  { &cg_cameraShakeMagnitude, "cg_cameraShakeMagnitude", "1", CVAR_ARCHIVE }
+  { &cg_cameraShakeMagnitude, "cg_cameraShakeMagnitude", "1", CVAR_ARCHIVE },
+  
+  { &cg_debug1, "cg_debug1", "", CVAR_CHEAT },
+  { &cg_debug2, "cg_debug2", "", CVAR_CHEAT },
+  { &cg_debug3, "cg_debug3", "", CVAR_CHEAT },
+  { &cg_debug4, "cg_debug4", "", CVAR_CHEAT }
 };
 
 static int   cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );
@@ -745,6 +758,13 @@ static void CG_RegisterSounds( void )
   cgs.media.cuboidResizeSoundB      = trap_S_RegisterSound( "sound/cuboid/resizeb.wav", qfalse );
   cgs.media.cuboidRotateSound       = trap_S_RegisterSound( "sound/cuboid/rotate.wav", qfalse );
   cgs.media.cuboidAxisChangeSound   = trap_S_RegisterSound( "sound/cuboid/axischange.wav", qfalse );
+
+  cgs.media.unpoweredSurgeLoop      = trap_S_RegisterSound( "sound/buildables/human/unpowered_surge.wav", qfalse );  
+  cgs.media.powerSwitchSound        = trap_S_RegisterSound( "sound/buildables/human/switch.wav", qfalse );
+  for( i = 0; i < 4; i++ )
+    cgs.media.powerZap[ i ]          = trap_S_RegisterSound( va( "sound/buildables/human/powerzap%i.wav", i + 1 ), qfalse );
+  
+  cgs.media.hitSound                = trap_S_RegisterSound( "sound/feedback/hit.wav", qfalse );
 }
 
 
@@ -776,6 +796,21 @@ static void CG_RegisterGraphics( void )
     "gfx/2d/numbers/nine_32b",
     "gfx/2d/numbers/minus_32b",
   };
+  static char *sb_digital[ 12 ] =
+  {
+    "gfx/2d/digital/0",
+    "gfx/2d/digital/1",
+    "gfx/2d/digital/2",
+    "gfx/2d/digital/3",
+    "gfx/2d/digital/4",
+    "gfx/2d/digital/5",
+    "gfx/2d/digital/6",
+    "gfx/2d/digital/7",
+    "gfx/2d/digital/8",
+    "gfx/2d/digital/9",
+    "gfx/2d/digital/minus",
+    "gfx/2d/digital/comma"
+  };
   static char *buildWeaponTimerPieShaders[ 8 ] =
   {
     "ui/assets/neutral/1_5pie",
@@ -797,6 +832,9 @@ static void CG_RegisterGraphics( void )
 
   for( i = 0; i < 11; i++ )
     cgs.media.numberShaders[ i ] = trap_R_RegisterShader( sb_nums[ i ] );
+  
+  for( i = 0; i < 12; i++ )
+    cgs.media.digitalNumberShaders[ i ] = trap_R_RegisterShader( sb_digital[ i ] );
 
   cgs.media.viewBloodShader           = trap_R_RegisterShader( "gfx/damage/fullscreen_painblend" );
 
@@ -813,14 +851,13 @@ static void CG_RegisterGraphics( void )
 
   cgs.media.backTileShader            = trap_R_RegisterShader( "console" );
 
-
   // building shaders
   cgs.media.greenBuildShader          = trap_R_RegisterShader("gfx/misc/greenbuild" );
   cgs.media.redBuildShader            = trap_R_RegisterShader("gfx/misc/redbuild" );
   cgs.media.humanSpawningShader       = trap_R_RegisterShader("models/buildables/telenode/rep_cyl" );
+  cgs.media.humanUnpoweredSpawningShader = trap_R_RegisterShader("gfx/misc/unpowered_prebuild" );
 
-  for( i = 0; i < CUBOID_CRACK_TEXTURES - 1; i++ )
-    cgs.media.cuboidCracks[ i ] = trap_R_RegisterShader( va( "models/cuboid/cracks_%i", i ) );
+  cgs.media.cuboidCracks              = trap_R_RegisterShader( "models/cuboid/cracks" );
 
   cgs.media.cuboidModel               = trap_R_RegisterModel( "models/cuboid/cuboid.md3" );
   cgs.media.cuboidRedBuildShader      = trap_R_RegisterShader( "gfx/cuboid/build_red" );
@@ -832,9 +869,30 @@ static void CG_RegisterGraphics( void )
   cg.waitForCB = qfalse;
   cg.cuboidValid = qfalse;
   cg.latestCBNumber = 0;
+  VectorSet( cg.cuboidSelection, 30, 30, 30 );
+
+  // ckit...
+  cgs.media.ckitBackgroundShader      = trap_R_RegisterShader( "gfx/ckit/background" );
+  cgs.media.ckitOverlayShader         = trap_R_RegisterShader( "gfx/ckit/overlay" );
+  
+  cgs.media.ckit_icon_bp              = trap_R_RegisterShader( "gfx/ckit/icon_bp" );
+  cgs.media.ckit_icon_current         = trap_R_RegisterShader( "gfx/ckit/icon_current" );
+  cgs.media.ckit_icon_depth           = trap_R_RegisterShader( "gfx/ckit/icon_depth" );
+  cgs.media.ckit_icon_health          = trap_R_RegisterShader( "gfx/ckit/icon_health" );
+  cgs.media.ckit_icon_height          = trap_R_RegisterShader( "gfx/ckit/icon_height" );
+  cgs.media.ckit_icon_network         = trap_R_RegisterShader( "gfx/ckit/icon_network" );
+  cgs.media.ckit_icon_nopower         = trap_R_RegisterShader( "gfx/ckit/icon_nopower" );
+  cgs.media.ckit_icon_nosurge         = trap_R_RegisterShader( "gfx/ckit/icon_nosurge" );
+  cgs.media.ckit_icon_off             = trap_R_RegisterShader( "gfx/ckit/icon_off" );
+  cgs.media.ckit_icon_power           = trap_R_RegisterShader( "gfx/ckit/icon_power" );
+  cgs.media.ckit_icon_storedbp        = trap_R_RegisterShader( "gfx/ckit/icon_storedbp" );
+  cgs.media.ckit_icon_surge           = trap_R_RegisterShader( "gfx/ckit/icon_surge" );
+  cgs.media.ckit_icon_time            = trap_R_RegisterShader( "gfx/ckit/icon_time" );
+  cgs.media.ckit_icon_voltage         = trap_R_RegisterShader( "gfx/ckit/icon_voltage" );
+  cgs.media.ckit_icon_width           = trap_R_RegisterShader( "gfx/ckit/icon_width" );
 
   for( i = 0; i < 15; i++ )
-    cgs.media.splashLogo[ i ] = trap_R_RegisterShader( va( "cuboid/logo_%i.tga", i ) );
+    cgs.media.splashLogo[ i ]         = trap_R_RegisterShader( va( "cuboid/logo_%i.tga", i ) );
   cgs.media.splashLeft                = trap_R_RegisterShader( "cuboid/logo_left.tga" );
   cgs.media.splashRight               = trap_R_RegisterShader( "cuboid/logo_right.tga" );
 
@@ -844,6 +902,21 @@ static void CG_RegisterGraphics( void )
 
   for( i = 0; i < 8; i++ )
     cgs.media.buildWeaponTimerPie[ i ] = trap_R_RegisterShader( buildWeaponTimerPieShaders[ i ] );
+
+  cgs.media.friendlyCrosshair         = trap_R_RegisterShader( "gfx/2d/crosshair_friendly.tga" );
+  cgs.media.hitCrosshair              = trap_R_RegisterShader( "gfx/2d/crosshair_hit.tga" );
+
+  cgs.media.ch_dot         = trap_R_RegisterShader( "gfx/2d/ch_dot.tga" );
+  cgs.media.ch_dothit      = trap_R_RegisterShader( "gfx/2d/ch_dothit.tga" );
+  cgs.media.ch_circle      = trap_R_RegisterShader( "gfx/2d/ch_circle.tga" );
+  cgs.media.ch_circlehit   = trap_R_RegisterShader( "gfx/2d/ch_circlehit.tga" );
+  cgs.media.ch_friendly    = trap_R_RegisterShader( "gfx/2d/ch_friendly.tga" );
+
+  cgs.media.ch_adot        = trap_R_RegisterShader( "gfx/2d/ch_adot.tga" );
+  cgs.media.ch_acircle     = trap_R_RegisterShader( "gfx/2d/ch_acircle.tga" );
+  cgs.media.ch_afriendly   = trap_R_RegisterShader( "gfx/2d/ch_afriendly.tga" );
+  cgs.media.ch_aheadshot   = trap_R_RegisterShader( "gfx/2d/ch_aheadshot.tga" );
+
 
   // player health cross shaders
   cgs.media.healthCross               = trap_R_RegisterShader( "ui/assets/neutral/cross.tga" );
@@ -884,6 +957,8 @@ static void CG_RegisterGraphics( void )
 
   cgs.media.humanBuildableBleedPS     = CG_RegisterParticleSystem( "humanBuildableBleedPS");  
   cgs.media.alienBuildableBleedPS     = CG_RegisterParticleSystem( "alienBuildableBleedPS" );
+
+  cgs.media.humanPowerZapPS           = CG_RegisterParticleSystem( "humanPowerZapPS" );
 
   cgs.media.alienBleedPS              = CG_RegisterParticleSystem( "alienBleedPS" );
   cgs.media.humanBleedPS              = CG_RegisterParticleSystem( "humanBleedPS" );
@@ -1009,6 +1084,13 @@ static void CG_RegisterClients( void )
   cgs.media.jetpackModel       = trap_R_RegisterModel( "models/players/human_base/jetpack.md3" );
   cgs.media.jetpackFlashModel  = trap_R_RegisterModel( "models/players/human_base/jetpack_flash.md3" );
   cgs.media.battpackModel      = trap_R_RegisterModel( "models/players/human_base/battpack.md3" );
+
+  cgs.media.ckit_background    = trap_R_RegisterModel( "models/weapons/ckit/ckit_background.md3" );
+  cgs.media.ckit_overlay       = trap_R_RegisterModel( "models/weapons/ckit/ckit_overlay.md3" );
+  cgs.media.ckit_bigicona      = trap_R_RegisterModel( "models/weapons/ckit/ckit_bigicona.md3" );
+  cgs.media.ckit_bigiconb      = trap_R_RegisterModel( "models/weapons/ckit/ckit_bigiconb.md3" );
+  cgs.media.ckit_icon          = trap_R_RegisterModel( "models/weapons/ckit/ckit_icon.md3" );
+  cgs.media.ckit_digit         = trap_R_RegisterModel( "models/weapons/ckit/ckit_digit.md3" );
 
   cg.charModelFraction = 1.0f;
   trap_UpdateScreen( );

@@ -1482,6 +1482,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, vec3_t origin, vec3_t angles
 
   for( i = 0; i < MAX_PERSISTANT; i++ )
     persistant[ i ] = client->ps.persistant[ i ];
+  persistant[ PERS_BUILDPOINTS ] = 0; // clear buildpoints
 
   eventSequence = client->ps.eventSequence;
   memset( client, 0, sizeof( *client ) );
@@ -1795,11 +1796,12 @@ void ClientDisconnect( int clientNum )
 G_RelayCuboidToSpectators
 
 Called everytime a player changes his cuboid size.
-A server command is issued to everyone spectating him
-so that their clients can know the cuboid size as well.
 ============
 */
-void G_RelayCuboidToSpectators(gentity_t *self)
+void G_RelayCuboidToSpectators( gentity_t *self )
 {
+  self->client->ps.misc[ MISC_CUBOID_X ] = self->client->cuboidSelection[ 0 ] * 10;
+  self->client->ps.misc[ MISC_CUBOID_Y ] = self->client->cuboidSelection[ 1 ] * 10;
+  self->client->ps.misc[ MISC_CUBOID_Z ] = self->client->cuboidSelection[ 2 ] * 10;
 }
 

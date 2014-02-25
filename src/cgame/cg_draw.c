@@ -636,7 +636,6 @@ static void CG_DrawPlayerWallclimbing( rectDef_t *rect, vec4_t backColor, vec4_t
 static void CG_DrawPlayerAmmoValue( rectDef_t *rect, vec4_t color )
 {
   int value;
-  int valueMarked = -1;
   qboolean bp = qfalse;
 
   switch( BG_PrimaryWeapon( cg.snap->ps.stats ) )
@@ -648,8 +647,7 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, vec4_t color )
     case WP_ABUILD:
     case WP_ABUILD2:
     case WP_HBUILD:
-      value = cg.snap->ps.persistant[ PERS_BP ];
-      valueMarked = cg.snap->ps.persistant[ PERS_MARKEDBP ];
+      value = cg.snap->ps.persistant[ PERS_BUILDPOINTS ];
       bp = qtrue;
       break;
 
@@ -660,8 +658,6 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, vec4_t color )
 
   if( value > 999 )
     value = 999;
-  if( valueMarked > 999 )
-    valueMarked = 999;
 
   if( value > -1 )
   {
@@ -678,10 +674,7 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, vec4_t color )
       return;
     }
 
-    if( valueMarked > 0 )
-      text = va( "%d+(%d)", value, valueMarked );
-    else
-      text = va( "%d", value );
+    text = va( "%d", value );
 
     len = strlen( text );
 
@@ -2557,10 +2550,10 @@ CG_DrawCrosshair
 static void CG_DrawCrosshair( rectDef_t *rect, vec4_t color )
 {
   float         w, h;
-  qhandle_t     hShader;
   float         x, y;
   weaponInfo_t  *wi;
   weapon_t      weapon;
+  qboolean      hit, ff;
 
   weapon = BG_GetPlayerWeapon( &cg.snap->ps );
 
@@ -2590,24 +2583,66 @@ static void CG_DrawCrosshair( rectDef_t *rect, vec4_t color )
   x = rect->x + ( rect->w / 2 ) - ( w / 2 );
   y = rect->y + ( rect->h / 2 ) - ( h / 2 );
 
-  hShader = wi->crossHair;
+  hit = ( cg.time <= cg.lastHitTime + 75 );
+  ff = ( cg.time == cg.crosshairClientTime || cg.crosshairBuildable >= 0 );
 
-  //aiming at a friendly player/buildable, dim the crosshair
-  if( cg.time == cg.crosshairClientTime || cg.crosshairBuildable >= 0 )
+  color[ 3 ] = 0.6f;
+
+  trap_R_SetColor( color );
+  
+  switch( wi->crossHairType )
   {
-    int i;
-    for( i = 0; i < 3; i++ )
-      color[i] *= .5f;
+    case CH_NONE:
+      break;
+    
+    case CH_DOT:
+      if( ff )
+        CG_DrawPic( x, y, w, h, cgs.media.ch_friendly );
+      else
+        CG_DrawPic( x, y, w, h, cgs.media.ch_dot );
 
+      if( hit )        
+        CG_DrawPic( x, y, w, h, cgs.media.ch_dothit );
+        
+      break;
+    
+    case CH_CIRCLE:
+      if( ff )
+        CG_DrawPic( x, y, w, h, cgs.media.ch_friendly );
+      
+      if( hit )
+        CG_DrawPic( x, y, w, h, cgs.media.ch_circlehit );
+      else
+        CG_DrawPic( x, y, w, h, cgs.media.ch_circle );
+        
+      break;
+    
+    case CH_CIRCLEDDOT:
+      if( ff )
+        CG_DrawPic( x, y, w, h, cgs.media.ch_friendly );
+      else
+        CG_DrawPic( x, y, w, h, cgs.media.ch_dot );
+      
+      if( hit )
+        CG_DrawPic( x, y, w, h, cgs.media.ch_circlehit );
+      else
+        CG_DrawPic( x, y, w, h, cgs.media.ch_circle );
+        
+      break;
+      
+    case CH_ALIEN:
+      if( ff )
+        CG_DrawPic( x, y, w, h, cgs.media.ch_afriendly );
+      else
+        CG_DrawPic( x, y, w, h, cgs.media.ch_adot );
+
+      if( hit )        
+        CG_DrawPic( x, y, w, h, cgs.media.ch_acircle );
+      
+      break;
   }
 
-  if( hShader != 0 )
-  {
-
-    trap_R_SetColor( color );
-    CG_DrawPic( x, y, w, h, hShader );
-    trap_R_SetColor( NULL );
-  }
+  trap_R_SetColor( NULL );
 }
 
 

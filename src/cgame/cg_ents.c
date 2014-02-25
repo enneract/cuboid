@@ -236,7 +236,8 @@ static void CG_EntityEffects( centity_t *cent )
 
 
   // constant light glow
-  if ( cent->currentState.constantLight )
+  if ( cent->currentState.constantLight &&
+       cent->currentState.eType != ET_BUILDABLE )
   {
     int   cl;
     int   i, r, g, b;

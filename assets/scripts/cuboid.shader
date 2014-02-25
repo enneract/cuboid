@@ -119,75 +119,69 @@ gfx/cuboid/build_axis
  }
 }
 
-/*  GENERIC DESTRUCTION ANIMATION SHADERS
- * These shaders are applied on model if the
- * cuboid is damaged.
+/*  CRACKS
+ * This is an animated shader, starting at 0s and ending at 1s.
+ * Cgame uses a shaderTime hack to select the proper frame.
  */
-models/cuboid/cracks_0
+
+models/cuboid/cracks
 {
+ sort 3
  {
-  map models/cuboid/cracks_0.jpg
-  blendFunc filter
+  map models/cuboid/cracks.tga
+  alphaFunc GT0
+  alphaGen wave sin 0.5 0.5 0.0 0.2
  }
 }
-
-models/cuboid/cracks_1
-{
- {
-  map models/cuboid/cracks_1.jpg
-  blendFunc filter
- }
-}
-
-models/cuboid/cracks_2
-{
- {
-  map models/cuboid/cracks_2.jpg
-  blendFunc filter
- }
-}
-
+ 
 /*  CUBOID-SPECIFIC TEXTURES
  * These shaders are applied to cuboid's model.
  */
 
 models/cuboid/glass/glass
 {
+ cull none
+ sort 4
  {
   map models/cuboid/glass/glass
   blendFunc filter
-  rgbGen lightingDiffuse
+  rgbGen identity
  }
 }
 
+
 models/cuboid/concrete/concrete
 {
+ sort 3
  {
   map models/cuboid/concrete/concrete.jpg
-  rgbGen lightingDiffuse
+  rgbGen vertex
  }
 }
 
 models/cuboid/ladder/ladder
 {
+ sort 3
  {
   map models/cuboid/ladder/ladder.jpg
-  rgbGen lightingDiffuse
+  rgbGen vertex
  }
 }
 
 models/cuboid/organic/organic
 {
+ sort 3
  {
   map models/cuboid/organic/organic.jpg
-  rgbGen lightingDiffuse
+  rgbGen vertex
  }
 }
 models/cuboid/organic/organic_1
 {
+ sort 3
  {
   map models/cuboid/organic/organic.jpg
-  rgbGen lightingDiffuse
+  rgbGen vertex
  }
  {
   map models/cuboid/organic/organic_fx.jpg
@@ -198,9 +192,10 @@ models/cuboid/organic/organic_1
 
 models/cuboid/organic/organic_2
 {
+ sort 3
  {
   map models/cuboid/organic/organic.jpg
-  rgbGen lightingDiffuse
+  rgbGen vertex
  }
  {
   map models/cuboid/organic/organic_fx.jpg
@@ -211,9 +206,10 @@ models/cuboid/organic/organic_2
 
 models/cuboid/organic/organic_3
 {
+ sort 3
  {
   map models/cuboid/organic/organic.jpg
-  rgbGen lightingDiffuse
+  rgbGen vertex
  }
  {
   map models/cuboid/organic/organic_fx.jpg
@@ -224,11 +220,32 @@ models/cuboid/organic/organic_3
 
 models/cuboid/slime/slime
 {
+ sort 3
  {
   map models/cuboid/slime/slime.jpg
-  rgbGen lightingDiffuse
+  rgbGen vertex
   tcMod turb 0.75 0.25 0 0.07
-  tcGen environment
+ }
+ {
+  map models/cuboid/slime/slime.jpg
+  blendFunc add
+  rgbGen vertex
+  tcMod turb 0.63 0.19 0.5 0.11
+ }
+}
+
+/*  CAPACITOR BANK
+ */
+models/buildables/capbank/capbank
+{
+ {
+  map models/buildables/capbank/capbank.jpg
+  rgbGen lightingDiffuse
+ }
+ {
+  map models/buildables/capbank/capbank_lights.jpg
+  blendFunc add
+  rgbGen wave sin 0.9 0.1 0 1.5
  }
 }
 
@@ -284,3 +301,24 @@ gfx/2d/basivisionFlare
   blendFunc add
  }
 }
+
+gfx/misc/unpowered_prebuild
+{
+ cull disable
+ {
+  map models/buildables/telenode/rep_cyl.jpg
+  blendfunc add
+  rgbGen wave sin 0.1 0.05 0 123.45
+  tcMod scroll 0.2 0
+ }
+}
+
+lightning01
+{
+ nopicmip
+ {
+  map gfx/lightning/lightning01.jpg
+  blendFunc add
+ }
+}
+

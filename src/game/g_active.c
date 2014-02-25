@@ -682,20 +682,6 @@ void ClientTimerActions( gentity_t *ent, int msec )
             client->ps.stats[ STAT_BUILDABLE ] |= SB_VALID_TOGGLEBIT;
           else
             client->ps.stats[ STAT_BUILDABLE ] &= ~SB_VALID_TOGGLEBIT;
-
-          // Let the client know which buildables will be removed by building
-          for( i = 0; i < MAX_MISC; i++ )
-          {
-            if( i < level.numBuildablesForRemoval )
-              client->ps.misc[ i ] = level.markedBuildables[ i ]->s.number;
-            else
-              client->ps.misc[ i ] = 0;
-          }
-        }
-        else
-        {
-          for( i = 0; i < MAX_MISC; i++ )
-            client->ps.misc[ i ] = 0;
         }
         break;
 
@@ -780,6 +766,55 @@ void ClientTimerActions( gentity_t *ent, int msec )
     ent->client->ps.stats[ STAT_SHAKE ] *= 0.77f;
     if( ent->client->ps.stats[ STAT_SHAKE ] < 0 )
       ent->client->ps.stats[ STAT_SHAKE ] = 0;
+
+    // update the currents and voltages
+    if( BG_GetPlayerWeapon( &client->ps ) == WP_HBUILD )
+    {
+      trace_t tr;
+      vec3_t viewOrigin, forward, end;
+      gentity_t *traceEnt;
+      int head_network = 0, head_entity = 1023;
+
+      BG_GetClientViewOrigin( &client->ps, viewOrigin );
+      AngleVectors( client->ps.viewangles, forward, NULL, NULL );
+      VectorMA( viewOrigin, 200, forward, end );
+
+      trap_Trace( &tr, viewOrigin, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID );
+      traceEnt = &g_entities[ tr.entityNum ];
+
+      head_network = ent->powerNetwork;
+
+      if( tr.fraction < 0.99f )
+      {
+        if( traceEnt->client )
+        {
+          if( traceEnt->client->pers.teamSelection == TEAM_HUMANS &&
+              traceEnt->client->ps.stats[ STAT_HEALTH ] >= 0 )
+          {
+              head_entity = traceEnt->s.number;
+              client->ps.misc[ MISC_INFO1 ] = traceEnt->client->ps.stats[ STAT_HEALTH ];
+              
+              if( BG_GetPlayerWeapon( &traceEnt->client->ps ) == WP_HBUILD )
+                client->ps.misc[ MISC_INFO2 ] = traceEnt->client->ps.persistant[ PERS_BUILDPOINTS ];
+              else
+                client->ps.misc[ MISC_INFO2 ] = -1;
+          }
+        }
+        else if( traceEnt->s.eType == ET_BUILDABLE &&
+                 traceEnt->health > 0 && traceEnt->buildableTeam == TEAM_HUMANS &&
+                 ( traceEnt->isPowerSource || traceEnt->requiresPower ) )
+        {
+          head_network = traceEnt->powerNetwork;
+          head_entity = traceEnt->s.number;
+          client->ps.misc[ MISC_INFO1 ] = traceEnt->current * 1000;
+          client->ps.misc[ MISC_INFO2 ] = traceEnt->voltage * 1000;
+          client->ps.misc[ MISC_INFO3 ] = traceEnt->storedBP * 10;
+        }
+      }
+        
+      client->ps.misc[ MISC_INFOHEAD ] = ( head_network & 1023 ) | ( head_entity & 1023 ) << 10;
+      
+    }
   }
 
   while( client->time1000 >= 1000 )
@@ -1769,16 +1804,11 @@ void ClientThink_real( gentity_t *ent )
     vec3_t    eyes, view, point;
     gentity_t *traceEnt;
 
-#define USE_OBJECT_RANGE 64
-
-    int       entityList[ MAX_GENTITIES ];
-    vec3_t    range = { USE_OBJECT_RANGE, USE_OBJECT_RANGE, USE_OBJECT_RANGE };
-    vec3_t    mins, maxs;
-    int       i, num;
+#define USE_OBJECT_RANGE 100
 
     // look for object infront of player
     AngleVectors( client->ps.viewangles, view, NULL, NULL );
-    BG_GetClientViewOrigin( &client->ps, eyes ); // !@#CUBOID
+    BG_GetClientViewOrigin( &client->ps, eyes );
     VectorMA( eyes, USE_OBJECT_RANGE, view, point );
       
     trap_Trace( &trace, client->ps.origin, NULL, NULL, point, ent->s.number, MASK_SHOT );
@@ -1786,50 +1816,29 @@ void ClientThink_real( gentity_t *ent )
 
     if( traceEnt && traceEnt->buildableTeam == client->ps.stats[ STAT_TEAM ] && traceEnt->use )
       traceEnt->use( traceEnt, ent, ent ); //other and activator are the same in this context
-    else
+    else if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
     {
-      //no entity in front of player - do a small area search
-
-      VectorAdd( client->ps.origin, range, maxs );
-      VectorSubtract( client->ps.origin, range, mins );
-
-      num = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
-      for( i = 0; i < num; i++ )
+      if( BG_AlienCanEvolve( client->ps.stats[ STAT_CLASS ],
+                             client->pers.credit,
+                             g_alienStage.integer ) )
       {
-        traceEnt = &g_entities[ entityList[ i ] ];
-
-        if( traceEnt && traceEnt->buildableTeam == client->ps.stats[ STAT_TEAM ] && traceEnt->use )
-        {
-          traceEnt->use( traceEnt, ent, ent ); //other and activator are the same in this context
-          break;
-        }
+        //no nearby objects and alien - show class menu
+        G_TriggerMenu( ent->client->ps.clientNum, MN_A_INFEST );
       }
-
-      if( i == num && client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
+      else
       {
-        if( BG_AlienCanEvolve( client->ps.stats[ STAT_CLASS ],
-                               client->pers.credit,
-                               g_alienStage.integer ) )
-        {
-          //no nearby objects and alien - show class menu
-          G_TriggerMenu( ent->client->ps.clientNum, MN_A_INFEST );
-        }
-        else
-        {
-          //flash frags
-          G_AddEvent( ent, EV_ALIEN_EVOLVE_FAILED, 0 );
-        }
+        //flash frags
+        G_AddEvent( ent, EV_ALIEN_EVOLVE_FAILED, 0 );
       }
     }
   }
 
-  client->ps.persistant[ PERS_BP ] = G_GetBuildPoints( client->ps.origin,
-    client->ps.stats[ STAT_TEAM ] );
-  client->ps.persistant[ PERS_MARKEDBP ] = G_GetMarkedBuildPoints( client->ps.origin,
-    client->ps.stats[ STAT_TEAM ] );
-
-  if( client->ps.persistant[ PERS_BP ] < 0 )
-    client->ps.persistant[ PERS_BP ] = 0;
+  if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
+  {
+    client->ps.persistant[ PERS_BUILDPOINTS ] = G_GetBuildPoints( client->ps.origin, client->ps.stats[ STAT_TEAM ] );
+    if( client->ps.persistant[ PERS_BUILDPOINTS ] < 0 )
+      client->ps.persistant[ PERS_BUILDPOINTS ] = 0;
+  }
 
   // perform once-a-second actions
   ClientTimerActions( ent, msec );

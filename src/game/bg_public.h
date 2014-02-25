@@ -280,18 +280,32 @@ typedef enum
   PERS_CREDIT,    // human credit
   PERS_QUEUEPOS,  // position in the spawn queue
   PERS_NEWWEAPON,  // weapon to switch to
-  PERS_BP,
-  PERS_MARKEDBP,
+  PERS_BUILDPOINTS, 
   //zdrytchx: no space in stats, use persistant. This meanas we risk doing a double jump upon spawning but death animations are 1700 msecs long, so technically it's impossible anyway
   PERS_JUMPTIME,
   PERS_SPAWNS_IMPLANTED
-  // netcode has space for 1 more
+  // netcode has space for 2 more
 } persEnum_t;
 
 #define PS_WALLCLIMBINGFOLLOW   0x00000001
 #define PS_WALLCLIMBINGTOGGLE   0x00000002
 #define PS_NONSEGMODEL          0x00000004
 #define PS_SPRINTTOGGLE         0x00000008
+
+// player_state->misc[] indexes
+typedef enum
+{
+  MISC_INFOHEAD,
+  MISC_INFO1,
+  MISC_INFO2,
+  MISC_INFO3,
+  
+  MISC_CUBOID_X,
+  MISC_CUBOID_Y,
+  MISC_CUBOID_Z
+  
+  // netcode has space for 10 more
+} miscEnum_t;
 
 // entityState_t->eFlags
 // notice that some flags are overlapped, so their meaning depends on context
@@ -307,7 +321,7 @@ typedef enum
 // buildable flags:
 #define EF_B_SPAWNED        0x0008
 #define EF_B_POWERED        0x0010
-#define EF_B_MARKED         0x0020
+#define EF_B_SURGE          0x0020    // note: enabled/disabled for Repeaters
 
 #define EF_WARN_CHARGE      0x0020    // Lucifer Cannon is about to overcharge
 #define EF_WALLCLIMB        0x0040    // wall walking
@@ -438,6 +452,10 @@ typedef enum
 
   BA_H_REACTOR,
   BA_H_REPEATER,
+  BA_H_CAPBANK,
+  BA_H_RTG,
+  
+  BA_H_REFINERY,
   
   //cuboids must stay in a block
 #define CUBOID_FIRST BA_H_CUBOID1
@@ -581,7 +599,10 @@ typedef enum
   EV_ALIEN_HATCH_FAILURE, // when it doesns't work
   
   EV_JETPACK_DEACTIVATE,
-  EV_JETPACK_REFUEL
+  EV_JETPACK_REFUEL,
+  
+  EV_POWER_SWITCH,
+  EV_POWER_ZAP
 
 } entity_event_t;
 
@@ -1068,9 +1089,17 @@ typedef struct
   qboolean      transparentTest;
   qboolean      uniqueTest;
   
-  int       value;
+  int           value;
   
   qboolean      cuboid;
+  
+  //power grid features
+  qboolean      isPowerSource;
+  qboolean      requiresPower;
+  float         resistance;
+  float         surgeResistance;
+  
+  qboolean      hasStorage;
 } buildableAttributes_t;
 
 typedef struct

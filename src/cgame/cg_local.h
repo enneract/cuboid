@@ -79,8 +79,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define TEAM_OVERLAY_MAXNAME_WIDTH  12
 #define TEAM_OVERLAY_MAXLOCATION_WIDTH  16
 
-#define CUBOID_CRACK_TEXTURES 4
-
 typedef enum
 {
   FOOTSTEP_NORMAL,
@@ -814,6 +812,15 @@ typedef struct weaponInfoMode_s
   sfxHandle_t impactFleshSound[ 4 ]; //random impact sound
 } weaponInfoMode_t;
 
+enum
+{
+  CH_NONE,
+  CH_DOT,
+  CH_CIRCLE,
+  CH_CIRCLEDDOT,
+  CH_ALIEN
+};
+
 // each WP_* weapon enum has an associated weaponInfo_t
 // that contains media references necessary to present the
 // weapon and its effects
@@ -839,7 +846,7 @@ typedef struct weaponInfo_s
   qhandle_t         weaponIcon;
   qhandle_t         ammoIcon;
 
-  qhandle_t         crossHair;
+  int               crossHairType;
   int               crossHairSize;
 
   sfxHandle_t       readySound;
@@ -931,6 +938,25 @@ typedef struct
 
 #define MAX_CONSOLE_TEXT  8192
 #define MAX_CONSOLE_LINES 32
+
+#define MAX_CKIT_ROWS 6
+#define MAX_CKIT_COLUMNS 7
+#define MAX_CKIT_TEXT 64 //make it big so Com_sprintf won't spam errors
+
+typedef struct
+{
+  qhandle_t icon;
+  char text[ MAX_CKIT_TEXT ];
+} ckitDisplayLine_t;
+
+typedef struct
+{
+  qhandle_t background;
+  qhandle_t bigicona;
+  qhandle_t bigiconb;
+  ckitDisplayLine_t lines[ MAX_CKIT_ROWS ];
+} ckitDisplay_t;
+
 
 // all cg.stepTime, cg.duckTime, cg.landTime, etc are set to cg.time when the action
 // occurs, and they will have visible effects for #define STEP_TIME or whatever msec after
@@ -1194,6 +1220,16 @@ typedef struct
   qhandle_t     announcerStack[ MAX_ANNOUNCER_STACK ];
   int           announcerStackPos;
   int           announcerStackLatest;
+
+  // no space for voltage and current information so they're being sent
+  // over the network in commands
+  int           bse_entityNum;
+  float         bse_voltage;
+  float         bse_current;
+
+  ckitDisplay_t ckitDisp;
+  
+  int           lastHitTime;
 } cg_t;
 
 
@@ -1228,6 +1264,7 @@ typedef struct
   qhandle_t   teamOverlayShader;
 
   qhandle_t   numberShaders[ 11 ];
+  qhandle_t   digitalNumberShaders[ 12 ]; // note: 11 is comma
 
   qhandle_t   shadowMarkShader;
   qhandle_t   wakeMarkShader;
@@ -1236,6 +1273,7 @@ typedef struct
   qhandle_t   greenBuildShader;
   qhandle_t   redBuildShader;
   qhandle_t   humanSpawningShader;
+  qhandle_t   humanUnpoweredSpawningShader;
 
   // disconnect
   qhandle_t   disconnectPS;
@@ -1337,12 +1375,16 @@ typedef struct
   qhandle_t   humanBleedPS;
   qhandle_t   alienBuildableBleedPS;
   qhandle_t   humanBuildableBleedPS;
-
+  
+  qhandle_t   humanPowerZapPS;
 
   qhandle_t   teslaZapTS;
 
   sfxHandle_t lCannonWarningSound;
   sfxHandle_t lCannonWarningSound2;
+
+  qhandle_t   friendlyCrosshair;
+  qhandle_t   hitCrosshair;
 
   qhandle_t   buildWeaponTimerPie[ 8 ];
   qhandle_t   upgradeClassIconShader;
@@ -1353,7 +1395,7 @@ typedef struct
   qhandle_t   healthCrossPoisoned;
   qhandle_t   healthCrossImplanted;
   
-  qhandle_t   cuboidCracks[CUBOID_CRACK_TEXTURES-1];
+  qhandle_t   cuboidCracks;
   qhandle_t   cuboidModel;
   qhandle_t   cuboidRedBuildShader;
   qhandle_t   cuboidYellowBuildShader;
@@ -1378,6 +1420,50 @@ typedef struct
   qhandle_t   basivisionShader;
   qhandle_t   basivisionBlipShader;
   qhandle_t   basivisionFlareShader;
+  
+  sfxHandle_t unpoweredSurgeLoop;
+  sfxHandle_t powerSwitchSound;
+  sfxHandle_t powerZap[ 4 ];
+  
+  //ckit's hacky dynamic display
+  qhandle_t   ckitBackgroundShader; //note: supposed to be dynamic but I've got nothing put there yet
+  qhandle_t   ckitOverlayShader;
+  
+  qhandle_t   ckit_background;
+  qhandle_t   ckit_overlay;
+  qhandle_t   ckit_bigicona;
+  qhandle_t   ckit_bigiconb;
+  qhandle_t   ckit_icon;
+  qhandle_t   ckit_digit;
+  
+  qhandle_t   ckit_icon_bp;
+  qhandle_t   ckit_icon_current;
+  qhandle_t   ckit_icon_depth;
+  qhandle_t   ckit_icon_health;
+  qhandle_t   ckit_icon_height;
+  qhandle_t   ckit_icon_network;
+  qhandle_t   ckit_icon_nopower;
+  qhandle_t   ckit_icon_nosurge;
+  qhandle_t   ckit_icon_off;
+  qhandle_t   ckit_icon_power;
+  qhandle_t   ckit_icon_storedbp;
+  qhandle_t   ckit_icon_surge;
+  qhandle_t   ckit_icon_time;
+  qhandle_t   ckit_icon_voltage;
+  qhandle_t   ckit_icon_width;
+  
+  qhandle_t   ch_dot;
+  qhandle_t   ch_dothit;
+  qhandle_t   ch_circle;
+  qhandle_t   ch_circlehit;
+  qhandle_t   ch_friendly;
+
+  qhandle_t   ch_adot;
+  qhandle_t   ch_acircle;
+  qhandle_t   ch_afriendly;
+  qhandle_t   ch_aheadshot;
+  
+  sfxHandle_t hitSound;
 } cgMedia_t;
 
 typedef struct
@@ -1425,7 +1511,6 @@ typedef struct
   int           timelimit;
   int           maxclients;
   char          mapname[ MAX_QPATH ];
-  qboolean      markDeconstruct;        // Whether or not buildables are marked
 
   int           voteTime[ NUM_TEAMS ];
   int           voteYes[ NUM_TEAMS ];
@@ -1623,8 +1708,10 @@ extern  vmCvar_t    cg_chatTeamPrefix;
 extern  vmCvar_t    cg_cuboidResizeAxis;
 extern  vmCvar_t    cg_cuboidResizeRate;
 extern  vmCvar_t    cg_cuboidPSQuality;
+
 extern  vmCvar_t    cg_cuboidInfoX;
 extern  vmCvar_t    cg_cuboidInfoY;
+extern  vmCvar_t    cg_drawCuboidInfo;
 
 extern  vmCvar_t    cg_fuelInfoX;
 extern  vmCvar_t    cg_fuelInfoY;
@@ -1633,6 +1720,11 @@ extern  vmCvar_t    cg_fuelInfoScale;
 extern  vmCvar_t    cg_announcer;
 
 extern  vmCvar_t    cg_cameraShakeMagnitude;
+
+extern  vmCvar_t    cg_debug1;
+extern  vmCvar_t    cg_debug2;
+extern  vmCvar_t    cg_debug3;
+extern  vmCvar_t    cg_debug4;
 
 //
 // cg_main.c
@@ -1753,15 +1845,16 @@ void        CG_DrawBuildableStatus( void );
 void        CG_InitBuildables( void );
 void        CG_HumanBuildableExplosion( vec3_t origin, vec3_t dir );
 void        CG_AlienBuildableExplosion( vec3_t origin, vec3_t dir );
-void        CG_CuboidAxis_f(void);
-void        CG_CuboidRotate_f(void);
-void        CG_CuboidSize_f(void);
-void        CG_Cuboid_Send(void);
-void        CG_Cuboid_Response(void);
+void        CG_CuboidAxis_f( void );
+void        CG_CuboidRotate_f( void );
+void        CG_CuboidSize_f( void );
+void        CG_Cuboid_Send( void );
+void        CG_Cuboid_Response( void );
 void        CG_CuboidResize( qboolean enlarge );
-void        CG_CuboidExplosion(buildable_t buildable, vec3_t origin, vec3_t cuboid);
-void        CG_DrawCuboidParticles(void);
-void        CG_CuboidAttack_f(void);
+void        CG_CuboidExplosion( buildable_t buildable, vec3_t origin, vec3_t cuboid );
+void        CG_DrawCuboidParticles( void );
+void        CG_CuboidAttack_f( void );
+qhandle_t  CG_BuildablePowerStatusIcon( entityState_t *es );
 
 //
 // cg_animation.c

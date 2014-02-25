@@ -271,6 +271,12 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops )
       last = cg.time;
     }
   }
+  
+  if( ps->persistant[ PERS_HITS ] != ops->persistant[ PERS_HITS ] )
+  {
+    trap_S_StartSound( NULL, cg.predictedPlayerState.clientNum, CHAN_AUTO, cgs.media.hitSound );
+    cg.lastHitTime = cg.time;
+  }
     
   // if we are going into the intermission, don't start any voices
   if( cg.intermissionStarted )

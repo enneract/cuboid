@@ -808,6 +808,25 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.repeaterUseSound );
       break;
 
+    case EV_POWER_SWITCH:
+      trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.powerSwitchSound );
+      break;
+      
+    case EV_POWER_ZAP:
+      {
+        particleSystem_t *ps;
+        ps = CG_SpawnNewParticleSystem( cgs.media.humanPowerZapPS );
+
+        if( CG_IsParticleSystemValid( &ps ) )
+        {
+          CG_SetAttachmentPoint( &ps->attachment, position );
+          CG_SetAttachmentCent( &ps->attachment, cg_entities + es->number );
+          CG_AttachToPoint( &ps->attachment );
+        }
+      }
+      trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.powerZap[ rand() % 4 ] );
+      break;
+
     case EV_GRENADE_BOUNCE:
       if( rand( ) & 1 )
         trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.hardBounceSound1 );

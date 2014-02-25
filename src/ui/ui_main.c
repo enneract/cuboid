@@ -1690,7 +1690,7 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
           break;
 
         case TEAM_HUMANS:
-          string = "Power";
+          string = "Mass";
           break;
 
         default:
@@ -2580,24 +2580,41 @@ static void UI_LoadHumanBuilds( void )
 {
   int     i, j = 0;
   stage_t stage;
+  static buildable_t list [ 14 ] =
+  {
+    BA_H_RTG,
+    BA_H_REACTOR,
+    BA_H_SPAWN,
+    BA_H_REFINERY,
+    BA_H_MGTURRET,
+    BA_H_ARMOURY,
+    BA_H_MEDISTAT,
+    BA_H_REPEATER,
+    BA_H_CAPBANK,
+    BA_H_DCC,
+    BA_H_TESLAGEN,
+    BA_H_CUBOID1,
+    BA_H_CUBOID2,
+    BA_H_CUBOID3
+  };
 
   UI_ParseCarriageList( );
   stage = UI_GetCurrentHumanStage( );
 
   uiInfo.humanBuildCount = 0;
 
-  for( i = BA_NONE + 1; i < BA_NUM_BUILDABLES; i++ )
+  for( i = 0; i < 14; i++ )
   {
-    if( BG_Buildable( i, NULL )->team == TEAM_HUMANS &&
-        BG_Buildable( i, NULL )->buildWeapon & uiInfo.weapons &&
-        BG_BuildableAllowedInStage( i, stage ) &&
-        BG_BuildableIsAllowed( i ) )
+    if( BG_Buildable( list[ i ], NULL )->team == TEAM_HUMANS &&
+        BG_Buildable( list[ i ], NULL )->buildWeapon & uiInfo.weapons &&
+        BG_BuildableAllowedInStage( list[ i ], stage ) &&
+        BG_BuildableIsAllowed( list[ i ] ) )
     {
-      uiInfo.humanBuildList[ j ].text = BG_Buildable( i, NULL )->humanName;
+      uiInfo.humanBuildList[ j ].text = BG_Buildable( list[ i ], NULL )->humanName;
       uiInfo.humanBuildList[ j ].cmd =
-        String_Alloc( va( "cmd build %s\n", BG_Buildable( i, NULL )->name ) );
+        String_Alloc( va( "cmd build %s\n", BG_Buildable( list[ i ], NULL )->name ) );
       uiInfo.humanBuildList[ j ].type = INFOTYPE_BUILDABLE;
-      uiInfo.humanBuildList[ j ].v.buildable = i;
+      uiInfo.humanBuildList[ j ].v.buildable = list[ i ];
 
       j++;
 

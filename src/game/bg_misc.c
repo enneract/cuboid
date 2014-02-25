@@ -69,7 +69,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     ASPAWN_VALUE,          //int       value;
-    qfalse                 //qboolean  cuboid;
+    qfalse,                //qboolean  cuboid;
+    DEFAULT_POWER_SETTINGS
   },
   {
     BA_A_OVERMIND,         //int       buildNum;
@@ -105,7 +106,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qtrue,                 //qboolean  uniqueTest;
     OVERMIND_VALUE,        //int       value;
-    qfalse                 //qboolean  cuboid;
+    qfalse,                //qboolean  cuboid;
+    DEFAULT_POWER_SETTINGS
   },
   {
     BA_A_BARRICADE,        //int       buildNum;
@@ -141,7 +143,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     BARRICADE_VALUE,       //int       value;
-    qfalse                 //qboolean  cuboid;
+    qfalse,                //qboolean  cuboid;
+    DEFAULT_POWER_SETTINGS
   },
   {
     BA_A_ACIDTUBE,         //int       buildNum;
@@ -177,7 +180,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     ACIDTUBE_VALUE,        //int       value;
-    qfalse                 //qboolean  cuboid;
+    qfalse,                //qboolean  cuboid;
+    DEFAULT_POWER_SETTINGS
   },
   {
     BA_A_TRAPPER,          //int       buildNum;
@@ -213,7 +217,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     TRAPPER_VALUE,         //int       value;
-    qfalse                 //qboolean  cuboid;
+    qfalse,                //qboolean  cuboid;
+    DEFAULT_POWER_SETTINGS
   },
   {
     BA_A_BOOSTER,          //int       buildNum;
@@ -250,7 +255,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     BOOSTER_VALUE,         //int       value;
-    qfalse                 //qboolean  cuboid;
+    qfalse,                //qboolean  cuboid;
+    DEFAULT_POWER_SETTINGS
   },
   {
     BA_A_HIVE,             //int       buildNum;
@@ -285,7 +291,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     HIVE_VALUE,            //int       value;
-    qfalse                 //qboolean  cuboid;
+    qfalse,                //qboolean  cuboid;
+    DEFAULT_POWER_SETTINGS
   },
   {
     BA_H_SPAWN,            //int       buildNum;
@@ -321,7 +328,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     HSPAWN_VALUE,          //int       value;
-    qfalse                 //qboolean  cuboid;
+    qfalse,                //qboolean  cuboid;
+    DEFAULT_POWER_SETTINGS
   },
   {
     BA_H_MGTURRET,         //int       buildNum;
@@ -357,7 +365,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     MGTURRET_VALUE,        //int       value;
-    qfalse                 //qboolean  cuboid;
+    qfalse,                //qboolean  cuboid;
+    qfalse,                //qboolean  isPowerSource;
+    qtrue,                 //qboolean  requiresPower;
+    MGTURRET_R_IDLE,       //float     resistance;
+    MGTURRET_R_ACTIVE,     //float     surgeResistance;
+    qfalse                 //qboolean  hasStorage;
   },
   {
     BA_H_TESLAGEN,         //int       buildNum;
@@ -393,7 +406,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     TESLAGEN_VALUE,        //int       value;
-    qfalse                 //qboolean  cuboid;
+    qfalse,                //qboolean  cuboid;
+    qfalse,                //qboolean  isPowerSource;
+    qtrue,                 //qboolean  requiresPower;
+    TESLAGEN_R_IDLE,       //float     resistance;
+    TESLAGEN_R_ACTIVE,     //float     surgeResistance;  
+    qfalse                 //qboolean  hasStorage;
   },
   {
     BA_H_ARMOURY,          //int       buildNum;
@@ -429,7 +447,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     ARMOURY_VALUE,         //int       value;
-    qfalse                 //qboolean  cuboid;
+    qfalse,                //qboolean  cuboid;
+    qfalse,                //qboolean  isPowerSource;
+    qtrue,                 //qboolean  requiresPower;
+    ARMOURY_RESISTANCE,    //float     resistance;
+    ARMOURY_RESISTANCE,    //float     surgeResistance;
+    qfalse                 //qboolean  hasStorage;
   },
   {
     BA_H_DCC,              //int       buildNum;
@@ -465,7 +488,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     DC_VALUE,              //int       value;
-    qfalse                 //qboolean  cuboid;
+    qfalse,                //qboolean  cuboid;
+    qfalse,                //qboolean  isPowerSource;
+    qtrue,                 //qboolean  requiresPower;
+    DC_R_IDLE,             //float     resistance;
+    DC_R_ACTIVE,           //float     surgeResistance;
+    qfalse                 //qboolean  hasStorage;
   },
   {
     BA_H_MEDISTAT,         //int       buildNum;
@@ -502,20 +530,24 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     MEDISTAT_VALUE,        //int       value;
-    qfalse                 //qboolean  cuboid;
+    qfalse,                //qboolean  cuboid;
+    qfalse,                //qboolean  isPowerSource;
+    qtrue,                 //qboolean  requiresPower;
+    MEDISTAT_R_IDLE,       //float     resistance;
+    MEDISTAT_R_ACTIVE,     //float     surgeResistance;
+    qfalse                 //qboolean  hasStorage;
   },
   {
     BA_H_REACTOR,          //int       buildNum;
     "reactor",             //char      *buildName;
     "Reactor",             //char      *humanName;
-    "All structures except the telenode rely on a reactor to operate. "
-      "The reactor provides power for all the human structures either "
-      "directly or via repeaters. Only one reactor can be built at a time.",
-    "team_human_reactor",  //char      *entityName;
+    "A large nuclear generator, able to power substantial amounts of "
+    "structures.",
+    "team_human_reactor_big",  //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
     0.0,                   //float     bounce;
     REACTOR_BP,            //int       buildPoints;
-    ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages
+    ( 1 << S3 ),           //int  stages
     REACTOR_HEALTH,        //int       health;
     0,                     //int       regenRate;
     REACTOR_SPLASHDAMAGE,  //int       splashDamage;
@@ -536,9 +568,14 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0,                     //int       creepSize;
     qfalse,                //qboolean  dccTest;
     qfalse,                //qboolean  transparentTest;
-    qtrue,                 //qboolean  uniqueTest;
+    qfalse,                //qboolean  uniqueTest;
     REACTOR_VALUE,         //int       value;
-    qfalse                 //qboolean  cuboid;
+    qfalse,                //qboolean  cuboid;
+    qtrue,                 //qboolean  isPowerSource;
+    qfalse,                //qboolean  requiresPower;
+    REACTOR_RESISTANCE,    //float     resistance;
+    REACTOR_RESISTANCE,    //float     surgeResistance;
+    qfalse                 //qboolean  hasStorage;
   },
   {
     BA_H_REPEATER,         //int       buildNum;
@@ -574,7 +611,135 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     REPEATER_VALUE,        //int       value;
-    qfalse                 //qboolean  cuboid;
+    qfalse,                //qboolean  cuboid;
+    DEFAULT_POWER_SETTINGS
+  },
+  {
+    BA_H_CAPBANK,          //int       buildNum;
+    "capbank",             //char      *buildName;
+    "Capacitor Bank",      //char      *humanName;
+    "A bank of capacitors able to compensate for "
+    "fluctations in the power network or even power "
+    "the network in the absence of a Reactor.",
+    "team_human_capbank",  //char      *entityName;
+    TR_GRAVITY,            //trType_t  traj;
+    0.0,                   //float     bounce;
+    CAPBANK_BP,            //int       buildPoints;
+    ( 1 << S2 )|( 1 << S3 ), //int  stages
+    CAPBANK_HEALTH,        //int       health;
+    0,                     //int       regenRate;
+    CAPBANK_SPLASHDAMAGE,  //int       splashDamage;
+    CAPBANK_SPLASHRADIUS,  //int       splashRadius;
+    MOD_HSPAWN,            //int       meansOfDeath;
+    TEAM_HUMANS,            //int       team;
+    ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
+    BANIM_IDLE1,           //int       idleAnim;
+    100,                   //int       nextthink;
+    CAPBANK_BT,            //int       buildTime;
+    qtrue,                 //qboolean  usable;
+    0,                     //int       turretRange;
+    0,                     //int       turretFireSpeed;
+    WP_NONE,               //weapon_t  turretProjType;
+    0.95f,                 //float     minNormal;
+    qfalse,                //qboolean  invertNormal;
+    qfalse,                //qboolean  creepTest;
+    0,                     //int       creepSize;
+    qfalse,                //qboolean  dccTest;
+    qfalse,                //qboolean  transparentTest;
+    qfalse,                //qboolean  uniqueTest;
+    CAPBANK_VALUE,         //int       value;
+    qfalse,                //qboolean  cuboid;
+    qtrue,                 //qboolean  isPowerSource;
+    qfalse,                //qboolean  requiresPower;
+    CAPBANK_RESISTANCE,    //float     resistance;
+    CAPBANK_RESISTANCE,    //float     surgeResistance;
+    qfalse                 //qboolean  hasStorage;
+  },
+  {
+    BA_H_RTG,              //int       buildNum;
+    "rtg",                 //char      *buildName;
+    "RTG Unit",            //char      *humanName;
+    "A portable all-in-one device, featuring a "
+    "radioisotope thermoelectric generator and a "
+    "miniaturized version of the Refinery. Does not "
+    "require power to be built. ^2First RTG Unit does "
+    "not require build points!",
+    "team_human_reactor",  //char      *entityName;
+    TR_GRAVITY,            //trType_t  traj;
+    0.0,                   //float     bounce;
+    RTG_BP,                //int       buildPoints;
+    ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages
+    RTG_HEALTH,            //int       health;
+    0,                     //int       regenRate;
+    RTG_SPLASHDAMAGE,      //int       splashDamage;
+    RTG_SPLASHRADIUS,      //int       splashRadius;
+    MOD_HSPAWN,            //int       meansOfDeath;
+    TEAM_HUMANS,           //int       team;
+    ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
+    BANIM_IDLE1,           //int       idleAnim;
+    500,                   //int       nextthink;
+    RTG_BT,                //int       buildTime;
+    qtrue,                 //qboolean  usable;
+    0,                     //int       turretRange;
+    0,                     //int       turretFireSpeed;
+    WP_NONE,               //weapon_t  turretProjType;
+    0.95f,                 //float     minNormal;
+    qfalse,                //qboolean  invertNormal;
+    qfalse,                //qboolean  creepTest;
+    0,                     //int       creepSize;
+    qfalse,                //qboolean  dccTest;
+    qfalse,                //qboolean  transparentTest;
+    qfalse,                //qboolean  uniqueTest;
+    RTG_VALUE,             //int       value;
+    qfalse,                //qboolean  cuboid;
+    qtrue,                 //qboolean  isPowerSource;
+    qfalse,                //qboolean  requiresPower;
+    RTG_RESISTANCE,        //float     resistance;
+    RTG_RESISTANCE,        //float     surgeResistance;
+    qtrue                  //qboolean  hasStorage;
+  },
+  {
+    BA_H_REFINERY,         //int       buildNum;
+    "refinery",            //char      *buildName;
+    "Refinery",            //char      *humanName;
+    "A portable all-in-one device, featuring a "
+    "radioisotope thermoelectric generator and a "
+    "miniaturized version of the Refinery. Does not "
+    "require power to be built. ^1This is the first "
+    "buildable to be built.",
+    "team_human_refinery", //char      *entityName;
+    TR_GRAVITY,            //trType_t  traj;
+    0.0,                   //float     bounce;
+    REFINERY_BP,           //int       buildPoints;
+    ( 1 << S2 )|( 1 << S3 ), //int  stages
+    REFINERY_HEALTH,       //int       health;
+    0,                     //int       regenRate;
+    REFINERY_SPLASHDAMAGE, //int       splashDamage;
+    REFINERY_SPLASHRADIUS, //int       splashRadius;
+    MOD_HSPAWN,            //int       meansOfDeath;
+    TEAM_HUMANS,           //int       team;
+    ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
+    BANIM_IDLE1,           //int       idleAnim;
+    500,                   //int       nextthink;
+    REFINERY_BT,           //int       buildTime;
+    qtrue,                 //qboolean  usable;
+    0,                     //int       turretRange;
+    0,                     //int       turretFireSpeed;
+    WP_NONE,               //weapon_t  turretProjType;
+    0.95f,                 //float     minNormal;
+    qfalse,                //qboolean  invertNormal;
+    qfalse,                //qboolean  creepTest;
+    0,                     //int       creepSize;
+    qfalse,                //qboolean  dccTest;
+    qfalse,                //qboolean  transparentTest;
+    qfalse,                //qboolean  uniqueTest;
+    REFINERY_VALUE,        //int       value;
+    qfalse,                //qboolean  cuboid;
+    qfalse,                //qboolean  isPowerSource;
+    qtrue,                 //qboolean  requiresPower;
+    REFINERY_R_IDLE,       //float     resistance;
+    REFINERY_R_ACTIVE,     //float     surgeResistance;
+    qtrue                  //qboolean  hasStorage;
   },
   {
     BA_H_CUBOID1,          //int       buildNum;
@@ -610,7 +775,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     0,                     //int       value;
-    qtrue                  //qboolean  cuboid;
+    qtrue,                 //qboolean  cuboid;
+    DEFAULT_POWER_SETTINGS
   },
   {
     BA_H_CUBOID2,          //int       buildNum;
@@ -618,13 +784,13 @@ static const buildableAttributes_t bg_buildableList[ ] =
     "Glass",               //char      *humanName;
     "A cuboid made of a transparent chemical compound. "
     "Its durability is low compared to other glass-like "
-    "materials. However it has shown increased strenght "
+    "materials. However it has shown increased strength "
     "when formed into a thin pane shape.",
     "team_human_hcuboid2", //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
     0.0,                   //float     bounce;
     0,                     //int       buildPoints;
-    ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages
+    ( 1 << S2 )|( 1 << S3 ), //int  stages
     0,                     //int       health;
     0,                     //int       regenRate;
     0,                     //int       splashDamage;
@@ -647,7 +813,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     0,                     //int       value;
-    qtrue                  //qboolean  cuboid;
+    qtrue,                 //qboolean  cuboid;
+    DEFAULT_POWER_SETTINGS
   },
   {
     BA_H_CUBOID3,          //int       buildNum;
@@ -661,7 +828,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     TR_GRAVITY,            //trType_t  traj;
     0.0,                   //float     bounce;
     0,                     //int       buildPoints;
-    ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages
+    ( 1 << S3 ),           //int  stages
     0,                     //int       health;
     0,                     //int       regenRate;
     0,                     //int       splashDamage;
@@ -684,7 +851,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     0,                     //int       value;
-    qtrue                  //qboolean  cuboid;
+    qtrue,                 //qboolean  cuboid;
+    DEFAULT_POWER_SETTINGS
   },
   {
     BA_A_CUBOID1,          //int       buildNum;
@@ -720,7 +888,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     0,                     //int       value;
-    qtrue                  //qboolean  cuboid;
+    qtrue,                 //qboolean  cuboid;
+    DEFAULT_POWER_SETTINGS
   },
   {
     BA_A_CUBOID2,          //int       buildNum;
@@ -735,7 +904,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     TR_GRAVITY,            //trType_t  traj;
     0.0,                   //float     bounce;
     0,                     //int       buildPoints;
-    ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages
+    ( 1 << S2 )|( 1 << S3 ), //int  stages
     0,                     //int       health;
     0,                     //int       regenRate;
     0,                     //int       splashDamage;
@@ -758,7 +927,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     0,                     //int       value;
-    qtrue                  //qboolean  cuboid;
+    qtrue,                 //qboolean  cuboid;
+    DEFAULT_POWER_SETTINGS
   }
 };
 
@@ -1283,7 +1453,7 @@ static const classAttributes_t bg_classList[ ] =
     80,                                             //int     steptime;
     LEVEL2_SPEED,                                   //float   speed;
     10.0f,                                          //float   acceleration;
-    3.0f,                                           //float   airAcceleration;
+    2.0f,                                           //float   airAcceleration;
     6.0f,                                           //float   friction;
     100.0f,                                         //float   stopSpeed;
     380.0f,                                         //float   jumpMagnitude;
@@ -1310,7 +1480,7 @@ static const classAttributes_t bg_classList[ ] =
     80,                                             //int     steptime;
     LEVEL2_UPG_SPEED,                               //float   speed;
     10.0f,                                          //float   acceleration;
-    3.0f,                                           //float   airAcceleration;
+    2.0f,                                           //float   airAcceleration;
     6.0f,                                           //float   friction;
     100.0f,                                         //float   stopSpeed;
     380.0f,                                         //float   jumpMagnitude;
@@ -1419,9 +1589,9 @@ static const classAttributes_t bg_classList[ ] =
     0.002f,                                         //float   bob;
     1.0f,                                           //float   bobCycle;
     100,                                            //int     steptime;
-    1.0f,                                           //float   speed;
+    1.1f,                                           //float   speed;
     10.0f,                                          //float   acceleration;
-    1.0f,                                           //float   airAcceleration;
+    1.5f,                                           //float   airAcceleration;
     6.0f,                                           //float   friction;
     100.0f,                                         //float   stopSpeed;
     220.0f,                                         //float   jumpMagnitude;
@@ -4301,7 +4471,7 @@ const cuboidAttributes_t BG_CuboidTypes [] =
   80,          // float hppv
   CBHPT_PLAIN,  // int hpt
   3.0,          // float bppv
-  20,           // int buildrate
+  30,           // int buildrate
   5000,         // int minbt
   qfalse,       // qboolean regen;
   0,            // int regenspeed
@@ -4325,7 +4495,7 @@ const cuboidAttributes_t BG_CuboidTypes [] =
   52,           // float hppv
   CBHPT_PANES,  // int hpt
   1.5,          // float bppv
-  15,           // int buildrate
+  25,           // int buildrate
   6500,         // int minbt
   qfalse,       // qboolean regen;
   0,            // int regenspeed
@@ -4349,7 +4519,7 @@ const cuboidAttributes_t BG_CuboidTypes [] =
   50,           // float hppv
   CBHPT_PLAIN,  // int hpt
   4.0,          // float bppv
-  10,           // int buildrate
+  15,           // int buildrate
   8000,         // int minbt
   qfalse,       // qboolean regen;
   0,            // int regenspeed

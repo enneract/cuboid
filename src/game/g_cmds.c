@@ -1363,7 +1363,7 @@ void Cmd_CallVote_f( gentity_t *ent )
     }
     else if( !Q_stricmp( vote, "map_restart" ) )
     {
-      if( level.time / 60000 >= g_restartVoteTimelimit.integer )
+      if( g_restartVoteTimelimit.integer && ( level.time - level.startTime ) / 60000 >= g_restartVoteTimelimit.integer )
       {
         trap_SendServerCommand( ent-g_entities,
           va( "print \"%s: It's not allowed to call a restart vote after %i minute%s.\n\"",
@@ -1377,7 +1377,7 @@ void Cmd_CallVote_f( gentity_t *ent )
     }
     else if( !Q_stricmp( vote, "map" ) )
     {
-      if( level.time / 60000 >= g_mapVoteTimelimit.integer )
+      if( g_mapVoteTimelimit.integer && ( level.time - level.startTime ) / 60000 >= g_mapVoteTimelimit.integer )
       {
         trap_SendServerCommand( ent-g_entities,
           va( "print \"%s: It's not allowed to call a map vote after %i minute%s. Call a ^1nextmap^7 vote instead\n\"",
@@ -1434,7 +1434,7 @@ void Cmd_CallVote_f( gentity_t *ent )
     }
     else if( !Q_stricmp( vote, "sudden_death" ) )
     {
-      if(!g_suddenDeathVotePercent.integer)
+      if( !g_suddenDeathVotePercent.integer )
       {
         trap_SendServerCommand( ent-g_entities,
               "print \"Sudden Death votes have been disabled\n\"" );
@@ -1918,6 +1918,7 @@ void Cmd_Destroy_f( gentity_t *ent )
   char        cmd[ 12 ];
   qboolean    deconstruct = qtrue;
   qboolean    lastSpawn = qfalse;
+  int         bp;
 
   if( ent->client->pers.namelog->denyBuild )
   {
@@ -1942,19 +1943,18 @@ void Cmd_Destroy_f( gentity_t *ent )
       ( ( ent->client->ps.weapon >= WP_ABUILD ) &&
         ( ent->client->ps.weapon <= WP_HBUILD ) ) )
   {
+    //give some BP back: 20% for a dead buildable, 80% for a new one
+    bp = BG_Buildable( traceEnt->s.modelindex, traceEnt->cuboidSize )->buildPoints;
+    bp *= MAX( (float)traceEnt->health, 0.0f ) /
+          BG_Buildable( traceEnt->s.modelindex, traceEnt->cuboidSize )->health * 0.6f + 0.2f;
+    
     // Always let the builder prevent the explosion
     if( traceEnt->health <= 0 )
     {
+      ent->client->ps.persistant[ PERS_BUILDPOINTS ] += bp;
       G_QueueBuildPoints( traceEnt );
       G_RewardAttackers( traceEnt );
       G_FreeEntity( traceEnt );
-      return;
-    }
-
-    // Cancel deconstruction (unmark)
-    if( deconstruct && g_markDeconstruct.integer && traceEnt->deconstruct )
-    {
-      traceEnt->deconstruct = qfalse;
       return;
     }
 
@@ -1972,8 +1972,7 @@ void Cmd_Destroy_f( gentity_t *ent )
         lastSpawn = qtrue;
     }
 
-    if( lastSpawn && !g_cheats.integer &&
-        !g_markDeconstruct.integer )
+    if( lastSpawn && !g_cheats.integer )
     {
       G_TriggerMenu( ent->client->ps.clientNum, MN_B_LASTSPAWN );
       return;
@@ -1986,9 +1985,7 @@ void Cmd_Destroy_f( gentity_t *ent )
       return;
     }
 
-    if( !g_markDeconstruct.integer ||
-        ( ent->client->pers.teamSelection == TEAM_HUMANS &&
-          !G_FindPower( traceEnt, qtrue ) ) )
+    if( ent->client->pers.teamSelection == TEAM_HUMANS )
     {
       if( ent->client->buildTimer )
       {
@@ -2004,21 +2001,18 @@ void Cmd_Destroy_f( gentity_t *ent )
         G_Damage( traceEnt, ent, ent, forward, tr.endpos,
                   traceEnt->health, 0, MOD_SUICIDE );
       }
-      else if( g_markDeconstruct.integer &&
-               ( ent->client->pers.teamSelection != TEAM_HUMANS ||
-                 G_FindPower( traceEnt , qtrue ) || lastSpawn ) )
-      {
-        traceEnt->deconstruct     = qtrue; // Mark buildable for deconstruction
-        traceEnt->deconstructTime = level.time;
-      }
       else
       {
         if( !g_cheats.integer && !g_instantBuild.integer ) // add a bit to the build timer
         {
-            ent->client->buildTimer +=             
-              BG_Buildable( traceEnt->s.modelindex, traceEnt->cuboidSize )->buildTime / 4;
-	    G_RecalcBuildTimer(ent->client);
+            ent->client->buildTimer += BG_Buildable( traceEnt->s.modelindex, traceEnt->cuboidSize )->buildTime / 4;
+            G_RecalcBuildTimer(ent->client);
         }
+
+        ent->client->ps.persistant[ PERS_BUILDPOINTS ] += bp;
+        if( ent->client->ps.persistant[ PERS_BUILDPOINTS ] > CKIT_STORAGE )
+          ent->client->ps.persistant[ PERS_BUILDPOINTS ] = CKIT_STORAGE;
+        
         G_Damage( traceEnt, ent, ent, forward, tr.endpos,
                   traceEnt->health, 0, MOD_DECONSTRUCT );
         G_FreeEntity( traceEnt );
@@ -2782,6 +2776,69 @@ void Cmd_Reload_f( gentity_t *ent )
   playerState_t *ps = &ent->client->ps;
   int ammo;
 
+  // reload transfers mass in case of CKit
+  if( ps->weapon == WP_HBUILD )
+  {
+    trace_t   trace;
+    vec3_t    eyes, view, point;
+    gentity_t *other;
+
+    #define USE_OBJECT_RANGE 100
+
+    // look for object infront of player
+    AngleVectors( ent->client->ps.viewangles, view, NULL, NULL );
+    BG_GetClientViewOrigin( &ent->client->ps, eyes );
+    VectorMA( eyes, USE_OBJECT_RANGE, view, point );
+      
+    trap_Trace( &trace, ent->client->ps.origin, NULL, NULL, point, ent->s.number, MASK_SHOT );
+    other = &g_entities[ trace.entityNum ];
+    
+    // transfer FROM buildable
+    if( other->s.eType == ET_BUILDABLE )
+    {
+      if( other->buildableTeam == TEAM_HUMANS &&
+          BG_Buildable( other->s.modelindex, NULL )->hasStorage &&
+          other->spawned && other->health >= 0 &&
+          other->storedBP > 0 )
+      {
+        float bp;
+        
+        bp = floor( MIN( MIN( other->storedBP, 4 ), 
+                         CKIT_STORAGE - ent->client->ps.persistant[ PERS_BUILDPOINTS ] ) );
+        
+        other->storedBP -= bp;
+        ent->client->ps.persistant[ PERS_BUILDPOINTS ] += bp;
+        
+        if( bp )
+          G_AddEvent( ent, EV_RPTUSE_SOUND, 0 );
+        else
+          G_AddEvent( ent, EV_BUILD_REPAIRED, 0 );          
+      }
+    }
+    //transfer TO another player
+    else if( other->client )
+    {
+      if( BG_GetPlayerWeapon( &other->client->ps ) == WP_HBUILD &&
+          other->client->ps.stats[ STAT_HEALTH ] >= 0 )
+      {
+        int bp;
+        
+        bp = MIN( MIN( ent->client->ps.persistant[ PERS_BUILDPOINTS ], 4 ),
+                  CKIT_STORAGE - other->client->ps.persistant[ PERS_BUILDPOINTS ] );
+        
+        ent->client->ps.persistant[ PERS_BUILDPOINTS ] -= bp;
+        other->client->ps.persistant[ PERS_BUILDPOINTS ] += bp;
+        
+        if( bp )
+          G_AddEvent( ent, EV_RPTUSE_SOUND, 0 );
+        else
+          G_AddEvent( ent, EV_BUILD_REPAIRED, 0 );
+      }
+    }
+
+    return;
+  }
+
   // weapon doesn't ever need reloading
   if( BG_Weapon( ps->weapon )->infiniteAmmo )
     return;
@@ -3305,7 +3362,6 @@ Cmd_Debug1_f
 */
 void Cmd_Debug1_f( gentity_t *other )
 {
-  other->client->ps.stats[ STAT_SHAKE ] += 70;
 }
 
 /*

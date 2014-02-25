@@ -86,11 +86,6 @@ vmCvar_t  g_maxNameChanges;
 
 vmCvar_t  g_alienBuildPoints;
 vmCvar_t  g_alienBuildQueueTime;
-vmCvar_t  g_humanBuildPoints;
-vmCvar_t  g_humanBuildQueueTime;
-vmCvar_t  g_humanRepeaterBuildPoints;
-vmCvar_t  g_humanRepeaterBuildQueueTime;
-vmCvar_t  g_humanRepeaterMaxZones;
 vmCvar_t  g_humanStage;
 vmCvar_t  g_humanCredits;
 vmCvar_t  g_humanMaxStage;
@@ -109,8 +104,6 @@ vmCvar_t  g_unlagged;
 vmCvar_t  g_disabledEquipment;
 vmCvar_t  g_disabledClasses;
 vmCvar_t  g_disabledBuildables;
-
-vmCvar_t  g_markDeconstruct;
 
 vmCvar_t  g_debugMapRotation;
 vmCvar_t  g_currentMapRotation;
@@ -157,6 +150,11 @@ vmCvar_t  g_cuboidMode;
 
 vmCvar_t  g_buildableDensityLimit;
 vmCvar_t  g_buildableDensityLimitRange;
+
+vmCvar_t  g_buildableValueModifier;
+vmCvar_t  g_playerValueModifier;
+vmCvar_t  g_massYieldModifier;
+vmCvar_t  g_voltageModifier;
 
 // copy cvars that can be set in worldspawn so they can be restored later
 static char cv_gravity[ MAX_CVAR_VALUE_STRING ];
@@ -232,11 +230,6 @@ static cvarTable_t   gameCvarTable[ ] =
 
   { &g_alienBuildPoints, "g_alienBuildPoints", DEFAULT_ALIEN_BUILDPOINTS, 0, 0, qfalse  },
   { &g_alienBuildQueueTime, "g_alienBuildQueueTime", DEFAULT_ALIEN_QUEUE_TIME, CVAR_ARCHIVE, 0, qfalse  },
-  { &g_humanBuildPoints, "g_humanBuildPoints", DEFAULT_HUMAN_BUILDPOINTS, 0, 0, qfalse  },
-  { &g_humanBuildQueueTime, "g_humanBuildQueueTime", DEFAULT_HUMAN_QUEUE_TIME, CVAR_ARCHIVE, 0, qfalse  },
-  { &g_humanRepeaterBuildPoints, "g_humanRepeaterBuildPoints", DEFAULT_HUMAN_REPEATER_BUILDPOINTS, CVAR_ARCHIVE, 0, qfalse  },
-  { &g_humanRepeaterMaxZones, "g_humanRepeaterMaxZones", DEFAULT_HUMAN_REPEATER_MAX_ZONES, CVAR_ARCHIVE, 0, qfalse  },
-  { &g_humanRepeaterBuildQueueTime, "g_humanRepeaterBuildQueueTime", DEFAULT_HUMAN_REPEATER_QUEUE_TIME, CVAR_ARCHIVE, 0, qfalse  },
   { &g_humanStage, "g_humanStage", "0", 0, 0, qfalse  },
   { &g_humanCredits, "g_humanCredits", "0", 0, 0, qfalse  },
   { &g_humanMaxStage, "g_humanMaxStage", DEFAULT_HUMAN_MAX_STAGE, 0, 0, qfalse, cv_humanMaxStage },
@@ -260,8 +253,6 @@ static cvarTable_t   gameCvarTable[ ] =
 
   { &g_floodMaxDemerits, "g_floodMaxDemerits", "5000", CVAR_ARCHIVE, 0, qfalse  },
   { &g_floodMinTime, "g_floodMinTime", "2000", CVAR_ARCHIVE, 0, qfalse  },
-
-  { &g_markDeconstruct, "g_markDeconstruct", "3", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue  },
 
   { &g_debugMapRotation, "g_debugMapRotation", "0", 0, 0, qfalse  },
   { &g_currentMapRotation, "g_currentMapRotation", "-1", 0, 0, qfalse  }, // -1 = NOT_ROTATING
@@ -301,7 +292,12 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_cuboidMode, "g_cuboidMode", "0", CVAR_ARCHIVE, 0, qfalse },
   
   { &g_buildableDensityLimit, "g_buildableDensityLimit", "0", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse },
-  { &g_buildableDensityLimitRange, "g_buildableDensityLimitRange", "0", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse }
+  { &g_buildableDensityLimitRange, "g_buildableDensityLimitRange", "0", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse },
+
+  { &g_playerValueModifier, "g_playerValueModifier", "0.5", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse },
+  { &g_buildableValueModifier, "g_buildableValueModifier", "0.16", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse },
+  { &g_massYieldModifier, "g_massYieldModifier", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse },
+  { &g_voltageModifier, "g_voltageModifier", "1.0", CVAR_ARCHIVE | CVAR_SERVERINFO }
 };
 
 static int gameCvarTableSize = sizeof( gameCvarTable ) / sizeof( gameCvarTable[ 0 ] );
@@ -1197,7 +1193,6 @@ void G_CalculateBuildPoints( void )
 {
   int               i;
   buildable_t       buildable;
-  buildPointZone_t  *zone;
 
   // BP queue updates
   while( level.alienBuildPointQueue > 0 &&
@@ -1209,15 +1204,6 @@ void G_CalculateBuildPoints( void )
                                                g_alienBuildQueueTime.integer );
   }
 
-  while( level.humanBuildPointQueue > 0 &&
-         level.humanNextQueueTime < level.time )
-  {
-    level.humanBuildPointQueue--;
-    level.humanNextQueueTime += G_NextQueueTime( level.humanBuildPointQueue,
-                                               g_humanBuildPoints.integer,
-                                               g_humanBuildQueueTime.integer );
-  }
-
   // Sudden Death checks
   if( G_TimeTilSuddenDeath( ) <= 0 && level.suddenDeathWarning < TW_PASSED )
   {
@@ -1226,7 +1212,6 @@ void G_CalculateBuildPoints( void )
     trap_SendServerCommand( -1, "print \"Beginning Sudden Death.\n\"" );
     trap_SendServerCommand( -1, "announce suddendeath" );    
     level.suddenDeathWarning = TW_PASSED;
-    G_ClearDeconMarks( );
 
     // Clear blueprints, or else structs that cost 0 BP can still be built after SD
     for( i = 0; i < level.maxclients; i++ )
@@ -1246,37 +1231,17 @@ void G_CalculateBuildPoints( void )
     level.suddenDeathWarning = TW_IMMINENT;
   }
 
-  level.humanBuildPoints = g_humanBuildPoints.integer - level.humanBuildPointQueue;
   level.alienBuildPoints = g_alienBuildPoints.integer - level.alienBuildPointQueue;
-
-  // Reset buildPointZones
-  for( i = 0; i < g_humanRepeaterMaxZones.integer; i++ )
-  {
-    buildPointZone_t *zone = &level.buildPointZones[ i ];
-
-    zone->active = qfalse;
-    zone->totalBuildPoints = g_humanRepeaterBuildPoints.integer;
-  }
 
   // Iterate through entities
   for( i = MAX_CLIENTS; i < level.num_entities; i++ )
   {
     gentity_t         *ent = &g_entities[ i ];
-    buildPointZone_t  *zone;
     buildable_t       buildable;
     int               cost;
 
     if( ent->s.eType != ET_BUILDABLE || ent->s.eFlags & EF_DEAD )
       continue;
-
-    // mark a zone as active
-    if( ent->usesBuildPointZone )
-    {
-      assert( ent->buildPointZone >= 0 && ent->buildPointZone < g_humanRepeaterMaxZones.integer );
-
-      zone = &level.buildPointZones[ ent->buildPointZone ];
-      zone->active = qtrue;
-    }
 
     // Subtract the BP from the appropriate pool
     buildable = ent->s.modelindex;
@@ -1284,62 +1249,7 @@ void G_CalculateBuildPoints( void )
 
     if( ent->buildableTeam == TEAM_ALIENS )
       level.alienBuildPoints -= cost;
-    if( buildable == BA_H_REPEATER )
-      level.humanBuildPoints -= cost;
-    else if( buildable != BA_H_REACTOR )
-    {
-      gentity_t *power = G_PowerEntityForEntity( ent );
-
-      if( power )
-      {
-        if( power->s.modelindex == BA_H_REACTOR )
-          level.humanBuildPoints -= cost;
-        else if( power->s.modelindex == BA_H_REPEATER && power->usesBuildPointZone )
-          level.buildPointZones[ power->buildPointZone ].totalBuildPoints -= cost;
-      }
-    }
   }
-
-  // Finally, update repeater zones and their queues
-  // note that this has to be done after the used BP is calculated
-  for( i = MAX_CLIENTS; i < level.num_entities; i++ )
-  {
-    gentity_t *ent = &g_entities[ i ];
-
-    if( ent->s.eType != ET_BUILDABLE || ent->s.eFlags & EF_DEAD ||
-        ent->buildableTeam != TEAM_HUMANS )
-      continue;
-
-    buildable = ent->s.modelindex;
-
-    if( buildable != BA_H_REPEATER )
-      continue;
-
-    if( ent->usesBuildPointZone && level.buildPointZones[ ent->buildPointZone ].active )
-    {
-      zone = &level.buildPointZones[ ent->buildPointZone ];
-
-      if( G_TimeTilSuddenDeath( ) > 0 )
-      {
-        // BP queue updates
-        while( zone->queuedBuildPoints > 0 &&
-               zone->nextQueueTime < level.time )
-        {
-          zone->queuedBuildPoints--;
-          zone->nextQueueTime += G_NextQueueTime( zone->queuedBuildPoints,
-                                     zone->totalBuildPoints,
-                                     g_humanRepeaterBuildQueueTime.integer );
-        }
-      }
-      else
-      {
-        zone->totalBuildPoints = zone->queuedBuildPoints = 0;
-      }
-    }
-  }
-
-  if( level.humanBuildPoints < 0 )
-    level.humanBuildPoints = 0;
 
   if( level.alienBuildPoints < 0 )
     level.alienBuildPoints = 0;
@@ -2338,38 +2248,12 @@ void CheckCvars( void )
       trap_Cvar_Set( "g_needpass", "0" );
   }
 
-  // Unmark any structures for deconstruction when
-  // the server setting is changed
-  if( g_markDeconstruct.modificationCount != lastMarkDeconModCount )
-  {
-    lastMarkDeconModCount = g_markDeconstruct.modificationCount;
-    G_ClearDeconMarks( );
-  }
-
   // If we change g_suddenDeathTime during a map, we need to update
   // when sd will begin
   if( g_suddenDeathTime.modificationCount != lastSDTimeModCount )
   {
     lastSDTimeModCount = g_suddenDeathTime.modificationCount;
     level.suddenDeathBeginTime = g_suddenDeathTime.integer * 60000;
-  }
-
-  // If the number of zones changes, we need a new array
-  if( g_humanRepeaterMaxZones.integer != lastNumZones )
-  {
-    buildPointZone_t  *newZones;
-    size_t            newsize = g_humanRepeaterMaxZones.integer * sizeof( buildPointZone_t );
-    size_t            oldsize = lastNumZones * sizeof( buildPointZone_t );
-
-    newZones = BG_Alloc( newsize );
-    if( level.buildPointZones )
-    {
-      Com_Memcpy( newZones, level.buildPointZones, MIN( oldsize, newsize ) );
-      BG_Free( level.buildPointZones );
-    }
-
-    level.buildPointZones = newZones;
-    lastNumZones = g_humanRepeaterMaxZones.integer;
   }
 
   level.frameMsec = trap_Milliseconds( );
@@ -2586,6 +2470,9 @@ void G_RunFrame( int levelTime )
   G_SpawnClients( TEAM_HUMANS );
   G_CalculateAvgPlayers( );
   G_UpdateZaps( msec );
+  
+  // update the power grid
+  G_UpdatePowerGrid( 0.001f * msec );
 
   // see if it is time to end the level
   CheckExitRules( );

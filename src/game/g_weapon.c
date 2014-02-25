@@ -768,8 +768,8 @@ void CheckCkitRepair( gentity_t *ent )
   if( tr.fraction < 1.0f && traceEnt->spawned && traceEnt->health > 0 &&
       traceEnt->s.eType == ET_BUILDABLE && traceEnt->buildableTeam == TEAM_HUMANS )
   {
-    if(BG_Buildable(traceEnt->s.modelindex,NULL)->cuboid)
-      if(!BG_CuboidAttributes(traceEnt->s.modelindex)->repairable)
+    if( BG_Buildable( traceEnt->s.modelindex, NULL )->cuboid )
+      if( !BG_CuboidAttributes( traceEnt->s.modelindex )->repairable )
         return;
       
     bHealth = BG_Buildable( traceEnt->s.modelindex, traceEnt->cuboidSize )->health;

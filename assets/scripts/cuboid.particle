@@ -64,3 +64,30 @@ alienHatchPS
     period 10 - ~0%
   }
 }
+
+humanPowerZapPS
+{
+  ejector // RC overloading
+  {
+    particle
+    {
+      shader sync lightning01
+
+      displacement 0 0 0 80
+
+      velocityType static
+      accelerationType static
+
+      radius 0 80~30 80~30
+      alpha  0 1 1
+      rotation 0 ~360 -
+      bounce 0
+
+      lifeTime 75
+    }
+
+    count 3
+    delay 0
+    period 10 - 0
+  }
+}
