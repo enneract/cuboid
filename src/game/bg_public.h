@@ -26,6 +26,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //tremulous balance header
 #include "tremulous.h"
 
+// thanks for defining MAX_EMOTICONS in q_shared...
+#undef MAX_EMOTICONS
+#define MAX_EMOTICONS 1024
+
 // because games can change separately from the main system version, we need a
 // second version that must match between game and cgame
 #define GAME_VERSION            "base"

@@ -6,6 +6,16 @@ Cuboid - a Tremulous 1.2 mod focused on cuboids and fixing balance issues.
 
 Version  Release date
 ______________________________________________________________________________________________
+0.1.8    Feb 25 2014
+GAMEPLAY:
+- Fixed a serious bug related to power networks.
+- Reactor made a bit less powerful.
+- Buildable stacking is now permitted.
+NON-GAMEPLAY:
+- Renamed hit.wav to _hit.wav to work around a file handling bug.
+- Tweaked the power zaps again.
+- Increased MAX_EMOTICONS to 1024.
+
 0.1.7    Feb 25 2014
 NOTES:
 - Because of a bug in Tremulous code, cuboid and power info might behave weirdly if g_synchronousClients is disabled.

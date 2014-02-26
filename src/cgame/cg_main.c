@@ -764,7 +764,7 @@ static void CG_RegisterSounds( void )
   for( i = 0; i < 4; i++ )
     cgs.media.powerZap[ i ]          = trap_S_RegisterSound( va( "sound/buildables/human/powerzap%i.wav", i + 1 ), qfalse );
   
-  cgs.media.hitSound                = trap_S_RegisterSound( "sound/feedback/hit.wav", qfalse );
+  cgs.media.hitSound                = trap_S_RegisterSound( "sound/feedback/_hit.wav", qfalse );
 }
 
 

@@ -31,6 +31,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "../../assets/ui/menudef.h"
 
+// thanks for defining MAX_EMOTICONS in q_shared...
+#undef MAX_EMOTICONS
+#define MAX_EMOTICONS 1024
+
 #define MAX_MENUNAME 32
 #define MAX_ITEMTEXT 64
 #define MAX_ITEMACTION 64

@@ -465,6 +465,9 @@ void G_ScanPowerGrid( gentity_t *this )
       if( !next->active )
         continue;
       grid.sources[ grid.sourceCount++ ] = next;
+
+      next->powerNetwork = grid.networkID;
+      G_ScanPowerGrid( next );
     }
     else
       grid.load[ grid.loadCount++ ] = next;
@@ -652,8 +655,8 @@ void G_UpdatePowerGrid( float dt )
         ent->voltage -= ent->current * dt / CAPBANK_CAPACITY;
 
       //zapping effect
-      #define MIN_ZAP_CURRENT 8.0f
-      #define ZAP_CHANCE_FACTOR 0.007f
+      #define MIN_ZAP_CURRENT 15.0f
+      #define ZAP_CHANCE_FACTOR 0.001f
       if( ent->current > MIN_ZAP_CURRENT )
       {
         float chance;
@@ -3192,10 +3195,12 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
       reason = IBE_NORMAL;
 
   //the only buildable one can build on is a cuboid
+  /*
   if( tr1.entityNum != ENTITYNUM_WORLD )
     if( g_entities[ tr1.entityNum ].s.eType == ET_BUILDABLE &&
         !BG_Buildable( g_entities[ tr1.entityNum ].s.modelindex, NULL )->cuboid )
       reason = IBE_NORMAL;
+  */
 
   contents = trap_PointContents( entity_origin, -1 );
 

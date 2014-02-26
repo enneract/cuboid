@@ -675,7 +675,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define RTG_RESISTANCE       5.0f
 
-#define REACTOR_RESISTANCE   1.0f
+#define REACTOR_RESISTANCE   1.66f
 
 #define CAPBANK_RESISTANCE   0.05f
 #define CAPBANK_CAPACITY     2.0f
