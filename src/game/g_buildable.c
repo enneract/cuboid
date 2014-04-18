@@ -3388,7 +3388,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   if( cuboid )
   {
     BG_CuboidBBox( cuboidSize, built->r.mins, built->r.maxs );
-    VectorCopy( cuboidSize, &built->cuboidSize );
+    VectorCopy( cuboidSize, built->cuboidSize );
   }
   else
     BG_BuildableBoundingBox( buildable, built->r.mins, built->r.maxs );
