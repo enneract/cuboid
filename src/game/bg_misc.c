@@ -991,7 +991,7 @@ const buildableAttributes_t *BG_Buildable( buildable_t buildable, const vec3_t c
   else
     return &nullBuildable;
 
-  if( attr->cuboid )
+  if( attr->cuboid && cuboidSize )
   {
     volume = cuboidSize[ 0 ] * cuboidSize[ 1 ] * cuboidSize[ 2 ] * 5.5306341e-5; // NOTE: cubic quake units -> cubic meters ( 1qu = 0.0381m )
     memcpy( &cuboidAttr, attr, sizeof( buildableAttributes_t ) );
