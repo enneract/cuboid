@@ -514,6 +514,12 @@ static int CG_IsUnacceptableError( playerState_t *ps, playerState_t *pps )
       return 16;
   }
 
+  for( i = 0; i < MAX_PERSISTANT; i++ )
+  {
+    if( pps->misc[ i ] != ps->misc[ i ] )
+      return 17;
+  }
+
   if( pps->generic1 != ps->generic1 ||
     pps->loopSound != ps->loopSound )
   {
