@@ -911,9 +911,9 @@ static void CG_GenerateCKitDisplay( void )
      part 1: figure out what we're dealing with
   */
   
-  powerNetwork = ( ps->misc[ MISC_INFOHEAD ] & 1023 );
+  powerNetwork = ps->misc[ MISC_POWER_NETWORK ] & 1023;
   
-  probeEntity =  ( ps->misc[ MISC_INFOHEAD ] >> 10 ) & 1023;
+  probeEntity =  ps->misc[ MISC_PROBE_ENTITY ] & 1023;
   if( probeEntity != 1023 )
   {
     target = qtrue;

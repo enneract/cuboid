@@ -299,7 +299,8 @@ typedef enum
 // player_state->misc[] indexes
 typedef enum
 {
-  MISC_INFOHEAD,
+  MISC_POWER_NETWORK,
+  MISC_PROBE_ENTITY,
   MISC_INFO1,
   MISC_INFO2,
   MISC_INFO3,

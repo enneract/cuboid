@@ -811,7 +811,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
         }
       }
         
-      client->ps.misc[ MISC_INFOHEAD ] = ( head_network & 1023 ) | ( head_entity & 1023 ) << 10;
+      client->ps.misc[ MISC_POWER_NETWORK ] = head_network;
+      client->ps.misc[ MISC_PROBE_ENTITY ] = head_entity;
       
     }
   }
