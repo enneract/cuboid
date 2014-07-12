@@ -824,6 +824,9 @@ const char        *G_CuboidName(buildable_t buildable, const vec3_t cuboidSize, 
 void              G_LayoutBuildItem( buildable_t buildable, vec3_t origin, vec3_t angles, vec3_t origin2, vec3_t angles2 );
 void              G_RemoveUnbuiltBuildables( gentity_t *self );
 void              G_UpdatePowerGrid( float dt );
+int               G_GetBuildPoints( const vec3_t pos, team_t team );
+void              G_RelayCuboidToSpectators( gclient_t *client );
+qboolean          G_CheckCuboidSize( vec3_t dims, buildable_t type );
 
 //
 // g_utils.c

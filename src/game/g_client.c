@@ -1797,10 +1797,10 @@ G_RelayCuboidToSpectators
 Called everytime a player changes his cuboid size.
 ============
 */
-void G_RelayCuboidToSpectators( gentity_t *self )
+void G_RelayCuboidToSpectators( gclient_t *client )
 {
-  self->client->ps.misc[ MISC_CUBOID_X ] = self->client->cuboidSelection[ 0 ] * 10;
-  self->client->ps.misc[ MISC_CUBOID_Y ] = self->client->cuboidSelection[ 1 ] * 10;
-  self->client->ps.misc[ MISC_CUBOID_Z ] = self->client->cuboidSelection[ 2 ] * 10;
+  client->ps.misc[ MISC_CUBOID_X ] = client->cuboidSelection[ 0 ] * 10;
+  client->ps.misc[ MISC_CUBOID_Y ] = client->cuboidSelection[ 1 ] * 10;
+  client->ps.misc[ MISC_CUBOID_Z ] = client->cuboidSelection[ 2 ] * 10;
 }
 
