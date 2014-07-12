@@ -878,8 +878,8 @@ static qboolean PM_CheckJump( void )
 
 	 //ZdrytchX: check for double-jump
   if(pm->ps->stats[ STAT_STAMINA ] > 0 //derp doesn't have STAMINA_MIN_TO_JUMP :/
-    || pm->ps->stats[ STAT_TEAM ] == pm->ps->stats[ STAT_TEAM ] == TEAM_ALIENS
-    && !BG_ClassHasAbility( pm->ps->stats[ STAT_CLASS ], SCA_WALLJUMPER ) )
+    || ( pm->ps->stats[ STAT_TEAM ] == TEAM_ALIENS
+    && !BG_ClassHasAbility( pm->ps->stats[ STAT_CLASS ], SCA_WALLJUMPER ) ) )
     //Trust me. You don't want marauders flying out of the map from 3 wall jumps.
 		if (cpm_pm_jump_z) {
 			if (pm->ps->persistant[PERS_JUMPTIME] > 0) {
