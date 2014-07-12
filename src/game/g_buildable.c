@@ -2407,10 +2407,8 @@ void HMGTurret_Think( gentity_t *self )
   if( !self->powered )
   {
     // if power loss drop turret
-    if( self->spawned &&
-        HMGTurret_State( self, MGT_STATE_INACTIVE ) );
-      return;
-
+    if( self->spawned )
+      HMGTurret_State( self, MGT_STATE_INACTIVE );
     return;
   }
   if( !self->spawned )
@@ -3736,7 +3734,7 @@ static gentity_t *G_FinishSpawningBuildable( gentity_t *ent, qboolean force )
   else
     VectorSet( normal, 0.0f, 0.0f, 1.0f );
 
-  built = G_Build( ent, buildable, ent->s.pos.trBase, normal, ent->s.angles, built->cuboidSize );
+  built = G_Build( ent, buildable, ent->s.pos.trBase, normal, ent->s.angles, ent->cuboidSize );
 
   built->takedamage = qtrue;
   built->spawned = qtrue; //map entities are already spawned

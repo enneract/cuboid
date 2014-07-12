@@ -2216,7 +2216,7 @@ void CG_Cuboid_Response(void)
   // cb2 <a> <b> <c> : server sets client-side cuboid
   // cb3 <echo>      : server agrees on player's cuboid
   // cb4 <echo>      : server disagrees on player's cuboid
-  int offs;
+  int offs = 0;
   
   if( !BG_Buildable( cg.predictedPlayerState.stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT, NULL )->cuboid )
     return;

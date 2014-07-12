@@ -2616,6 +2616,8 @@ void Cmd_Build_f( gentity_t *ent )
 
   buildable = BG_BuildableByName( s )->number;
   
+  team = ent->client->ps.stats[ STAT_TEAM ];
+
   /* To allow players build cuboids with completely arbitrary
    * dimensions (the current resizing method doesn't provide 
    * much precision) the build command was extended with the
@@ -2666,8 +2668,6 @@ void Cmd_Build_f( gentity_t *ent )
     G_TriggerMenu( ent->client->ps.clientNum, MN_B_SUDDENDEATH );
     return;
   }
-
-  team = ent->client->ps.stats[ STAT_TEAM ];
 
   if( buildable != BA_NONE &&
       ( ( 1 << ent->client->ps.weapon ) & BG_Buildable( buildable, NULL )->buildWeapon ) &&
