@@ -109,6 +109,7 @@ char *modNames[ ] =
   "MOD_LEVEL4_CLAW",
   "MOD_LEVEL4_TRAMPLE",
   "MOD_LEVEL4_CRUSH",
+  "MOD_LEVEL4_BOMB",
 
   "MOD_SLOWBLOB",
   "MOD_POISON",
@@ -124,7 +125,9 @@ char *modNames[ ] =
   "MOD_OVERMIND",
   "MOD_DECONSTRUCT",
   "MOD_REPLACE",
-  "MOD_NOCREEP"
+  "MOD_NOCREEP",
+  "MOD_ALIEN_HATCH",
+  "MOD_ALIEN_HATCH_FAILED"
 };
 
 /*
