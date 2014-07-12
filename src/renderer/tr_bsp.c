@@ -264,6 +264,8 @@ static	void R_LoadVisibility( lump_t *l ) {
 //===============================================================================
 
 
+#define	LL(x) x=LittleLong(x)
+
 /*
 ===============
 ShaderForShaderNum
@@ -273,7 +275,7 @@ static shader_t *ShaderForShaderNum( int shaderNum, int lightmapNum ) {
 	shader_t	*shader;
 	dshader_t	*dsh;
 
-	shaderNum = LittleLong( shaderNum );
+	LL( shaderNum );
 	if ( shaderNum < 0 || shaderNum >= s_worldData.numShaders ) {
 		ri.Error( ERR_DROP, "ShaderForShaderNum: bad num %i", shaderNum );
 	}

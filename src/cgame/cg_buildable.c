@@ -194,8 +194,7 @@ void CG_DrawCuboid( vec3_t origin, vec3_t dims, qhandle_t shader, int margin )
 void CG_DrawCuboidAxis(vec3_t cuboidOrigin, vec3_t size, int axis, qhandle_t shader)
 {
  vec3_t origin, localZ, localX, localY, start, end, quad[2][4];
- float len, width;
- polyVert_t poly[4];
+ float len;
  
  VectorCopy(cuboidOrigin,origin);
  origin[2]+=size[2]/2.0f;
@@ -273,7 +272,7 @@ void CG_InitCuboidExplosions(void)
 
 void CG_CuboidExplosion(buildable_t buildable, vec3_t origin, vec3_t dims)
 {
- int i,p,m,q;
+ int i,p,q;
  float v,s;
  cuboidParticle_t *pc;
  vec3_t sdims;
@@ -301,7 +300,7 @@ void CG_CuboidExplosion(buildable_t buildable, vec3_t origin, vec3_t dims)
   p=ceil(sqrt(v/pow(sdims[2],3)))*2;
  else if(q==2)
   p=ceil(pow(v/pow(sdims[2],3),0.75f))*3;
- else if(q>=3)
+ else
   p=ceil(pow(v/pow(sdims[2],3),0.85f))*6;
  p=MIN(p,MAX_CPARTICLES_PER_EXPLOSION);
  
@@ -363,9 +362,8 @@ void CG_CuboidParticlePhysics(cuboidParticle_t *pc)
 
 void CG_DrawCuboidParticles(void)
 {
- int i,j,drawn=0,c;
- float t;
- vec3_t alight, dlight, lightdir, newOrigin;
+ int i,j,drawn=0;
+ //vec3_t alight, dlight, lightdir;
  cuboidParticle_t *pc;
  refEntity_t re;
   
@@ -687,8 +685,6 @@ void CG_InitBuildables( void )
   fileHandle_t  f;
   pc_token_t    token;
   cuboidInfo_t  *cuboid;
-  const char    *s;
-  float         n;
  
   memset( cg_buildables, 0, sizeof( cg_buildables ) );
 
@@ -1095,7 +1091,7 @@ void CG_GhostBuildable( buildable_t buildable, vec3_t dims )
 
   if(BG_Buildable(buildable, NULL)->cuboid)
   { 
-    qhandle_t shader, ashader;
+    qhandle_t shader;
 
     CG_Cuboid_Send( ); //NOTE: CG_Cuboid_Send has its own timer so we don't spam server with commands every frame
 
@@ -1832,7 +1828,7 @@ void CG_Buildable( centity_t *cent )
           prebuildSound = cgs.media.unpoweredSurgeLoop;
         }
       }
-      else if( team == TEAM_ALIENS )
+      else
       {
         texture = cgs.media.cuboidAlienPrebuild;
         prebuildSound = cgs.media.alienBuildablePrebuild;
@@ -2318,8 +2314,6 @@ Syntax:
 #define SWAPFLOATS(a,b) {float __t;__t=a,a=b,b=__t;}
 void CG_CuboidRotate_f(void)
 {
-  int axis;
-
   if( !BG_Buildable( cg.predictedPlayerState.stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT, NULL )->cuboid )
     return;
   switch( cg_cuboidResizeAxis.integer )
@@ -2378,8 +2372,6 @@ Syntax:
 */
 void CG_CuboidSize_f(void)
 {
-  int axis;
-
   if( trap_Argc( ) < 4 )
   {
     Com_Printf( "cuboidAxis x y z : set the cuboid selection\n" );

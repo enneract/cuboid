@@ -654,7 +654,6 @@ static void CG_RegisterSounds( void )
   int         i;
   char        name[ MAX_QPATH ];
   const char  *soundName;
-  const cuboidAttributes_t *cuboid;
 
   cgs.media.alienStageTransition  = trap_S_RegisterSound( "sound/announcements/overmindevolved.wav", qtrue );
   cgs.media.humanStageTransition  = trap_S_RegisterSound( "sound/announcements/reinforcement.wav", qtrue );
@@ -779,8 +778,7 @@ This function may execute for a couple of minutes with a slow disk.
 */
 static void CG_RegisterGraphics( void )
 {
-  int         i,j;
-  const cuboidAttributes_t *cuboid;
+  int         i;
   
   static char *sb_nums[ 11 ] =
   {

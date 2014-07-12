@@ -223,7 +223,7 @@ CG_BasivisionBlip
 */
 void CG_BasivisionBlip( vec3_t origin, float size, qhandle_t shader, float flareSize, qhandle_t flare )
 {
-  float x, y, s;
+  float x, y;
 
   if( !CG_WorldToScreen( origin, &x, &y ) )
     return;

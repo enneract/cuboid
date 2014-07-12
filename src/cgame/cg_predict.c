@@ -98,8 +98,6 @@ static void CG_ClipMoveToEntities ( const vec3_t start, const vec3_t mins,
   vec3_t        bmins, bmaxs;
   vec3_t        origin, angles;
   centity_t     *cent;
-  vec3_t  dims;
-  vec3_t        size;
 
   //SUPAR HACK
   //this causes a trace to collide with the local player

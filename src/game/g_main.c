@@ -1192,7 +1192,6 @@ Recalculate the quantity of building points available to the teams
 void G_CalculateBuildPoints( void )
 {
   int               i;
-  buildable_t       buildable;
 
   // BP queue updates
   while( level.alienBuildPointQueue > 0 &&
@@ -2234,9 +2233,7 @@ CheckCvars
 void CheckCvars( void )
 {
   static int lastPasswordModCount   = -1;
-  static int lastMarkDeconModCount  = -1;
   static int lastSDTimeModCount = -1;
-  static int lastNumZones = 0;
 
   if( g_password.modificationCount != lastPasswordModCount )
   {

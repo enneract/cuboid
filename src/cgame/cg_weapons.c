@@ -1404,7 +1404,6 @@ void CG_AddViewWeapon( playerState_t *ps )
   weaponInfo_t  *wi;
   weapon_t      weapon = ps->weapon;
   weaponMode_t  weaponMode = ps->generic1;
-  vec3_t        cuboidSize;
 
   // no weapon carried - can't draw it
   if( weapon == WP_NONE )

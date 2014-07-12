@@ -234,12 +234,11 @@ player_die
 */
 void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath )
 {
-  gentity_t *ent, *ent2;
+  gentity_t *ent;
   int       anim;
   int       killer, killerHP;
   int       i;
   char      *killerName, *obit;
-  vec3_t    dir;
 
   if( self->client->ps.pm_type == PM_DEAD )
     return;

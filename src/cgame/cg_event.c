@@ -491,7 +491,6 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
   int           clientNum;
   clientInfo_t  *ci;
   int           steptime;
-  vec3_t  cuboid;
   buildable_t   cuboidType;
 
   if( cg.snap->ps.persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT )

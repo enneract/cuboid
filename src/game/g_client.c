@@ -284,7 +284,6 @@ find the nearest impregnated human for spawning
 static gentity_t *G_SelectAlienImplantedSpawn( vec3_t preference )
 {
   int i;
-  float r;
   gentity_t *search, *spot = NULL;
   
   for( i = 0; i < level.num_entities; i++ )

@@ -3346,7 +3346,6 @@ qboolean G_admin_settitle( gentity_t *ent )
   int i;
   gentity_t *vic = NULL;
   g_admin_admin_t *a = NULL;
-  g_admin_level_t *l = NULL;
   int na;
   int len;
 

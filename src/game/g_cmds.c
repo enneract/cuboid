@@ -2598,7 +2598,6 @@ void Cmd_Build_f( gentity_t *ent )
   float         dist;
   vec3_t        origin, normal;
   team_t        team;
-  char buf[128];
   vec3_t  dims;
 
   if( ent->client->pers.namelog->denyBuild )

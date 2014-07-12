@@ -1238,7 +1238,6 @@ static void PM_AirMove( void )
   usercmd_t cmd;
 
   float		accel; // CPM
-	float		wishspeed2; // CPM
 	float   velscale;//classes temp.var
 
   velscale = BG_Class( pm->ps->stats[ STAT_CLASS ] )->airAcceleration;

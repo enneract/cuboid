@@ -610,7 +610,6 @@ void ClientTimerActions( gentity_t *ent, int msec )
   qboolean  walking = qfalse, stopped = qfalse,
             crouched = qfalse, jumping = qfalse,
             strafing = qfalse;
-  int       i;
 
   ucmd = &ent->client->pers.cmd;
 
