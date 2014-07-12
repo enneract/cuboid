@@ -564,6 +564,8 @@ odd tokens are cuboid modes
 */
 void G_CheckCuboidConfig(char* mapname)
 {
+// this code is worth a facepalm
+/*
   char* token;
   char config[MAX_CVAR_VALUE_STRING]; //should be enough for few maps
   qboolean type=qfalse;
@@ -591,6 +593,7 @@ void G_CheckCuboidConfig(char* mapname)
       }
   } 
   Com_Printf("cuboids are %s%s^7 on %s\n",(mode==0?"^2ENABLED":(mode==1?"^1DISABLED ON S1":"^1DISABLED")),(found?"":" BY DEFAULT"),mapname);
+*/
 }
 
 /*
