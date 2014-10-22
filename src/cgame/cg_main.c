@@ -522,7 +522,7 @@ void CG_RemoveNotifyLine( void )
     cg.consoleText[ i ] = cg.consoleText[ i + offset ];
 
   //pop up the first consoleLine
-  for( i = 0; i < cg.numConsoleLines; i++ )
+  for( i = 0; i < cg.numConsoleLines - 1; i++ )
     cg.consoleLines[ i ] = cg.consoleLines[ i + 1 ];
 
   cg.numConsoleLines--;
